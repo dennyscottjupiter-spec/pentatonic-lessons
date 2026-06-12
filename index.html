@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PENTATONIC ARCADE // LEVEL 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="hud">
+    <div class="hud-left">
+      <span class="blink">●</span>
+      <span class="hud-label">INSERT COIN</span>
+    </div>
+    <h1 class="title">PENTATONIC <span class="accent">ARCADE</span></h1>
+    <div class="hud-right">
+      <span class="hud-label">SCORE</span>
+      <span id="score" class="hud-value">0000</span>
+    </div>
+  </header>
+
+  <section class="level-card">
+    <div class="level-tag">LEVEL 1</div>
+    <h2 class="level-title">A MINOR / C MAJOR PENTATONIC</h2>
+    <p class="level-blurb">
+      Same five notes, two roots. Pick a lens, pick a shape, click the fretboard.
+    </p>
+  </section>
+
+  <section class="controls">
+    <fieldset class="control-group">
+      <legend>SCALE LENS</legend>
+      <div class="btn-row">
+        <button class="arc-btn lens active" data-lens="Am">A MINOR</button>
+        <button class="arc-btn lens" data-lens="C">C MAJOR</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>BOX POSITION</legend>
+      <div class="btn-row" id="box-row">
+        <button class="arc-btn box active" data-box="1">1</button>
+        <button class="arc-btn box" data-box="2">2</button>
+        <button class="arc-btn box" data-box="3">3</button>
+        <button class="arc-btn box" data-box="4">4</button>
+        <button class="arc-btn box" data-box="5">5</button>
+        <button class="arc-btn box" data-box="all">ALL</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>OPTIONS</legend>
+      <div class="btn-row">
+        <button class="arc-btn toggle active" data-toggle="labels">LABELS</button>
+        <button class="arc-btn toggle active" data-toggle="sound">SOUND</button>
+        <button class="arc-btn ghost" id="play-scale">▶ PLAY SCALE</button>
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="fretboard-wrap">
+    <div id="fretboard" aria-label="Interactive guitar fretboard"></div>
+  </section>
+
+  <section class="legend">
+    <div class="legend-item"><span class="dot root"></span> ROOT</div>
+    <div class="legend-item"><span class="dot note"></span> SCALE NOTE</div>
+    <div class="legend-item"><span class="dot dim"></span> OUT OF SCALE</div>
+    <div class="legend-item readout">LAST: <span id="last-note">—</span></div>
+  </section>
+
+  <section class="lesson">
+    <h3>QUICK BRIEFING</h3>
+    <ul>
+      <li><b>The 5 notes:</b> A — C — D — E — G. That's it. Five notes, anywhere on the neck.</li>
+      <li><b>A minor lens:</b> root = <span class="mono">A</span>. Sounds sad / bluesy / rock.</li>
+      <li><b>C major lens:</b> root = <span class="mono">C</span>. Same shapes, sounds bright / poppy / country.</li>
+      <li><b>5 box positions</b> cover the whole neck. Box 1 starts at fret 5 — your home base.</li>
+      <li><b>Try this:</b> jam Box 1 over an Am chord, then over a C chord. Hear the lens shift.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span class="mono">▙▟ PRESS ANY FRET TO BEGIN ▙▟</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
