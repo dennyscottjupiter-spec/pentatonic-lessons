@@ -12,41 +12,50 @@ There is no build, lint, or test command. Verification = open the page and inter
 
 ## Architecture
 
-Three files, single page, no modules.
+Six plain JS files loaded in order by `index.html` (no ES modules — `file://` compatible). All share global scope.
 
-- **`index.html`** — structure: HUD (score + theme switcher + 🏋️ + ❓), level card with live title, controls (KEY row / LENS / BOX / OPTIONS), game panel, fretboard div, help modal, practice modal, win screen. JS renders the KEY row at boot via `wireControls`.
+```
+data.js → audio.js → engine.js → game.js → practice.js → app.js
+```
+
+- **`index.html`** — structure: HUD (score + theme switcher + 🏋️ + ❓), level card with live title, controls (KEY row / LENS / BOX / OPTIONS), game panel, fretboard div, help modal, practice modal, win screen. Has a tiny inline `<script>` in `<head>` to apply the saved theme before first paint (avoids CRT flash). JS renders the KEY row at boot via `wireControls`.
 - **`styles.css`** — all styling. `:root` vars are the entire theming surface (`--font-display`, `--font-body`, `--scanline-alpha`, color vars). `body.theme-*` blocks override `:root` per theme. Note states (`in-scale`, `root`, `out`, `dimmed`, `playing`, `correct`, `wrong`) are CSS classes toggled per `<g class="fb-note">`.
-- **`app.js`** — all behavior. Procedural, no framework. Boot sequence: `setKey(0); buildFretboard(); refreshNotes(); wireControls(); loadGame(); updateScore(); updateTimerDisplay();`
 
-### `app.js` internal structure (read in this order)
+### File responsibilities
 
-1. **Constants** — `NOTE_NAMES`, `PENT_OFFSETS` (minor pentatonic intervals), `STRINGS`, `TOTAL_FRETS`, `BOXES` (Am-anchored per-string `[lo, hi]` fret ranges), `KEYS` (12-entry table: minor/major name, chroma, offset from A), `LICKS` (3 licks × 5 boxes, Am-anchor-relative), `GAME` (XP tuning constants).
-2. **Early theme IIFE** — restores saved theme class before first paint (no CRT flash).
-3. **`state` object** — single source of truth: `keyIdx`, `lens` (`'minor'`/`'major'`), `box`, `labels`, `sound`, `score`, `theme`, game fields (`mode`, `gameLevel`, `gameLevelXP`, `gameStreak`, `gameLives`, `gameScore`, `highScore`, `gamePhase`, `currentLick`, `gameInputStep`), computed fields (`scaleNotes`, `activeBoxes`).
-4. **Music helpers** — `midiToName`, `midiToFreq`, `fretMidi`, `computeScaleNotes(keyIdx)`, `computeActiveBoxes(keyIdx)`, `setKey(keyIdx)`, `isInScale`, `isRoot`, `isInBox`, `transposeFret`.
-5. **Audio** — `ensureAudio()`, Karplus-Strong engine (`karplusCache` Map, `buildKarplusBuffer`, `playNote(midi, duration)`), `playBuzz()`, `playFanfare()`.
-6. **Fretboard render** — `buildFretboard()` constructs the SVG once at boot. `fretCenterX`, `mkSvg` helpers.
-7. **`refreshNotes()`** — does NOT rebuild the SVG. Walks `.fb-note` groups and toggles classes from current `state`. Hot path for all key/lens/box changes.
-8. **Interactions** — `onNoteClick` (routes to game or explore), `flashNote`, `updateScore`, `playCurrentScale` (with generation guard).
-9. **Theme** — `applyTheme(theme)`.
-10. **Modals** — `toggleHelp`, `closeHelp`, `togglePractice`, `closePractice`, `renderChallenge`.
-11. **Metronome** — `metro` object, `metroBeat`, `metroSchedule`, `metroStart`, `metroStop`.
-12. **Timer** — `timer` object, `timerChime`, `updateTimerDisplay`, `timerStart`, `timerStop`, `timerReset`.
-13. **Boot validator IIFE** — validates every LICK step is in-scale and in-box; `console.error` on failure. Stays in code permanently.
-14. **Game engine** — `pickLick` (key-aware, auto-skips off-board transpositions), `showGamePhase` (show phase with generation counter), `onGameNoteClick` (input judgment), `lickComplete` (XP/streak/level-up/win), `updateGamePanel`, `updateGameHUD`, `showWinScreen`, `enterGame`, `exitGame`.
-15. **Persistence** — `saveGame`, `loadGame`.
-16. **`wireControls()`** — wires theme buttons, JS-rendered key selector, lens, box, toggles, play-scale, game-toggle, modals, metronome, timer, win screen, global `keydown` shortcuts.
-17. **Boot sequence** at file end.
+| File | Owns |
+|------|------|
+| `data.js` | Constants: `PENT_OFFSETS`, `MAJOR_OFFSETS`, `SHARP_NAMES`, `FLAT_NAMES`, flat-preference sets, `STRINGS`, `TOTAL_FRETS`, `BOXES`, `KEYS`, `LICKS`, `GAME` |
+| `audio.js` | `ensureAudio`, Karplus-Strong (`karplusCache`, `buildKarplusBuffer`, `playNote`), `playBuzz`, `playFanfare`, metronome (`metro`, `metroStart/Stop`), timer (`timer`, `timerStart/Stop/Reset`, `updateTimerDisplay`) |
+| `engine.js` | Music helpers (`midiToChroma`, `fretMidi`, `fretChroma`, `spell`, `getAnchorOffset`, `computeScaleChromas`, `computeActiveBoxes`, `setKey`, `isInScale`, `isRoot`, `isInBox`, `transposeFret`), fretboard SVG (`buildFretboard`, `refreshNotes`), `playCurrentScale`, `playGen` |
+| `game.js` | Boot validator IIFE, game engine (`pickLick`, `showGamePhase`, `onGameNoteClick`, `lickComplete`, `updateGamePanel`, `updateGameHUD`, `enterGame`, `exitGame`), persistence (`saveGame`, `loadGame`) |
+| `practice.js` | Modal helpers (`toggleHelp`, `closeHelp`, `togglePractice`, `closePractice`, `renderChallenge`) |
+| `app.js` | `state` object, `onNoteClick`, `flashNote`, `updateScore`, `applyTheme`, `wireControls`, boot sequence |
 
-### Key design points
+### Key model — PARALLEL (v3.1+)
 
-- **Key vs lens are orthogonal.** `keyIdx` (0-11) selects which 5 notes exist on the board. `lens` (`minor`/`major`) only changes which note is highlighted as root — the 5 notes never move. `box` only dims out-of-position notes.
+Each KEY button selects a **root note**; MINOR/MAJOR picks that root's own pentatonic. The two lenses give **different 5 notes** (not the same shapes with a different root highlight).
+
+- `C` + MAJOR → C D E G A (no accidentals) ✓
+- `C` + MINOR → C Eb F G Bb
+- `A` + MINOR → A C D E G (classic blues)
+
+**Box/lick anchoring** still uses the Am-anchored `BOXES`/`LICKS` data via `getAnchorOffset()`:
+- Minor: `anchorChroma = rootChroma`; offset = `(root - 9 + 12) % 12`
+- Major: `anchorChroma = (rootChroma + 9) % 12` (relative minor); same offset formula
+
+**Scale membership** is tested by **chroma** (integer 0–11), never by note name — eliminates sharp/flat mismatches. `spell(chroma)` returns the correctly-spelled display name per current key context.
+
+**Lens change must call `setKey(state.keyIdx)` again** — the anchor offset changes, so `state.activeBoxes` must be recomputed.
+
+### Other key design points
+
 - **One SVG, class toggles only.** `refreshNotes()` is the hot path; `buildFretboard()` runs once at boot. Never rebuild the SVG for state changes.
 - **String order is high→low** in `STRINGS[]` (index 0 = high e). `BOXES`, `LICKS`, MIDI math all assume this.
-- **`BOXES` data is Am-anchored.** `computeActiveBoxes(keyIdx)` shifts all fret ranges by `KEYS[keyIdx].offset`, octave-adjusting (±12) to keep everything within frets 0–17.
-- **`LICKS` data is Am-anchored.** `transposeFret(f, keyOffset)` applies the same octave-adjust logic. The game auto-skips licks where any step can't be kept on-board.
-- **Generation counter (`playGen`).** Incremented on every mode/sequence change. All `setTimeout` callbacks in `showGamePhase` and `playCurrentScale` capture the generation and bail if stale — prevents ghost notes and flashes when exiting mid-playback.
-- **Autoplay policy.** Every audio path routes through `ensureAudio()` and is triggered from a user click.
+- **`BOXES` and `LICKS` data are Am-anchored.** `computeActiveBoxes()` and `transposeFret(f, anchorOffset)` apply `getAnchorOffset()` with octave-adjust (±12) to keep everything within frets 0–17.
+- **Generation counter (`playGen`).** Incremented on every mode/sequence/box/key change. All `setTimeout` callbacks in `showGamePhase` and `playCurrentScale` capture the generation and bail if stale.
+- **Game follows user's box.** Box buttons stay live in game mode; switching box or key restarts the lick with `++playGen`. Lens is locked during game. 2 misses → new lick (not same lick indefinitely).
+- **Autoplay policy.** Every audio path routes through `ensureAudio()` from a user click.
 - **localStorage is always wrapped in try/catch** (throws in private/incognito mode).
 
 ## Themes
@@ -54,11 +63,11 @@ Three files, single page, no modules.
 | Name | Class | Font | Scanline |
 |------|-------|------|----------|
 | CRT Arcade (default) | `:root` | Press Start 2P + VT323 | 0.18 |
-| Hawaii | `theme-hawaii` | Press Start 2P + VT323 | 0.10 |
-| Space | `theme-space` | Press Start 2P + VT323 | 0.15 |
-| VS Code Dark | `theme-vsc` | JetBrains Mono | 0.03 |
+| Hawaii 🌺 | `theme-hawaii` | Press Start 2P + VT323 | 0.10 |
+| Synthwave Neon 🌅 | `theme-synthwave` | Press Start 2P + VT323 | 0.14 |
+| Blueprint 📐 | `theme-blueprint` | JetBrains Mono (both) | 0.02 |
 
-Editing any theme = its `body.theme-*` override block in `styles.css`. New theme = copy that block, add a button in `.hud-right` in `index.html`, handle in `applyTheme()` in `app.js`.
+Editing any theme = its `body.theme-*` override block in `styles.css`. New theme = copy that block, add a button in `.hud-right` in `index.html`, add class to the `classList.remove(...)` call in `applyTheme()` in `app.js`.
 
 ## Keyboard shortcuts
 
@@ -80,9 +89,12 @@ Editing any theme = its `body.theme-*` override block in `styles.css`. New theme
 | `v1.4.0-practice` | Practice Lab (metronome + timer) |
 | `v2.0.0-scales` | All 12 keys + relative lens |
 | `v3.0.0-game` | Lick Attack game complete |
+| `v3.1.0-parallel-keys` | Parallel key model + game follows box + bidirectional scale |
+| `v3.2.0-themes` | Synthwave Neon + Blueprint replace Space/VSC |
+| `v3.4.0-modularized` | app.js split into 6 ordered plain scripts |
 
 ## Conventions
 - Surgical changes only. No build step, no framework, no dependencies beyond CDN fonts.
-- Keep all logic in `app.js`. Don't split into modules — no ES module resolution without a server.
+- Split across 6 plain `<script>` files (not ES modules — no server needed). Boot order matters: `data → audio → engine → game → practice → app`.
 - Arcade/retro theme is intentional. Don't migrate to "modern clean" without asking.
-- The boot-time LICK validator stays in code permanently — it costs nothing at runtime.
+- The boot-time LICK validator stays in `game.js` permanently — it costs nothing at runtime.

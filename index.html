@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
+<script>/* early theme — avoids CRT flash before app.js loads */
+try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.classList.add('theme-'+t);}catch(e){}</script>
 </head>
 <body>
   <div class="scanlines" aria-hidden="true"></div>
@@ -211,6 +213,11 @@
     <span class="mono">▙▟ PRESS ANY FRET TO BEGIN ▙▟</span>
   </footer>
 
+  <script src="data.js"></script>
+  <script src="audio.js"></script>
+  <script src="engine.js"></script>
+  <script src="game.js"></script>
+  <script src="practice.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
