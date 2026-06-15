@@ -1,97 +1,117 @@
-# PLANNING — PENTATONIC ARCADE: LEVEL 2 UPGRADE
+# PLANNING — PENTATONIC ARCADE: LEVEL 2 UPGRADE (12-STEP PLAN)
 
 ```
-  ╔═══════════════════════════════════════════════════════╗
-  ║   ▙▟ PENTATONIC ARCADE ▙▟ — THE GAMIFICATION UPDATE   ║
-  ║                                                       ║
-  ║   🎸 GUITAR PLUCK SOUND     [Karplus-Strong synth]    ║
-  ║   🌺 3 SWITCHABLE WORLDS    [CRT / Hawaii / Space]    ║
-  ║   🕹️ LICK ATTACK GAME       [Simon-style + XP/levels] ║
-  ║                                                       ║
-  ║          INSERT COIN ── PRESS START TO PLAN           ║
-  ╚═══════════════════════════════════════════════════════╝
+  ╔════════════════════════════════════════════════════════════╗
+  ║  ▙▟ PENTATONIC ARCADE ▙▟ — THE BIG UPGRADE (v1.0 → v3.0)   ║
+  ║                                                            ║
+  ║   🎸 KARPLUS PLUCK    🎨 4 THEMES+FONTS   ⌨️ HOTKEYS 1-5   ║
+  ║   ❓ HELP OVERLAY     🎼 ALL 12 KEYS      🏋️ PRACTICE LAB  ║
+  ║   🕹️ LICK ATTACK GAME (key-aware)        🏷️ TAGGED DROPS   ║
+  ║                                                            ║
+  ║          INSERT COIN ── PRESS START TO SHIP                ║
+  ╚════════════════════════════════════════════════════════════╝
 ```
 
 ### 🎯 Objective
 
-Upgrade the pentatonic lesson app with (1) a realistic plucked-guitar sound via Karplus-Strong synthesis, (2) three switchable visual themes, and (3) a Simon-style "repeat the lick" game with real pentatonic licks, levels mapped to boxes 1–5, XP/streaks, and localStorage persistence — shipped as atomic tasks, each ending in a manual smoke test and a git commit.
+Upgrade the pentatonic lesson app across three phases (12 atomic steps), each ending in a manual smoke test + git commit. Headline milestones get annotated git tags. Phases ship lowest-risk first: non-breaking wins → music engine → game.
 
-**Assumption stated:** build order is audio → backgrounds → game, because audio is the smallest change and benefits everything after it, and the game is the largest and depends on the final sound for its show-the-lick phase.
+**Decisions locked:**
+1. **Themes:** 4 total — CRT (default), Hawaii, Space, VSC Dark. Each also changes the font.
+2. **Scales:** all 12 keys, relative lens (same 5 shapes, just root moves between minor/major of the pair).
+3. **Exercises:** guided Practice Lab panel + working Web Audio metronome + countdown timer.
+4. **Game:** licks follow the selected key (transposed); auto-skip if transposed lick runs past fret 17.
 
-### 🗺️ Relevant Codebase Areas
+### 🗺️ Codebase areas
 
-- `app.js` — all behavior. Key landmarks:
-  - `playNote()` (~line 91) — the piano-ish synth being replaced.
-  - `state` object (~line 45) — gains `theme`, `mode`, and game fields.
-  - `onNoteClick()` (~line 270) — must route clicks to the game when in GAME mode.
-  - `playCurrentScale()` + `flashNote()` — reusable for the lick "show phase".
-  - `wireControls()` (~line 315) — where new buttons get wired.
-- `index.html` — HUD (theme selector goes here), controls section (mode toggle goes here), level card (game panel replaces/augments it in GAME mode).
-- `styles.css` — `:root` color variables at the top are the entire theming surface; themes = override blocks on a `body.theme-*` class.
+- `app.js` — all behavior. Key landmarks: `playNote()`, `state`, `BOXES`, `isInScale`/`isRoot`, `refreshNotes()`, `wireControls()`.
+- `styles.css` — `:root` vars = theming surface; `.scanlines`; note state classes.
+- `index.html` — HUD (top right = theme switcher + ❓ + 🏋️), `.controls` (key/lens/box/options), modals appended before `<script>`.
 
-### 📋 Step-by-Step Plan
+---
 
-> **Step 1 — Replace `playNote()` with Karplus-Strong pluck** 🎸
-> In `app.js`, swap the two-oscillator synth for Karplus-Strong (a noise burst fed through a short averaging delay loop — physically models a vibrating string). Implementation: compute the pluck **offline into an `AudioBuffer`** (plain JS loop filling samples, length from `audioCtx.sampleRate` — don't hardcode 44100, many machines run 48kHz), cache one full-decay buffer per MIDI note in a `Map`, play via `AudioBufferSourceNode`. **Duration handling:** callers pass different durations (0.9 default, 0.5 in `playCurrentScale`) — do NOT cache per (midi, duration). Cache one ~1.5s natural-decay buffer per note and shape shorter durations with a `GainNode` fade-out on playback. Keep the `playNote(midi, duration)` signature so all callers (`onNoteClick`, `playCurrentScale`) work untouched.
-> **Test:** open `index.html`, click frets — every note sounds like a plucked string, low E sounds deep, high e bright. `▶ PLAY SCALE` still works (notes audibly shorter than single clicks). **Commit.**
+### 📋 Step-by-step plan
 
-> **Step 2 — Add theme variable blocks to `styles.css`** 🎨
-> Keep the current CRT palette as the `:root` default. Add `body.theme-hawaii { ... }` (sunset oranges/teals, warm sand fretboard) and `body.theme-space { ... }` (deep blues, starfield gradient) blocks that override the same custom properties (`--bg`, `--cyan`, `--magenta`, `--fret-wood`, etc.) plus the `body` background gradient. Scanlines overlay stays in all themes (it's the arcade identity), but expose its strength as a `--scanline-alpha` custom property so themes can soften it (Hawaii wants a fainter overlay) without duplicating the `.scanlines` rule.
-> **Test:** in DevTools, add `theme-hawaii` / `theme-space` to `<body>` — full visual switch, fretboard stays readable in both. Hard-refresh (Ctrl+Shift+R) to defeat CSS cache. **Commit.**
+#### ── PHASE 1 · Non-breaking wins ──
 
-> **Step 3 — Theme selector buttons + persistence** 🌺
-> Add three small buttons to the HUD in `index.html` (`data-theme="crt|hawaii|space"`). In `app.js`: add `state.theme`, wire clicks in `wireControls()` to set the body class, save the choice to `localStorage` (wrapped in `try/catch` — private/incognito mode throws), restore on boot. **Gotcha:** apply the saved theme class as the *first* boot action — `app.js` loads at the end of `<body>`, so restoring it late paints one frame of default CRT before the saved theme kicks in (visible flash on every page load).
-> **Test:** click each theme → instant switch; refresh page → chosen theme persists. **Commit.**
+> **Step 1 — Karplus-Strong pluck audio** 🎸  → tag `v1.1.0-audio`
+> Replace 2-oscillator `playNote()` with Karplus-Strong (noise burst through a short averaging delay loop). Render offline into an `AudioBuffer` (length from `audioCtx.sampleRate`, not hardcoded 44100), cache one ~1.5s natural-decay buffer per MIDI note in a `Map` (lazy), shape shorter durations with a `GainNode` fade-out on playback. Keep `playNote(midi, duration)` signature.
+> **Test:** click frets — plucked-string tone; PLAY SCALE works (shorter notes). **Commit + tag.**
 
-> **Step 4 — Add curated `LICKS` data table** 🎼
-> New data block in `app.js` near `BOXES`: `LICKS = { 1: [...], 2: [...], ... 5: [...] }`, ~3–4 hand-curated classic pentatonic licks per box. Each lick = `{ name, steps: [{ s, f }, ...] }` (string index + fret). Every step must be in-scale AND inside its box's fret range — add a **permanent** boot-time validator (~10 lines: silent when valid, `console.error` naming the offending lick/step when not). It stays in the code: it costs nothing and protects every future lick edit.
-> **Test:** open console → no errors; temporarily corrupt one fret number → console names the bad lick; revert. **Commit.**
+> **Step 2 — 4 themes + fonts + switcher + persistence** 🎨  → tag `v1.2.0-themes`
+> Add `--font-display`, `--font-body`, `--scanline-alpha` to `:root`. Refactor CSS to use these vars. Add `body.theme-hawaii` (sunset orange/teal), `body.theme-space` (deep blue/starfield), `body.theme-vsc` (VS Code dark + JetBrains Mono font). Add compact theme switcher (CRT / 🌺 / 🚀 / VSC) in `.hud` top-right. In `app.js`: `state.theme`, wire clicks, `localStorage` save (try/catch), restore on boot as first action.
+> **Test:** all 4 themes switch fully; choice survives hard-refresh. **Commit + tag.**
 
-> **Step 5 — EXPLORE ⇄ GAME mode toggle + game panel skeleton** 🕹️
-> Add a prominent mode button in `index.html` (arcade style: `▶ START GAME` / `◀ BACK TO EXPLORE`) and a hidden game panel (level name, streak, lives/status message). In `app.js`: `state.mode = 'explore' | 'game'`; entering game mode locks lens/box *buttons* but the game itself drives the position — it sets `state.box = String(currentLevel)` and calls `refreshNotes()` so the fretboard highlight follows the level — and shows the panel; leaving restores the player's previous explore selection. No gameplay yet.
-> **Test:** toggle both ways — panel shows/hides, box buttons disable in game mode, explore works exactly as before. **Commit.**
+> **Step 3 — Help overlay (❓ button + `?` key)** ❓
+> Add `❓` button in `.hud` top-right and `#help-modal` to `index.html` with: 5 notes, lens/box/key explainer, keyboard shortcuts list, theme tip. In `app.js`: `toggleHelp()`; open via button or `?` key; close via X / Esc / outside click.
+> **Test:** click ❓ and press `?` → modal opens; Esc/X/outside closes. **Commit.**
 
-> **Step 6 — Lick playback ("show phase")** 📼
-> Game engine part 1 in `app.js`: pick a lick from `LICKS[currentLevel]`, play it step-by-step reusing `playNote()` + `flashNote()` with a tempo delay, while input is ignored. A "WATCH..." status shows in the game panel. Triggered by the START button (user gesture → satisfies the browser autoplay policy, which blocks audio that wasn't initiated by a click).
-> **Test:** press start in game mode → lick plays and lights up on the fretboard, clicking during playback does nothing. **Commit.**
+> **Step 4 — Keyboard shortcuts (boxes 1–5, 0=ALL)** ⌨️  → (tagged together with Step 3 as `v1.3.0-help-keys`)
+> One global `keydown` in `wireControls()`: `1`–`5` trigger the existing `.box` buttons (DRY); `0` triggers ALL; `?` opens help; `Esc` closes any open modal. Guard: ignore when `e.target` is `input`/`textarea` (metronome BPM field).
+> **Test:** press 1–5 → box switches; 0 → ALL; typing in BPM doesn't trigger box. **Commit + tag `v1.3.0-help-keys`.**
 
-> **Step 7 — Input phase + right/wrong judgment** 🎯
-> Game engine part 2: after the show phase, status flips to "YOUR TURN". `onNoteClick` routes to the game handler when `state.mode === 'game'`: correct fret → pluck + green flash, advance; wrong fret → buzz (short low Karplus pluck or noise burst) + red flash, lose a life/retry the lick. Completing the lick → success fanfare + next lick.
-> **Test:** play a round — correct sequence completes, deliberate wrong note is rejected with feedback. Explore-mode clicking still scores the old way. **Commit.**
+> **Step 5 — Practice Lab: drills + 7-day challenge + metronome + timer** 🏋️  → tag `v1.4.0-practice`
+> `🏋️ PRACTICE` button in HUD opens `#practice-modal` with: (a) daily drills list; (b) 7-day challenge checkboxes (localStorage-persisted); (c) backing track suggestions (text + YouTube search links); (d) Web Audio lookahead metronome (40–240 BPM, accent on beat 1); (e) countdown timer (5/10 min presets + custom, chime on zero).
+> **Test:** metronome clicks + accent; timer counts down + chimes; checkbox survives refresh. **Commit + tag.**
 
-> **Step 8 — XP, streaks, and levels = boxes** ⚡️
-> Progression layer with concrete defaults (all tunable constants at the top of the game section): completing a lick = **100 XP × streak multiplier** (×1 base, +1 per consecutive no-miss lick, capped at ×3); any wrong note resets the streak. **500 XP within Level N (= Box N)** → "LEVEL UP" → game advances to Box N+1's licks and the fretboard box highlight follows. Level 5 cleared → "YOU LEARNED THE NECK" win screen (arcade GAME OVER style, the good kind). HUD score shows game score while in game mode.
-> **Test:** complete licks → XP climbs, streak resets on a miss, level-up moves to the next box. **Commit.**
+#### ── PHASE 2 · Music engine ──
 
-> **Step 9 — Persist game progress in localStorage** 💾
-> Save `{ xp, level, highScore }` under one key (same `try/catch` guard as Step 3), restore on boot so the player resumes at their level. High score shows in the HUD.
-> **Test:** earn XP, refresh page → level/XP/high score survive. Incognito window → app still works (no crash, just no save). **Commit.**
+> **Step 6 — All 12 keys + relative lens + `transposeBoxes`** 🎼  → tag `v2.0.0-scales`
+> Add `KEYS` table (12 pairs: minor root name, major name, minor chroma, offset from Am). Add `transposeBoxes(keyIdx)` (shifts A-anchored `BOXES` fret ranges, octave-adjusts to stay within 0–17). Replace fixed `SCALE_NOTES` / `isInScale` / `isRoot` with dynamic versions reading `state.keyIdx` + `state.lens`. Render 12 key selector buttons from JS into a new `#key-row`. Change lens buttons to MINOR / MAJOR. Update level-card title to the live key. `refreshNotes()` stays the hot path.
+> **Test:** all 12 keys switch shapes; MINOR/MAJOR flips root; box hotkeys + positions still work. **Commit + tag.**
 
-### ⚠️ Risks & Gotchas
+#### ── PHASE 3 · Lick Attack game ──
 
-- **Browser autoplay policy:** an `AudioContext` created/resumed without a user gesture stays suspended → silent game. Every playback path (show phase included) must start from a click. The existing `ensureAudio()` pattern already handles this — keep routing through it.
-- **Click-handler conflict (Step 7):** `onNoteClick` currently adds explore points on every click. If the mode guard is missed, playing the game would also inflate the explore score. Route by `state.mode` at the top of the handler.
-- **Lick data vs box data:** `BOXES` fret ranges are hand-curated; a lick step outside its box renders dimmed and confuses the player. The Step 4 boot-time validator exists precisely to catch this — don't skip it.
-- **CSS cache:** changes to `styles.css` need Ctrl+Shift+R (known machine-wide gotcha) — soft F5 will lie to you during Steps 2–3 testing.
-- **Private/incognito mode:** `localStorage.setItem` throws. Both persistence steps wrap access in `try/catch` so the app degrades to no-save instead of crashing.
-- **Slow connections:** only externals are the two Google Fonts (already `preconnect`ed); all new audio is synthesized, zero new network assets — no impact.
-- **Orphaned playback timeouts:** the show phase (Step 6) and the existing `playCurrentScale()` (app.js:306) schedule notes with `setTimeout` chains. If the user exits game mode (or starts a new sequence) mid-playback, stale callbacks keep firing — ghost notes and flashes in explore mode. Fix pattern: a single generation counter, incremented on every mode/sequence change; each scheduled callback captures its generation and bails if it's stale.
-- **Karplus-Strong buffer memory:** the fretboard spans MIDI 40 (low E open) to 81 (high e fret 17) = **42 distinct pitches**. At 1.5s buffers, 48kHz, 4 bytes/sample ≈ 12 MB if every note gets cached — modest, so caching all is fine; just generate each buffer lazily on first play rather than all at boot.
+> **Step 7 — Curated `LICKS` data + boot validator** 🎼
+> `LICKS = {1:[…],…,5:[…]}` near `BOXES`, 3 hand-curated licks per box, stored as `{ name, steps:[{s,f}] }` relative to the Am anchor (so `transposeBoxes` also transposes lick frets). Permanent boot validator (~12 lines): every step in-scale AND in-box-range → silent; else `console.error` names the offending lick/step.
+> **Test:** console clean; corrupt a fret → error fires; revert. **Commit.**
 
-### 🔍 Files That Will Change
+> **Step 8 — EXPLORE ⇄ GAME mode toggle + panel skeleton** 🕹️
+> `▶ START GAME` / `◀ EXPLORE` button + hidden `#game-panel` (level, streak, status, lives). `state.mode`; entering game locks key/lens/box *buttons* but game drives `state.box` + `refreshNotes()`; leaving restores prior explore selection.
+> **Test:** toggle both ways; panel shows/hides; buttons disable in game; explore unchanged. **Commit.**
 
-- `app.js` — Steps 1, 3, 4, 5, 6, 7, 8, 9: new audio engine, theme wiring, `LICKS` data, game engine, progression, persistence.
-- `styles.css` — Steps 2, 5, 7, 8: theme blocks, game panel styling, correct/wrong flash classes, level-up/win screens.
-- `index.html` — Steps 3, 5, 8, 9: theme selector buttons, mode toggle button, game panel markup, win-screen markup, high-score HUD slot.
+> **Step 9 — Lick playback (show phase, key-aware)** 📼
+> Pick a lick from `LICKS[level]`, transpose to `state.keyIdx` (skip if any step > fret 17 after transposition). Play step-by-step via `playNote` + `flashNote` while input is ignored ("WATCH…"). Single **generation counter** bumped on every mode/sequence change; stale `setTimeout` callbacks bail (retrofits `playCurrentScale` too).
+> **Test:** START → lick plays + lights up; clicking during playback does nothing; exit mid-play kills ghost notes. **Commit.**
 
-No new files — per project convention, all logic stays in `app.js` (no-build constraint).
+> **Step 10 — Input phase + right/wrong judgment** 🎯
+> After show, status → "YOUR TURN". `onNoteClick` routes to game handler when `state.mode==='game'`: correct fret → pluck + green flash, advance; wrong → buzz + red flash, lose a life, reset `gameInputStep`, retry show. Lick complete → fanfare + next lick. Explore clicks score the old way (route by `state.mode` at handler top).
+> **Test:** correct sequence completes; wrong note rejected with feedback; explore scoring intact. **Commit.**
 
-### ✅ How to Verify It Works
+> **Step 11 — XP, streaks, and levels = boxes** ⚡️
+> Tunable constants at top of game section: `100 XP × streak multiplier` (×1 base, +1 per no-miss lick, cap ×3); any miss resets streak. `500 XP in Level N (=Box N)` → "LEVEL UP" → game advances to Box N+1. Level 5 cleared → "YOU LEARNED THE NECK" win screen. HUD shows game score in game mode.
+> **Test:** XP climbs; streak resets on miss; level-up moves box. **Commit.**
 
-No test framework — verification is the per-step manual smoke test listed inside each step, performed by opening `index.html` (`Start-Process index.html`) and clicking. Final end-to-end check after Step 9: fresh hard-refresh → pick Hawaii theme → press START GAME → complete two licks (one with a deliberate mistake) → refresh → theme, level, XP, and high score all persist.
+> **Step 12 — Persist game progress** 💾  → tag `v3.0.0-game`
+> Save `{ xp, level, highScore, levelXP }` under one key (try/catch); restore on boot; high score in HUD.
+> **Test:** earn XP, refresh → level/XP/high score survive; incognito → no crash. **Commit + tag.**
 
-### ❓ Clarifications That Would Improve This Plan
+---
 
-- **Lives/fail state:** assumed "lose a life on wrong note, retry the lick, streak resets" with infinite continues (it's a learning tool, not a punisher). If you want hard GAME OVER + restart-from-level-start arcade rules, say so before Step 7.
-- **Explore score vs game score:** assumed they're separate (HUD shows whichever mode is active). Merge them if you prefer one lifetime score.
-- **Show-phase style:** assumed the game plays the **whole lick** and you repeat it in full — best for memorizing real phrases. Classic Simon instead *grows* the sequence one note at a time (show 1, repeat; show 2, repeat…). Say so before Step 6 if you want the growing style.
+### 🏷️ Tag scheme
+
+| Tag | Closes |
+|-----|--------|
+| `v1.1.0-audio` | Step 1 — Karplus pluck |
+| `v1.2.0-themes` | Step 2 — 4 themes + fonts |
+| `v1.3.0-help-keys` | Steps 3–4 — help overlay + hotkeys |
+| `v1.4.0-practice` | Step 5 — Practice Lab |
+| `v2.0.0-scales` | Step 6 — all 12 keys |
+| `v3.0.0-game` | Steps 7–12 — game complete |
+
+### ⚠️ Key risks
+
+- **Autoplay policy:** every playback path routes through `ensureAudio()` from a click.
+- **Box transpose off-board:** `transposeBoxes` octave-adjusts to stay 0–17; game auto-skips licks that still overflow.
+- **Orphaned timeouts:** generation counter in show-phase + `playCurrentScale`.
+- **Keydown vs text inputs:** hotkey listener guards on `e.target.matches('input, textarea')`.
+- **CSS cache:** Ctrl+Shift+R required after style edits (known machine gotcha).
+- **localStorage in incognito:** every persistence path wrapped in try/catch.
+
+### 🔍 Files changed
+
+- `app.js` — Steps 1–12
+- `styles.css` — Steps 2, 5–12
+- `index.html` — Steps 2–8, 11–12
+
+No new files.
