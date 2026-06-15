@@ -35,42 +35,51 @@ body.theme-hawaii {
   background: radial-gradient(ellipse at top, #3d1a00, #1a0800 70%);
 }
 
-/* ── Space ───────────────────────────────────────────────── */
-body.theme-space {
-  --bg: #00001a;
-  --bg-2: #000033;
-  --cyan: #00e0ff;
-  --magenta: #cc00ff;
-  --yellow: #ffee00;
-  --green: #00ff80;
-  --dim: #1a1a4a;
-  --fret-wood: #0a0a2a;
-  --fret-line: #2a2a9a;
-  --string: #8080ff;
-  --text: #c0c0ff;
+/* ── Synthwave Neon ──────────────────────────────────────── */
+body.theme-synthwave {
+  --bg: #0d0015;
+  --bg-2: #1a0028;
+  --cyan: #00b8ff;
+  --magenta: #ff0080;
+  --yellow: #ffe600;
+  --green: #00ff9f;
+  --dim: #3a1040;
+  --fret-wood: #120020;
+  --fret-line: #ff0080;
+  --string: #ff80c0;
+  --text: #fff0f8;
   --font-display: 'Press Start 2P', monospace;
   --font-body: 'VT323', monospace;
-  --scanline-alpha: 0.15;
-  background: radial-gradient(ellipse at top, #000033, #00001a 70%);
+  --scanline-alpha: 0.14;
+  background:
+    repeating-linear-gradient(0deg,  transparent, transparent 49px, rgba(255,0,128,0.13) 50px),
+    repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(0,184,255,0.07) 50px),
+    radial-gradient(ellipse 80% 40% at 50% 92%, rgba(255,80,0,0.4) 0%, transparent 65%),
+    linear-gradient(180deg, #0d0015 0%, #1a0030 45%, #2d0055 68%, #cc0050 100%);
 }
 
-/* ── VS Code Dark ────────────────────────────────────────── */
-body.theme-vsc {
-  --bg: #1e1e1e;
-  --bg-2: #252526;
-  --cyan: #007acc;
-  --magenta: #c586c0;
-  --yellow: #dcdcaa;
-  --green: #4ec9b0;
-  --dim: #3c3c3c;
-  --fret-wood: #252526;
-  --fret-line: #007acc;
-  --string: #9cdcfe;
-  --text: #d4d4d4;
+/* ── Blueprint ───────────────────────────────────────────── */
+body.theme-blueprint {
+  --bg: #0a1628;
+  --bg-2: #0d1e38;
+  --cyan: #00d4ff;
+  --magenta: #ff6b9d;
+  --yellow: #ffd166;
+  --green: #06d6a0;
+  --dim: #1e3a5a;
+  --fret-wood: #081424;
+  --fret-line: #1a5a8a;
+  --string: #7ecef4;
+  --text: #e8f4fd;
   --font-display: 'JetBrains Mono', monospace;
   --font-body: 'JetBrains Mono', monospace;
-  --scanline-alpha: 0.03;
-  background: linear-gradient(180deg, #252526, #1e1e1e);
+  --scanline-alpha: 0.02;
+  background:
+    repeating-linear-gradient(0deg,  transparent, transparent 19px, rgba(0,212,255,0.055) 20px),
+    repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,212,255,0.055) 20px),
+    repeating-linear-gradient(0deg,  transparent, transparent 99px, rgba(0,212,255,0.11)  100px),
+    repeating-linear-gradient(90deg, transparent, transparent 99px, rgba(0,212,255,0.11)  100px),
+    linear-gradient(150deg, #0a1628 0%, #0d1e38 100%);
 }
 
 * { box-sizing: border-box; }
@@ -265,8 +274,8 @@ html, body {
   padding: 18px 12px 24px;
   min-width: 900px;
 }
-body.theme-vsc #fretboard,
-body.theme-space #fretboard {
+body.theme-blueprint #fretboard,
+body.theme-synthwave #fretboard {
   background: linear-gradient(180deg, var(--bg-2) 0%, var(--fret-wood) 100%);
 }
 
