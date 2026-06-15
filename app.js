@@ -88,36 +88,41 @@ function ensureAudio() {
   return audioCtx;
 }
 
+// Karplus-Strong: offline buffer per MIDI note, lazy-cached
+const karplusCache = new Map();
+
+function buildKarplusBuffer(ctx, freq) {
+  const sr = ctx.sampleRate;
+  const N = Math.max(2, Math.round(sr / freq));
+  const totalSamples = Math.round(sr * 1.5);
+  const buf = ctx.createBuffer(1, totalSamples, sr);
+  const out = buf.getChannelData(0);
+  const delay = new Float32Array(N);
+  for (let i = 0; i < N; i++) delay[i] = Math.random() * 2 - 1;
+  for (let i = 0, ptr = 0; i < totalSamples; i++) {
+    out[i] = delay[ptr];
+    delay[ptr] = 0.498 * (delay[ptr] + delay[(ptr + 1) % N]);
+    ptr = (ptr + 1) % N;
+  }
+  return buf;
+}
+
 function playNote(midi, duration = 0.9) {
   if (!state.sound) return;
   const ctx = ensureAudio();
-  const now = ctx.currentTime;
-  const freq = midiToFreq(midi);
-
-  // Pluck-ish: triangle + soft sine sub, exponential decay
-  const osc1 = ctx.createOscillator();
-  osc1.type = 'triangle';
-  osc1.frequency.value = freq;
-
-  const osc2 = ctx.createOscillator();
-  osc2.type = 'sine';
-  osc2.frequency.value = freq * 2;
-
+  if (!karplusCache.has(midi)) {
+    karplusCache.set(midi, buildKarplusBuffer(ctx, midiToFreq(midi)));
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = karplusCache.get(midi);
   const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.4, now + 0.01);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
-  const gain2 = ctx.createGain();
-  gain2.gain.setValueAtTime(0.0001, now);
-  gain2.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
-  gain2.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.6);
-
-  osc1.connect(gain).connect(ctx.destination);
-  osc2.connect(gain2).connect(ctx.destination);
-  osc1.start(now); osc2.start(now);
-  osc1.stop(now + duration + 0.05);
-  osc2.stop(now + duration + 0.05);
+  const now = ctx.currentTime;
+  gain.gain.setValueAtTime(1, now);
+  gain.gain.setValueAtTime(1, now + duration * 0.6);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration + 0.05);
+  src.connect(gain).connect(ctx.destination);
+  src.start(now);
+  src.stop(now + duration + 0.15);
 }
 
 // ---------- Fretboard render ----------
