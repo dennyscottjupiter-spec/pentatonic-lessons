@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PENTATONIC ARCADE // LEVEL 1</title>
+<title>PENTATONIC ARCADE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -15,29 +15,45 @@
   <header class="hud">
     <div class="hud-left">
       <span class="blink">●</span>
-      <span class="hud-label">INSERT COIN</span>
-    </div>
-    <h1 class="title">PENTATONIC <span class="accent">ARCADE</span></h1>
-    <div class="hud-right">
       <span class="hud-label">SCORE</span>
       <span id="score" class="hud-value">0000</span>
+      <span class="hud-label" id="highscore-label" style="display:none">HI</span>
+      <span id="highscore" class="hud-value" style="display:none">0000</span>
+    </div>
+
+    <h1 class="title">PENTATONIC <span class="accent">ARCADE</span></h1>
+
+    <div class="hud-right">
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme="crt" title="CRT Arcade">CRT</button>
+        <button class="theme-btn" data-theme="hawaii" title="Hawaii">🌺</button>
+        <button class="theme-btn" data-theme="space" title="Space">🚀</button>
+        <button class="theme-btn" data-theme="vsc" title="VS Code Dark">VSC</button>
+      </div>
+      <button class="hud-icon-btn" id="practice-btn" title="Practice Lab [P]">🏋️</button>
+      <button class="hud-icon-btn" id="help-btn" title="Help [?]">❓</button>
     </div>
   </header>
 
   <section class="level-card">
     <div class="level-tag">LEVEL 1</div>
-    <h2 class="level-title">A MINOR / C MAJOR PENTATONIC</h2>
+    <h2 class="level-title" id="level-title">A MINOR / C MAJOR PENTATONIC</h2>
     <p class="level-blurb">
-      Same five notes, two roots. Pick a lens, pick a shape, click the fretboard.
+      Same five notes, two roots. Pick a key, pick a lens, pick a shape, click the fretboard.
     </p>
   </section>
 
   <section class="controls">
     <fieldset class="control-group">
+      <legend>KEY</legend>
+      <div class="btn-row" id="key-row"><!-- rendered by JS --></div>
+    </fieldset>
+
+    <fieldset class="control-group">
       <legend>SCALE LENS</legend>
       <div class="btn-row">
-        <button class="arc-btn lens active" data-lens="Am">A MINOR</button>
-        <button class="arc-btn lens" data-lens="C">C MAJOR</button>
+        <button class="arc-btn lens active" data-lens="minor">MINOR</button>
+        <button class="arc-btn lens" data-lens="major">MAJOR</button>
       </div>
     </fieldset>
 
@@ -59,9 +75,19 @@
         <button class="arc-btn toggle active" data-toggle="labels">LABELS</button>
         <button class="arc-btn toggle active" data-toggle="sound">SOUND</button>
         <button class="arc-btn ghost" id="play-scale">▶ PLAY SCALE</button>
+        <button class="arc-btn ghost" id="game-toggle">▶ START GAME</button>
       </div>
     </fieldset>
   </section>
+
+  <!-- Game panel -->
+  <div id="game-panel">
+    <div class="game-stat">LEVEL <span id="game-level">1</span></div>
+    <div class="game-stat">STREAK <span id="game-streak">×1</span></div>
+    <div class="game-stat">LIVES <span id="game-lives">♥♥♥</span></div>
+    <div id="game-status">PRESS START GAME TO BEGIN</div>
+    <div class="game-stat">LEVEL XP <span id="game-level-xp">0/500</span></div>
+  </div>
 
   <section class="fretboard-wrap">
     <div id="fretboard" aria-label="Interactive guitar fretboard"></div>
@@ -77,13 +103,108 @@
   <section class="lesson">
     <h3>QUICK BRIEFING</h3>
     <ul>
-      <li><b>The 5 notes:</b> A — C — D — E — G. That's it. Five notes, anywhere on the neck.</li>
+      <li><b>Pick a KEY</b> (any of 12), then flip MINOR/MAJOR to hear the same shapes from a different root.</li>
       <li><b>A minor lens:</b> root = <span class="mono">A</span>. Sounds sad / bluesy / rock.</li>
       <li><b>C major lens:</b> root = <span class="mono">C</span>. Same shapes, sounds bright / poppy / country.</li>
-      <li><b>5 box positions</b> cover the whole neck. Box 1 starts at fret 5 — your home base.</li>
-      <li><b>Try this:</b> jam Box 1 over an Am chord, then over a C chord. Hear the lens shift.</li>
+      <li><b>5 box positions</b> cover the whole neck. Press <span class="mono">1–5</span> on your keyboard to switch.</li>
+      <li><b>Try this:</b> jam Box 1 in Am over a backing track, then hit ▶ START GAME to level up!</li>
     </ul>
   </section>
+
+  <!-- Help modal -->
+  <div id="help-modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Help">
+    <div class="modal-box">
+      <button class="modal-close" id="help-close" aria-label="Close">✕</button>
+      <h2>⌨️ KEYBOARD SHORTCUTS</h2>
+      <ul>
+        <li><span class="kbd">1</span>–<span class="kbd">5</span> → select box position</li>
+        <li><span class="kbd">0</span> → show ALL positions</li>
+        <li><span class="kbd">?</span> → toggle this help</li>
+        <li><span class="kbd">P</span> → toggle Practice Lab</li>
+        <li><span class="kbd">Esc</span> → close any panel</li>
+      </ul>
+      <h2>🎸 HOW TO USE</h2>
+      <ul>
+        <li>Pick a <b>KEY</b> from the 12 buttons — shapes shift to that key on the neck.</li>
+        <li>Toggle <b>MINOR / MAJOR</b> to move the highlighted root (the 5 notes stay the same).</li>
+        <li>Select a <b>BOX POSITION</b> (1–5) to focus on one region of the neck.</li>
+        <li>Click any fret to hear it. <b>ROOT</b> notes glow pink, <b>SCALE NOTES</b> glow cyan.</li>
+      </ul>
+      <h2>🎨 THEMES</h2>
+      <p>Switch via the top-right buttons: CRT · 🌺 Hawaii · 🚀 Space · VSC Dark. Choice is saved.</p>
+      <h2>🏋️ PRACTICE LAB</h2>
+      <p>Daily drills, a 7-day challenge, backing-track links, a metronome, and a countdown timer.</p>
+      <h2>🕹️ LICK ATTACK</h2>
+      <p>Watch the lick light up on the fretboard → then replay it. Earn XP, level up through all 5 box positions.</p>
+    </div>
+  </div>
+
+  <!-- Practice Lab modal -->
+  <div id="practice-modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Practice Lab">
+    <div class="modal-box">
+      <button class="modal-close" id="practice-close" aria-label="Close">✕</button>
+      <h2>🏋️ PRACTICE LAB</h2>
+
+      <div class="practice-section">
+        <h3>⚡ DAILY DRILLS</h3>
+        <ul>
+          <li>Ascend + descend Box 1 slowly to a metronome click (start at 60 BPM)</li>
+          <li>Play every note in the box, naming it out loud as you go</li>
+          <li>Target the root note on beat 1 — let every phrase land there</li>
+          <li>Connect Box 1 → Box 2 without stopping (overlap frets 7-8)</li>
+          <li>3-notes-per-string runs across all 6 strings, up and down</li>
+          <li>Practice "call and response" — play a 2-bar phrase, leave 2 bars silence</li>
+        </ul>
+      </div>
+
+      <div class="practice-section">
+        <h3>📅 7-DAY CHALLENGE</h3>
+        <div id="challenge-days">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <div class="practice-section">
+        <h3>🎵 BACKING TRACKS</h3>
+        <ul>
+          <li><a href="https://www.youtube.com/results?search_query=A+minor+pentatonic+backing+track+70bpm" target="_blank" rel="noopener" style="color:var(--cyan)">Am groove — 70 BPM (YouTube search)</a></li>
+          <li><a href="https://www.youtube.com/results?search_query=C+major+pentatonic+backing+track" target="_blank" rel="noopener" style="color:var(--cyan)">C major pop — backing track (YouTube search)</a></li>
+          <li><a href="https://www.youtube.com/results?search_query=blues+shuffle+Am+backing+track" target="_blank" rel="noopener" style="color:var(--cyan)">Bluesy Am shuffle (YouTube search)</a></li>
+          <li><a href="https://www.youtube.com/results?search_query=Em+pentatonic+rock+backing+track" target="_blank" rel="noopener" style="color:var(--cyan)">Em rock backing track (YouTube search)</a></li>
+        </ul>
+      </div>
+
+      <div class="practice-section">
+        <h3>🥁 METRONOME</h3>
+        <div class="metro-controls">
+          <span id="metro-beat-indicator"></span>
+          <input type="range" id="metro-slider" min="40" max="240" value="80" />
+          <input type="number" id="metro-bpm" min="40" max="240" value="80" />
+          <span style="font-size:16px">BPM</span>
+          <button class="arc-btn ghost" id="metro-start">▶ START</button>
+        </div>
+      </div>
+
+      <div class="practice-section">
+        <h3>⏱️ PRACTICE TIMER</h3>
+        <div class="timer-controls">
+          <span id="timer-display">05:00</span>
+          <button class="arc-btn ghost" data-mins="5" id="timer-5">5 MIN</button>
+          <button class="arc-btn ghost" data-mins="10" id="timer-10">10 MIN</button>
+          <button class="arc-btn ghost" id="timer-toggle">▶ START</button>
+          <button class="arc-btn" id="timer-reset">RESET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Win screen -->
+  <div id="win-screen">
+    <h2>★ YOU LEARNED THE NECK ★</h2>
+    <p>ALL 5 BOX POSITIONS MASTERED</p>
+    <p id="win-score"></p>
+    <button class="arc-btn" id="win-close">▶ PLAY AGAIN</button>
+  </div>
 
   <footer>
     <span class="mono">▙▟ PRESS ANY FRET TO BEGIN ▙▟</span>
