@@ -543,6 +543,41 @@ footer {
   text-align: center;
 }
 
+/* Learning modal */
+.lesson-body { font-family: var(--font-body); font-size: 18px; line-height: 1.7; color: var(--text); }
+.lesson-body p  { margin: 10px 0; }
+.lesson-body ul, .lesson-body ol { margin: 8px 0 8px 20px; }
+.lesson-body li { margin: 4px 0; }
+.lesson-body b  { color: var(--cyan); }
+.lesson-body em { color: var(--yellow); font-style: normal; }
+
+.learn-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+  gap: 12px;
+}
+#learn-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.learn-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--dim);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.learn-dot.active {
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  transform: scale(1.3);
+}
+.learn-dot:hover { background: var(--text); }
+#learn-prev:disabled, #learn-next:disabled { opacity: 0.3; pointer-events: none; }
+
 /* Win screen */
 #win-screen {
   position: fixed;

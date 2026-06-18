@@ -126,6 +126,12 @@ function wireControls() {
   $('#practice-close').addEventListener('click', closePractice);
   $('#practice-modal').addEventListener('click', e => { if (e.target === $('#practice-modal')) closePractice(); });
 
+  $('#learn-btn').addEventListener('click', () => { renderLesson(_learnIdx); toggleLearn(); });
+  $('#learn-close').addEventListener('click', closeLearn);
+  $('#learn-modal').addEventListener('click', e => { if (e.target === $('#learn-modal')) closeLearn(); });
+  $('#learn-prev').addEventListener('click', () => renderLesson(_learnIdx - 1));
+  $('#learn-next').addEventListener('click', () => renderLesson(_learnIdx + 1));
+
   const slider = $('#metro-slider'), bpmIn = $('#metro-bpm');
   slider.addEventListener('input', () => { metro.bpm = +slider.value; bpmIn.value = slider.value; });
   bpmIn.addEventListener('input', () => { const v=Math.max(40,Math.min(240,+bpmIn.value||80)); metro.bpm=v; slider.value=v; });
@@ -144,9 +150,10 @@ function wireControls() {
 
   document.addEventListener('keydown', e => {
     if (e.target.matches('input,textarea,select')) return;
-    if (e.key==='?'||(e.key==='/'&&e.shiftKey)) { closePractice(); toggleHelp(); return; }
-    if (e.key==='p'||e.key==='P') { closeHelp(); renderChallenge(); togglePractice(); return; }
-    if (e.key==='Escape') { closeHelp(); closePractice(); return; }
+    if (e.key==='?'||(e.key==='/'&&e.shiftKey)) { closePractice(); closeLearn(); toggleHelp(); return; }
+    if (e.key==='p'||e.key==='P') { closeHelp(); closeLearn(); renderChallenge(); togglePractice(); return; }
+    if (e.key==='l'||e.key==='L') { closeHelp(); closePractice(); renderLesson(_learnIdx); toggleLearn(); return; }
+    if (e.key==='Escape') { closeHelp(); closePractice(); closeLearn(); return; }
     if (e.key>='1'&&e.key<='5') { const b=$$('.box[data-box="'+e.key+'"]')[0]; if(b&&!b.disabled)b.click(); return; }
     if (e.key==='0') { const b=$$('.box[data-box="all"]')[0]; if(b&&!b.disabled)b.click(); return; }
   });

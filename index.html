@@ -202,6 +202,19 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     </div>
   </div>
 
+  <!-- Learning modal -->
+  <div id="learn-modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Learning">
+    <div class="modal-box">
+      <button class="modal-close" id="learn-close" aria-label="Close">✕</button>
+      <div id="learn-content"><!-- rendered by JS --></div>
+      <div class="learn-nav">
+        <button class="arc-btn ghost" id="learn-prev">‹ PREV</button>
+        <span id="learn-dots"></span>
+        <button class="arc-btn ghost" id="learn-next">NEXT ›</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Win screen -->
   <div id="win-screen">
     <h2>★ YOU LEARNED THE NECK ★</h2>
