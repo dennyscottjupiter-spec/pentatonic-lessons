@@ -417,21 +417,6 @@
   </div>
 
   <!-- ENHARMONIC INFO BANNER -->
-  <div class="section-title">ℹ ENHARMONIC NOTE</div>
-  <div class="enh-banner" id="enh-banner">
-    <div class="enh-header" onclick="document.getElementById('enh-banner').classList.toggle('open')">
-      <span>ℹ ENHARMONIC SPELLINGS — 3 KEYS (click to expand)</span>
-      <span class="arrow">▼</span>
-    </div>
-    <div class="enh-body">
-      <p>These 3 key/lens combos use enharmonically-spelled note names. The pitches are musically correct; only the display name flips from the button label. Tests encode these as <em>expected</em> (green) and this banner documents them.</p>
-      <br/>
-      <div><span class="enh-key">Ab MINOR</span> → <span class="enh-note">G#</span><span class="enh-note">B</span><span class="enh-note">C#</span><span class="enh-note">D#</span><span class="enh-note">F#</span></div>
-      <div><span class="enh-key">C# MAJOR</span> → <span class="enh-note">Db</span><span class="enh-note">Eb</span><span class="enh-note">F</span><span class="enh-note">Ab</span><span class="enh-note">Bb</span></div>
-      <div><span class="enh-key">F# MAJOR</span> → <span class="enh-note">Gb</span><span class="enh-note">Ab</span><span class="enh-note">Bb</span><span class="enh-note">Db</span><span class="enh-note">Eb</span></div>
-    </div>
-  </div>
-
   <!-- SUITE TABLE -->
   <div class="section-title">◉ TEST SUITES</div>
   <div id="suite-container">
@@ -542,7 +527,7 @@ window.renderTestReport = function() {
   });
 
   /* ── scale grid ── */
-  var KEYS_ORDER = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];
+  var KEYS_ORDER = ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'];
 
   var table = document.createElement('table');
   table.className = 'scale-grid';

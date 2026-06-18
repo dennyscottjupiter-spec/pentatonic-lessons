@@ -61,37 +61,36 @@
 
   // ═══════════════════════════════════════════════════
   // GROUND-TRUTH SCALE TABLE
-  // Derived from PENT_OFFSETS=[0,3,5,7,10], MAJOR_OFFSETS=[0,2,4,7,9]
-  // + the flat-flag rule (FLAT_MINOR_ROOTS / FLAT_MAJOR_ROOTS).
-  // 3 enharmonic cases documented in tests.html banner.
+  // Derived from PENT_OFFSETS=[0,3,5,7,10], MAJOR_OFFSETS=[0,2,4,7,9].
+  // All sharps — no flat spelling, no enharmonic exceptions.
   // ═══════════════════════════════════════════════════
   var SCALES = {
-    //          key   lens      chromas (sorted)          display names (root first)
-    'A minor':  { chromas:[9,0,2,4,7],   notes:['A','C','D','E','G']           },
-    'Bb minor': { chromas:[10,1,3,5,8],  notes:['Bb','Db','Eb','F','Ab']       },
-    'B minor':  { chromas:[11,2,4,6,9],  notes:['B','D','E','F#','A']          },
-    'C minor':  { chromas:[0,3,5,7,10],  notes:['C','Eb','F','G','Bb']         },
-    'C# minor': { chromas:[1,4,6,8,11],  notes:['C#','E','F#','G#','B']        },
-    'D minor':  { chromas:[2,5,7,9,0],   notes:['D','F','G','A','C']           },
-    'Eb minor': { chromas:[3,6,8,10,1],  notes:['Eb','Gb','Ab','Bb','Db']      },
-    'E minor':  { chromas:[4,7,9,11,2],  notes:['E','G','A','B','D']           },
-    'F minor':  { chromas:[5,8,10,0,3],  notes:['F','Ab','Bb','C','Eb']        },
-    'F# minor': { chromas:[6,9,11,1,4],  notes:['F#','A','B','C#','E']         },
-    'G minor':  { chromas:[7,10,0,2,5],  notes:['G','Bb','C','D','F']          },
-    'Ab minor': { chromas:[8,11,1,3,6],  notes:['G#','B','C#','D#','F#']       }, // ← enharmonic
+    //           key   lens      chromas (sorted)          display names (root first)
+    'A minor':   { chromas:[9,0,2,4,7],   notes:['A','C','D','E','G']             },
+    'A# minor':  { chromas:[10,1,3,5,8],  notes:['A#','C#','D#','F','G#']         },
+    'B minor':   { chromas:[11,2,4,6,9],  notes:['B','D','E','F#','A']            },
+    'C minor':   { chromas:[0,3,5,7,10],  notes:['C','D#','F','G','A#']           },
+    'C# minor':  { chromas:[1,4,6,8,11],  notes:['C#','E','F#','G#','B']          },
+    'D minor':   { chromas:[2,5,7,9,0],   notes:['D','F','G','A','C']             },
+    'D# minor':  { chromas:[3,6,8,10,1],  notes:['D#','F#','G#','A#','C#']        },
+    'E minor':   { chromas:[4,7,9,11,2],  notes:['E','G','A','B','D']             },
+    'F minor':   { chromas:[5,8,10,0,3],  notes:['F','G#','A#','C','D#']          },
+    'F# minor':  { chromas:[6,9,11,1,4],  notes:['F#','A','B','C#','E']           },
+    'G minor':   { chromas:[7,10,0,2,5],  notes:['G','A#','C','D','F']            },
+    'G# minor':  { chromas:[8,11,1,3,6],  notes:['G#','B','C#','D#','F#']         },
 
-    'A major':  { chromas:[9,11,1,4,6],  notes:['A','B','C#','E','F#']         },
-    'Bb major': { chromas:[10,0,2,5,7],  notes:['Bb','C','D','F','G']          },
-    'B major':  { chromas:[11,1,3,6,8],  notes:['B','C#','D#','F#','G#']       },
-    'C major':  { chromas:[0,2,4,7,9],   notes:['C','D','E','G','A']           },
-    'C# major': { chromas:[1,3,5,8,10],  notes:['Db','Eb','F','Ab','Bb']       }, // ← enharmonic
-    'D major':  { chromas:[2,4,6,9,11],  notes:['D','E','F#','A','B']          },
-    'Eb major': { chromas:[3,5,7,10,0],  notes:['Eb','F','G','Bb','C']         },
-    'E major':  { chromas:[4,6,8,11,1],  notes:['E','F#','G#','B','C#']        },
-    'F major':  { chromas:[5,7,9,0,2],   notes:['F','G','A','C','D']           },
-    'F# major': { chromas:[6,8,10,1,3],  notes:['Gb','Ab','Bb','Db','Eb']      }, // ← enharmonic
-    'G major':  { chromas:[7,9,11,2,4],  notes:['G','A','B','D','E']           },
-    'Ab major': { chromas:[8,10,0,3,5],  notes:['Ab','Bb','C','Eb','F']        },
+    'A major':   { chromas:[9,11,1,4,6],  notes:['A','B','C#','E','F#']           },
+    'A# major':  { chromas:[10,0,2,5,7],  notes:['A#','C','D','F','G']            },
+    'B major':   { chromas:[11,1,3,6,8],  notes:['B','C#','D#','F#','G#']         },
+    'C major':   { chromas:[0,2,4,7,9],   notes:['C','D','E','G','A']             },
+    'C# major':  { chromas:[1,3,5,8,10],  notes:['C#','D#','F','G#','A#']         },
+    'D major':   { chromas:[2,4,6,9,11],  notes:['D','E','F#','A','B']            },
+    'D# major':  { chromas:[3,5,7,10,0],  notes:['D#','F','G','A#','C']           },
+    'E major':   { chromas:[4,6,8,11,1],  notes:['E','F#','G#','B','C#']          },
+    'F major':   { chromas:[5,7,9,0,2],   notes:['F','G','A','C','D']             },
+    'F# major':  { chromas:[6,8,10,1,3],  notes:['F#','G#','A#','C#','D#']        },
+    'G major':   { chromas:[7,9,11,2,4],  notes:['G','A','B','D','E']             },
+    'G# major':  { chromas:[8,10,0,3,5],  notes:['G#','A#','C','D#','F']          },
   };
 
   // Helper: set state + recompute for a given KEYS index + lens
@@ -149,9 +148,8 @@
       var chromas = KEYS.map(function(k){ return k.chroma; }).sort(function(a,b){return a-b;});
       arrEq(chromas, [0,1,2,3,4,5,6,7,8,9,10,11]);
     });
-    test('SHARP_NAMES and FLAT_NAMES have 12 entries each', function() {
+    test('SHARP_NAMES has 12 entries', function() {
       eq(SHARP_NAMES.length, 12);
-      eq(FLAT_NAMES.length, 12);
     });
     test('STRINGS: 6 strings, high→low (MIDI 64,59,55,50,45,40)', function() {
       var midis = STRINGS.map(function(s){ return s.midi; });
@@ -185,19 +183,17 @@
     test('TOTAL_FRETS = 17', function() {
       eq(TOTAL_FRETS, 17);
     });
-    test('FLAT_MINOR_ROOTS is a Set with 6 members including 0(C), 5(F), 10(Bb)', function() {
-      ok(FLAT_MINOR_ROOTS instanceof Set);
-      eq(FLAT_MINOR_ROOTS.size, 6);
-      ok(FLAT_MINOR_ROOTS.has(0));   // C
-      ok(FLAT_MINOR_ROOTS.has(5));   // F
-      ok(FLAT_MINOR_ROOTS.has(10));  // Bb
+    test('SHARP_NAMES: spot-check A=9, A#=10, G#=8', function() {
+      eq(SHARP_NAMES[9],  'A');
+      eq(SHARP_NAMES[10], 'A#');
+      eq(SHARP_NAMES[8],  'G#');
     });
-    test('FLAT_MAJOR_ROOTS is a Set with 6 members including 10(Bb), 3(Eb), 8(Ab)', function() {
-      ok(FLAT_MAJOR_ROOTS instanceof Set);
-      eq(FLAT_MAJOR_ROOTS.size, 6);
-      ok(FLAT_MAJOR_ROOTS.has(10));  // Bb
-      ok(FLAT_MAJOR_ROOTS.has(3));   // Eb
-      ok(FLAT_MAJOR_ROOTS.has(8));   // Ab
+    test('KEYS: Bb/Eb/Ab are gone — A#/D#/G# present', function() {
+      var names = KEYS.map(function(k){ return k.name; });
+      ok(!names.includes('Bb') && !names.includes('Eb') && !names.includes('Ab'),
+         'Flat key names must not be present');
+      ok(names.includes('A#') && names.includes('D#') && names.includes('G#'),
+         'Sharp key names must be present');
     });
     test('LICKS has 5 box keys, each with 4 licks', function() {
       eq(Object.keys(LICKS).length, 5);
@@ -279,7 +275,7 @@
   // SUITE 5 — Scale spelling (all 24 scales)
   // ═══════════════════════════════════════════════════
   suite('5 · Scale spelling — note names for all 24 scales', function() {
-    var allNames = new Set(SHARP_NAMES.concat(FLAT_NAMES));
+    var allNames = new Set(SHARP_NAMES);
 
     KEYS.forEach(function(k, keyIdx) {
       ['minor','major'].forEach(function(lens) {
@@ -445,6 +441,73 @@
             bad.push('f=' + f + ' offset=' + offset + ' → tf=' + tf);
         }
       }
+      ok(bad.length === 0, bad.slice(0,3).join('; '));
+    });
+
+    // ── Box-contiguity tests (the critical gap that let the fragmentation bug slip) ──
+
+    test('computeActiveBoxes: each box is contiguous (maxHi−minLo < 12) for all 12 minor keys', function() {
+      var bad = [];
+      KEYS.forEach(function(k, ki) {
+        applyKey(ki, 'minor');
+        var boxes = computeActiveBoxes();
+        [1,2,3,4,5].forEach(function(pos) {
+          var minLo = Infinity, maxHi = -Infinity;
+          Object.entries(boxes[pos]).forEach(function(e) {
+            var r = e[1]; minLo = Math.min(minLo, r[0]); maxHi = Math.max(maxHi, r[1]);
+          });
+          if (maxHi - minLo >= 12)
+            bad.push(k.name + ' min box' + pos + ' span=' + (maxHi - minLo));
+        });
+      });
+      ok(bad.length === 0, 'Split boxes: ' + bad.slice(0,3).join('; '));
+    });
+
+    test('computeActiveBoxes: each box is contiguous (maxHi−minLo < 12) for all 12 major keys', function() {
+      var bad = [];
+      KEYS.forEach(function(k, ki) {
+        applyKey(ki, 'major');
+        var boxes = computeActiveBoxes();
+        [1,2,3,4,5].forEach(function(pos) {
+          var minLo = Infinity, maxHi = -Infinity;
+          Object.entries(boxes[pos]).forEach(function(e) {
+            var r = e[1]; minLo = Math.min(minLo, r[0]); maxHi = Math.max(maxHi, r[1]);
+          });
+          if (maxHi - minLo >= 12)
+            bad.push(k.name + ' maj box' + pos + ' span=' + (maxHi - minLo));
+        });
+      });
+      ok(bad.length === 0, 'Split boxes: ' + bad.slice(0,3).join('; '));
+    });
+
+    test('A# MAJOR Box 1 regression: G/D/A strings share region with e/B/E (no split)', function() {
+      applyKey(1, 'major'); // A# major (keyIdx 1)
+      state.box = '1';
+      state.activeBoxes = computeActiveBoxes();
+      var box = state.activeBoxes[1];
+      var eRange = box['e'], gRange = box['G'];
+      ok(Math.abs(eRange[0] - gRange[0]) <= 5,
+         'e=[' + eRange + '] and G=[' + gRange + '] should be in the same neck region');
+      ok(gRange[0] >= 0 && gRange[1] <= TOTAL_FRETS,
+         'G string must be in range [0,' + TOTAL_FRETS + ']');
+    });
+
+    test('transposeFretInBox: all base frets for box 1-5 land in [0, TOTAL_FRETS] for all 12 minor keys', function() {
+      var bad = [];
+      KEYS.forEach(function(k, ki) {
+        applyKey(ki, 'minor');
+        var ao = getAnchorOffset();
+        [1,2,3,4,5].forEach(function(pos) {
+          Object.entries(BOXES[pos]).forEach(function(e) {
+            var r = e[1];
+            for (var f = r[0]; f <= r[1]; f++) {
+              var tf = transposeFretInBox(f, ao, pos);
+              if (tf < 0 || tf > TOTAL_FRETS)
+                bad.push(k.name + ' minor box' + pos + ' f=' + f + ' → tf=' + tf);
+            }
+          });
+        });
+      });
       ok(bad.length === 0, bad.slice(0,3).join('; '));
     });
   });
@@ -634,16 +697,15 @@
   var scaleGrid = {};
   KEYS.forEach(function(k, keyIdx) {
     ['minor','major'].forEach(function(lens) {
-      var label   = k.name + ' ' + lens;         // matches SCALES key
-      var gridKey = k.name + ' ' + lens.toUpperCase(); // matches renderTestReport key
+      var label   = k.name + ' ' + lens;
+      var gridKey = k.name + ' ' + lens.toUpperCase();
       var gt      = SCALES[label];
       var pass    = false;
       var notes   = gt ? gt.notes.slice() : [];
       if (gt) {
         try {
           applyKey(keyIdx, lens);
-          // Verify spelled names match
-          var spelled = gt.chromas.map(function(ch){ return spell(ch); }).sort().join(',');
+          var spelled  = gt.chromas.map(function(ch){ return spell(ch); }).sort().join(',');
           var expected = gt.notes.slice().sort().join(',');
           pass = (spelled === expected);
         } catch(e) { pass = false; }
