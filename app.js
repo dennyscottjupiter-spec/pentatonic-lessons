@@ -56,7 +56,7 @@ function updateScore() {
 
 // ---------- Theme ----------
 function applyTheme(theme) {
-  document.body.classList.remove('theme-hawaii','theme-space','theme-vsc','theme-synthwave','theme-blueprint');
+  document.body.classList.remove('theme-tropical','theme-mission','theme-blueprint');
   if (theme !== 'crt') document.body.classList.add('theme-' + theme);
   state.theme = theme;
   $$('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
@@ -68,7 +68,7 @@ function wireControls() {
   $$('.theme-btn').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme)));
   try {
     const saved = localStorage.getItem('pent-theme') || 'crt';
-    const valid = ['crt','hawaii','synthwave','blueprint'];
+    const valid = ['crt','tropical','mission','blueprint'];
     applyTheme(valid.includes(saved) ? saved : 'crt');
   } catch(e) { applyTheme('crt'); }
 
