@@ -4,9 +4,6 @@ const PENT_OFFSETS  = [0, 3, 5, 7, 10];
 const MAJOR_OFFSETS = [0, 2, 4, 7, 9];
 
 const SHARP_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const FLAT_NAMES  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
-const FLAT_MINOR_ROOTS = new Set([0, 2, 3, 5, 7, 10]);
-const FLAT_MAJOR_ROOTS = new Set([1, 3, 5, 6, 8, 10]);
 
 const STRINGS = [
   { name:'e', midi:64, thick:false },
@@ -29,17 +26,17 @@ const BOXES = {
 
 const KEYS = [
   { name:'A',  chroma:9  },
-  { name:'Bb', chroma:10 },
+  { name:'A#', chroma:10 },
   { name:'B',  chroma:11 },
   { name:'C',  chroma:0  },
   { name:'C#', chroma:1  },
   { name:'D',  chroma:2  },
-  { name:'Eb', chroma:3  },
+  { name:'D#', chroma:3  },
   { name:'E',  chroma:4  },
   { name:'F',  chroma:5  },
   { name:'F#', chroma:6  },
   { name:'G',  chroma:7  },
-  { name:'Ab', chroma:8  },
+  { name:'G#', chroma:8  },
 ];
 
 const LICKS = {

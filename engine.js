@@ -6,9 +6,7 @@ function fretMidi(si, f)     { return STRINGS[si].midi + f; }
 function fretChroma(si, f)   { return midiToChroma(fretMidi(si, f)); }
 
 function spell(chroma) {
-  const rc   = KEYS[state.keyIdx].chroma;
-  const flat = state.lens === 'minor' ? FLAT_MINOR_ROOTS.has(rc) : FLAT_MAJOR_ROOTS.has(rc);
-  return flat ? FLAT_NAMES[chroma] : SHARP_NAMES[chroma];
+  return SHARP_NAMES[chroma];
 }
 
 function keyNameByChroma(chroma) {
@@ -26,21 +24,40 @@ function computeScaleChromas(rootChroma, lens) {
   return new Set(offs.map(o => (rootChroma + o) % 12));
 }
 
+// Compute the single octave shift k so the whole box (all 6 strings) stays in [0, TOTAL_FRETS].
+// Box spans are < 12 semitones, so one rigid shift always works.
+function boxOctaveShift(boxRanges, offset) {
+  let minLo = Infinity, maxHi = -Infinity;
+  for (const str in boxRanges) {
+    const [lo, hi] = boxRanges[str];
+    minLo = Math.min(minLo, lo + offset);
+    maxHi = Math.max(maxHi, hi + offset);
+  }
+  let k = 0;
+  while (maxHi + k > TOTAL_FRETS) k -= 12;
+  while (minLo + k < 0)           k += 12;
+  return k;
+}
+
 function computeActiveBoxes() {
   const offset = getAnchorOffset();
   if (offset === 0) return BOXES;
   const result = {};
   for (const pos in BOXES) {
+    const k = boxOctaveShift(BOXES[pos], offset);
     result[pos] = {};
     for (const str in BOXES[pos]) {
-      let [lo, hi] = BOXES[pos][str];
-      lo += offset; hi += offset;
-      while (hi > TOTAL_FRETS) { lo -= 12; hi -= 12; }
-      while (lo < 0)           { lo += 12; hi += 12; }
-      result[pos][str] = [lo, hi];
+      const [lo, hi] = BOXES[pos][str];
+      result[pos][str] = [lo + offset + k, hi + offset + k];
     }
   }
   return result;
+}
+
+// Transpose a lick fret using the same rigid shift as its box (keeps note inside box range).
+function transposeFretInBox(f, anchorOffset, pos) {
+  const k = boxOctaveShift(BOXES[pos], anchorOffset);
+  return f + anchorOffset + k;
 }
 
 function setKey(keyIdx) {
