@@ -32,8 +32,9 @@ function pickLick() {
   const box   = state.box === 'all' ? '1' : state.box;
   const licks = LICKS[box] || LICKS[1];
   const ao    = getAnchorOffset();
+  const posNum = parseInt(box, 10);
   const eligible = licks.filter(lick =>
-    lick.steps.every(({f}) => { const tf = transposeFret(f, ao); return tf >= 0 && tf <= TOTAL_FRETS; })
+    lick.steps.every(({f}) => { const tf = transposeFretInBox(f, ao, posNum); return tf >= 0 && tf <= TOTAL_FRETS; })
   );
   const pool = eligible.length > 0 ? eligible : licks;
   return pool[state.gameLickIdx++ % pool.length];
@@ -48,15 +49,17 @@ function showGamePhase() {
   state.currentLick   = lick;
   state.gameInputStep = 0;
   state.lickAttempts  = 0;
+  state.lickHasError  = false;
   state.gamePhase     = 'show';
   updateGamePanel('👀 WATCH...');
-  const gen = ++playGen;
-  const STEP = getStepMs();
-  const ao   = getAnchorOffset();
+  const gen    = ++playGen;
+  const STEP   = getStepMs();
+  const ao     = getAnchorOffset();
+  const posNum = parseInt(state.box === 'all' ? '1' : state.box, 10);
   lick.steps.forEach(({s,f}, i) => {
     setTimeout(() => {
       if (playGen !== gen) return;
-      const tf = transposeFret(f, ao);
+      const tf = transposeFretInBox(f, ao, posNum);
       playNote(fretMidi(s, tf), 0.5);
       const g = getFretEl(s, tf); if (g) flashNote(g);
     }, i * STEP);
@@ -69,22 +72,33 @@ function showGamePhase() {
 }
 
 function onGameNoteClick(g) {
-  const si   = +g.dataset.string;
-  const fret = +g.dataset.fret;
-  const ao   = getAnchorOffset();
-  const exp  = state.currentLick.steps[state.gameInputStep];
-  const expF = transposeFret(exp.f, ao);
+  const si     = +g.dataset.string;
+  const fret   = +g.dataset.fret;
+  const ao     = getAnchorOffset();
+  const posNum = parseInt(state.box === 'all' ? '1' : state.box, 10);
+  const exp    = state.currentLick.steps[state.gameInputStep];
+  const expF   = transposeFretInBox(exp.f, ao, posNum);
 
   if (si === exp.s && fret === expF) {
     playNote(+g.dataset.midi, 0.4); flashNote(g, 'correct');
-    state.gameInputStep++;
-    if (state.gameInputStep >= state.currentLick.steps.length) lickComplete();
   } else {
     playBuzz(); flashNote(g, 'wrong');
-    state.lickAttempts++; state.gameStreak = 0;
-    updateGameHUD();
-    updateGamePanel(state.lickAttempts >= 2 ? '✗ MISSED — NEW LICK' : '✗ WRONG — WATCH AGAIN');
-    setTimeout(() => { if (state.mode === 'game') showGamePhase(); }, 900);
+    state.lickHasError = true;
+    updateGamePanel('✗ WRONG NOTE — KEEP GOING');
+  }
+
+  // Always advance — let the player finish the full sequence
+  state.gameInputStep++;
+  if (state.gameInputStep >= state.currentLick.steps.length) {
+    if (!state.lickHasError) {
+      lickComplete();
+    } else {
+      state.lickAttempts++;
+      state.gameStreak = 0;
+      updateGameHUD();
+      updateGamePanel(state.lickAttempts >= 2 ? '✗ MISSED — NEW LICK' : '✗ TRY AGAIN — WATCH CAREFULLY');
+      setTimeout(() => { if (state.mode === 'game') showGamePhase(); }, 1800);
+    }
   }
 }
 

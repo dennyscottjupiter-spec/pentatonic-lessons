@@ -18,6 +18,7 @@ const state = {
   gameLickIdx:   0,
   gameInputStep: 0,
   gamePhase:     'idle',
+  lickHasError:  false,
   exploreSavedBox: '1',
   currentLick:   null,
   scaleChromas: new Set([9,0,2,4,7]),
