@@ -10,6 +10,34 @@ Open `index.html` directly in a browser — no server, no bundler, no install st
 
 There is no build, lint, or test command. Verification = open the page and interact: click frets, switch keys/themes, open Practice Lab, start the game.
 
+## Test suite
+
+Open `tests.html` directly in Chrome (or via `python3 -m http.server` + localhost). **232 tests, zero dependencies.**
+
+- `tests.js` — zero-dep framework + 10 suites loaded after the real source scripts
+- `tests.html` — CRT-arcade "SYSTEM DIAGNOSTICS" report shell; loads `data.js → audio.js → engine.js → game.js → practice.js` then `tests.js`. **Does NOT load `app.js`** (would boot the full DOM); provides a minimal `state` stub instead.
+
+### What is covered
+
+| Suite | What it tests |
+|-------|--------------|
+| 1 · Music helpers | `midiToChroma`, `fretMidi`, `fretChroma` — pure math, edge cases |
+| 2 · Data integrity | `KEYS`/`STRINGS`/`BOXES`/`PENT_OFFSETS`/`MAJOR_OFFSETS`/`LICKS`/`GAME` constants |
+| 3 · LICK validator | Every lick step: chroma ∈ Am pentatonic + fret within its Box range |
+| 4 · Scale chromas | All 24 scales (12 keys × MINOR/MAJOR): correct 5-chroma sets + relative-pair identity |
+| 5 · Scale spelling | Correct note names for all 24 scales incl. 3 enharmonic cases |
+| 6 · Rendered fretboard | Every `.fb-note` CSS class (`root`/`in-scale`/`out`) + label matches `spell()` for all 24 scales |
+| 7 · Box transposition | `getAnchorOffset`, `computeActiveBoxes` (all 12×2), `transposeFret` all stay in [0,17] |
+| 8 · Box membership | `isInScale`, `isRoot`, `isInBox` correctness |
+| 9 · Game logic | `getStepMs` tiers, `pickLick` transposition, XP/streak math |
+| 10 · Smoke | `playNote`/`metroStop`/`timerReset`/`renderChallenge` must not throw |
+
+### Enharmonic note (3 keys)
+Three key/lens combos display enharmonically (pitches are correct, button label and note names diverge). Tests encode these as **expected/green** and the report shows an info banner:
+- **Ab MINOR** → G# B C# D# F#
+- **C# MAJOR** → Db Eb F Ab Bb
+- **F# MAJOR** → Gb Ab Bb Db Eb
+
 ## Architecture
 
 Six plain JS files loaded in order by `index.html` (no ES modules — `file://` compatible). All share global scope.
@@ -92,6 +120,7 @@ Editing any theme = its `body.theme-*` override block in `styles.css`. New theme
 | `v3.1.0-parallel-keys` | Parallel key model + game follows box + bidirectional scale |
 | `v3.2.0-themes` | Synthwave Neon + Blueprint replace Space/VSC |
 | `v3.4.0-modularized` | app.js split into 6 ordered plain scripts |
+| `v3.5.0-test-suite` | Comprehensive test suite: 232 tests, CRT-arcade SYSTEM DIAGNOSTICS report |
 
 ## Conventions
 - Surgical changes only. No build step, no framework, no dependencies beyond CDN fonts.
