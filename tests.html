@@ -607,6 +607,7 @@ function escHtml(s) {
 <button id="metro-start"  style="display:none">▶ START</button>
 <button id="timer-toggle" style="display:none">▶ START</button>
 <span   id="timer-display" style="display:none">05:00</span>
+<button id="pause-btn" style="display:none"></button>
 
 <script>
 /* Stub globals that app.js normally provides.
@@ -631,6 +632,9 @@ window.state = {
   currentLick:   null,
   scaleChromas:  new Set(),
   activeBoxes:   null,
+  accidentals:   'sharp',
+  blues:         false,
+  paused:        false,
 };
 /* Stubs for DOM-touching helpers referenced by game.js */
 window.onNoteClick   = function(){};
@@ -645,6 +649,7 @@ window.updateTimerDisplay = function(){};
 
 <script src="data.js"></script>
 <script src="audio.js"></script>
+<script src="player.js"></script>
 <script src="engine.js"></script>
 <script src="game.js"></script>
 <script src="practice.js"></script>

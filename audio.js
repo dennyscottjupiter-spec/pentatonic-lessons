@@ -1,5 +1,8 @@
-// audio.js — Web Audio engine (Karplus-Strong, sound FX, metronome, timer)
-// Depends on: data.js (GAME)
+// ---
+// purpose: Web Audio — Karplus-Strong plucks, sound FX, metronome, practice timer
+// exports: ensureAudio, playNote, playFanfare, metroStart/Stop, timerStart/Stop
+// depends: app.js (state.sound), player.js (updatePlayingFlag, guarded)
+// ---
 
 let audioCtx = null;
 function ensureAudio() {
@@ -98,10 +101,12 @@ function metroStart() {
   metro.nextBeat = ctx.currentTime + 0.05; metro.beatCount = 0; metro.running = true;
   document.getElementById('metro-start').textContent = '■ STOP';
   metroSchedule(ctx);
+  if (typeof updatePlayingFlag === 'function') updatePlayingFlag();
 }
 function metroStop() {
   metro.running = false; clearTimeout(metro.timerId);
   document.getElementById('metro-start').textContent = '▶ START';
+  if (typeof updatePlayingFlag === 'function') updatePlayingFlag();
 }
 
 // ---------- Practice timer ----------
@@ -137,10 +142,12 @@ function timerStart() {
       document.getElementById('timer-toggle').textContent = '▶ START';
     }
   }, 1000);
+  if (typeof updatePlayingFlag === 'function') updatePlayingFlag();
 }
 function timerStop() {
   timer.running = false; clearInterval(timer.intervalId);
   document.getElementById('timer-toggle').textContent = '▶ START';
+  if (typeof updatePlayingFlag === 'function') updatePlayingFlag();
 }
 function timerReset(minutes) {
   timerStop();

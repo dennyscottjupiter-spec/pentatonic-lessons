@@ -4,6 +4,10 @@ const PENT_OFFSETS  = [0, 3, 5, 7, 10];
 const MAJOR_OFFSETS = [0, 2, 4, 7, 9];
 
 const SHARP_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT_NAMES  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+// Blue note as a chroma offset from the root: ♭5 of minor, ♭3 of major (never in the pentatonic)
+const BLUE_OFFSETS = { minor:6, major:3 };
 
 const STRINGS = [
   { name:'e', midi:64, thick:false },

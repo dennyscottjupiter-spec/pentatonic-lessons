@@ -1,5 +1,8 @@
-// game.js — Lick Attack game engine + boot validator
-// Depends on: data.js, audio.js, engine.js, app.js (state, updateScore)
+// ---
+// purpose: Lick Attack game engine + boot-time lick validator
+// exports: showGamePhase, onGameNoteClick, enterGame, exitGame, saveGame
+// depends: data.js, audio.js, engine.js, player.js (playSteps), app.js (state)
+// ---
 
 // ---------- Boot validator (permanent) ----------
 (function validateLicks() {
@@ -52,23 +55,20 @@ function showGamePhase() {
   state.lickHasError  = false;
   state.gamePhase     = 'show';
   updateGamePanel('👀 WATCH...');
-  const gen    = ++playGen;
+  // A between-licks timer can land while paused: keep PAUSED shown, restore WATCH on resume
+  if (state.paused) { pauseMemo.status = '👀 WATCH...'; updateGamePanel(PAUSED_TEXT); }
+  ++playGen;
   const STEP   = getStepMs();
   const ao     = getAnchorOffset();
   const posNum = parseInt(state.box === 'all' ? '1' : state.box, 10);
-  lick.steps.forEach(({s,f}, i) => {
-    setTimeout(() => {
-      if (playGen !== gen) return;
-      const tf = transposeFretInBox(f, ao, posNum);
-      playNote(fretMidi(s, tf), 0.5);
-      const g = getFretEl(s, tf); if (g) flashNote(g);
-    }, i * STEP);
-  });
-  setTimeout(() => {
-    if (playGen !== gen) return;
+  playSteps(lick.steps, STEP, ({s,f}) => {
+    const tf = transposeFretInBox(f, ao, posNum);
+    playNote(fretMidi(s, tf), 0.5);
+    const g = getFretEl(s, tf); if (g) flashNote(g);
+  }, () => {
     state.gamePhase = 'input';
     updateGamePanel('🎸 YOUR TURN!');
-  }, lick.steps.length * STEP + 250);
+  });
 }
 
 function onGameNoteClick(g) {
@@ -138,6 +138,7 @@ function showWinScreen() {
 function enterGame() {
   state.exploreSavedBox = state.box;
   state.mode            = 'game';
+  updatePlayingFlag();
   if (state.box === 'all') {
     state.box = '1';
     document.querySelectorAll('.box').forEach(b => b.classList.toggle('active', b.dataset.box==='1'));
@@ -145,7 +146,8 @@ function enterGame() {
   state.lickAttempts = 0; state.gameStreak = 0;
   document.getElementById('game-panel').classList.add('visible');
   document.getElementById('game-toggle').textContent = '◀ EXPLORE';
-  document.querySelectorAll('.lens').forEach(b => b.disabled = true);
+  // PLAY SCALE would bump playGen and strand the lick in its 'show' phase
+  document.querySelectorAll('.lens, #play-scale').forEach(b => b.disabled = true);
   refreshNotes(); updateScore(); updateGameHUD();
   document.getElementById('highscore-label').style.display = '';
   document.getElementById('highscore').style.display = '';
@@ -156,10 +158,11 @@ function enterGame() {
 function exitGame() {
   ++playGen;
   state.mode = 'explore'; state.gamePhase = 'idle';
+  stopSteps();
   state.box  = state.exploreSavedBox;
   document.getElementById('game-panel').classList.remove('visible');
   document.getElementById('game-toggle').textContent = '▶ START GAME';
-  document.querySelectorAll('.box, .lens, #key-row .arc-btn').forEach(b => b.disabled = false);
+  document.querySelectorAll('.box, .lens, #key-row .arc-btn, #play-scale').forEach(b => b.disabled = false);
   document.querySelectorAll('.box').forEach(b => b.classList.toggle('active', b.dataset.box===state.box));
   refreshNotes(); updateScore();
 }

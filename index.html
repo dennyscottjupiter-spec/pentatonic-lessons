@@ -7,7 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%230a0014'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='9'%20fill='%23ff2bd6'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="themes.css" />
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="hud.css" />
+<link rel="stylesheet" href="modals.css" />
+<link rel="stylesheet" href="features.css" />
 <script>/* early theme — avoids CRT flash before app.js loads */
 try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.classList.add('theme-'+t);}catch(e){}</script>
 </head>
@@ -15,7 +20,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <div class="scanlines" aria-hidden="true"></div>
 
   <header class="hud">
-    <div class="hud-left">
+    <div class="hud-chip">
       <span class="blink">●</span>
       <span class="hud-label">SCORE</span>
       <span id="score" class="hud-value">0000</span>
@@ -25,15 +30,49 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
 
     <h1 class="title">PENTATONIC <span class="accent">ARCADE</span></h1>
 
-    <div class="hud-right">
-      <div class="theme-switcher">
-        <button class="theme-btn active" data-theme="crt" title="CRT Arcade">CRT</button>
-        <button class="theme-btn" data-theme="tropical" title="Tropical Night">🌴</button>
-        <button class="theme-btn" data-theme="mission" title="Mission Control">🛰️</button>
-        <button class="theme-btn" data-theme="blueprint" title="Blueprint">📐</button>
+    <div class="hud-rail">
+      <button class="hud-btn" id="pause-btn" aria-label="Pause" aria-pressed="false" data-tip="Pause · Space">
+        <svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
+        <svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+      </button>
+
+      <div class="theme-picker">
+        <button class="hud-btn hud-btn--wide" id="theme-trigger" popovertarget="theme-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Theme" data-tip="Theme">
+          <span id="theme-swatch"><!-- JS copies the active swatch svg here --></span>
+          <span id="theme-name">CRT</span>
+          <svg class="ico ico-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="theme-menu" popover role="menu" aria-label="Theme">
+          <button class="theme-btn" role="menuitemradio" aria-checked="false" data-theme="crt">
+            <svg class="swatch" viewBox="0 0 34 18" aria-hidden="true"><rect width="34" height="18" rx="4" fill="#1a0a2e"/><path d="M3 6h28M3 12h28" stroke="#c8b8ff" stroke-width="1.5"/><circle cx="11" cy="6" r="3" fill="#ff2bd6"/><circle cx="23" cy="12" r="2.5" fill="#00f0ff"/></svg>
+            <span class="theme-name">CRT Arcade</span>
+            <svg class="ico check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </button>
+          <button class="theme-btn" role="menuitemradio" aria-checked="false" data-theme="tropical">
+            <svg class="swatch" viewBox="0 0 34 18" aria-hidden="true"><rect width="34" height="18" rx="4" fill="#031019"/><path d="M3 6h28M3 12h28" stroke="#4dd9c8" stroke-width="1.5"/><circle cx="11" cy="6" r="3" fill="#ff5d73"/><circle cx="23" cy="12" r="2.5" fill="#22e0c8"/></svg>
+            <span class="theme-name">Tropical Night</span>
+            <svg class="ico check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </button>
+          <button class="theme-btn" role="menuitemradio" aria-checked="false" data-theme="mission">
+            <svg class="swatch" viewBox="0 0 34 18" aria-hidden="true"><rect width="34" height="18" rx="4" fill="#030509"/><path d="M3 6h28M3 12h28" stroke="#3a6080" stroke-width="1.5"/><circle cx="11" cy="6" r="3" fill="#ff5b41"/><circle cx="23" cy="12" r="2.5" fill="#3dd6ff"/></svg>
+            <span class="theme-name">Mission Control</span>
+            <svg class="ico check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </button>
+          <button class="theme-btn" role="menuitemradio" aria-checked="false" data-theme="blueprint">
+            <svg class="swatch" viewBox="0 0 34 18" aria-hidden="true"><rect width="34" height="18" rx="4" fill="#081424"/><path d="M3 6h28M3 12h28" stroke="#7ecef4" stroke-width="1.5"/><circle cx="11" cy="6" r="3" fill="#ff6b9d"/><circle cx="23" cy="12" r="2.5" fill="#00d4ff"/></svg>
+            <span class="theme-name">Blueprint</span>
+            <svg class="ico check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </button>
+        </div>
       </div>
-      <button class="hud-icon-btn" id="practice-btn" title="Practice Lab [P]">🏋️</button>
-      <button class="hud-icon-btn" id="help-btn" title="Help [?]">❓</button>
+
+      <button class="hud-btn" id="practice-btn" aria-label="Practice Lab" data-tip="Practice Lab · P">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 21 9.5 4h5l2 17z"/><path d="M12 17l3-9"/></svg>
+      </button>
+      <button class="hud-btn" id="help-btn" aria-label="Help" data-tip="Help · ?">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.6v.6"/><path d="M12 17h.01"/></svg>
+      </button>
     </div>
   </header>
 
@@ -60,6 +99,14 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     </fieldset>
 
     <fieldset class="control-group">
+      <legend>NOTE NAMES</legend>
+      <div class="btn-row">
+        <button class="arc-btn acc active" data-acc="sharp" aria-pressed="true">♯ SHARPS</button>
+        <button class="arc-btn acc" data-acc="flat" aria-pressed="false">♭ FLATS</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="control-group">
       <legend>BOX POSITION</legend>
       <div class="btn-row" id="box-row">
         <button class="arc-btn box active" data-box="1">1</button>
@@ -74,8 +121,9 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     <fieldset class="control-group">
       <legend>OPTIONS</legend>
       <div class="btn-row">
-        <button class="arc-btn toggle active" data-toggle="labels">LABELS</button>
-        <button class="arc-btn toggle active" data-toggle="sound">SOUND</button>
+        <button class="arc-btn toggle active" data-toggle="labels" aria-pressed="true">LABELS</button>
+        <button class="arc-btn toggle active" data-toggle="sound" aria-pressed="true">SOUND</button>
+        <button class="arc-btn toggle" data-toggle="blues" aria-pressed="false">+ BLUE NOTE</button>
         <button class="arc-btn ghost" id="play-scale">▶ PLAY SCALE</button>
         <button class="arc-btn ghost" id="game-toggle">▶ START GAME</button>
         <button class="arc-btn ghost" id="learn-btn">📚 LEARNING</button>
@@ -99,6 +147,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <section class="legend">
     <div class="legend-item"><span class="dot root"></span> ROOT</div>
     <div class="legend-item"><span class="dot note"></span> SCALE NOTE</div>
+    <div class="legend-item" id="legend-blue" hidden><span class="dot blue"></span> <span id="legend-blue-text">BLUE NOTE ♭5</span></div>
     <div class="legend-item"><span class="dot dim"></span> OUT OF SCALE</div>
     <div class="legend-item readout">LAST: <span id="last-note">—</span></div>
   </section>
@@ -124,6 +173,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li><span class="kbd">0</span> → show ALL positions</li>
         <li><span class="kbd">?</span> → toggle this help</li>
         <li><span class="kbd">P</span> → toggle Practice Lab</li>
+        <li><span class="kbd">Space</span> or <span class="kbd">K</span> → pause / resume everything playing</li>
         <li><span class="kbd">Esc</span> → close any panel</li>
       </ul>
       <h2>🎸 HOW TO USE</h2>
@@ -133,9 +183,11 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li>Select a <b>BOX POSITION</b> (1–5) to focus on one neck region. Press <span class="mono">1–5</span> on keyboard.</li>
         <li>Click any fret to hear it. <b>ROOT</b> notes glow pink, <b>SCALE NOTES</b> glow cyan.</li>
         <li>▶ PLAY SCALE plays the box ascending then descending back down.</li>
+        <li><b>+ BLUE NOTE</b> adds the blues note (♭5 in minor, ♭3 in major), drawn with a dashed ring.</li>
+        <li><b>♯ / ♭</b> switches every note name between sharps and flats.</li>
       </ul>
       <h2>🎨 THEMES</h2>
-      <p>Switch via the top-right buttons: CRT · 🌴 Tropical Night · 🛰️ Mission Control · 📐 Blueprint. Choice is saved.</p>
+      <p>Pick a theme from the swatch menu at the top right: CRT · 🌴 Tropical Night · 🛰️ Mission Control · 📐 Blueprint. Your choice is saved.</p>
       <h2>🏋️ PRACTICE LAB</h2>
       <p>Daily drills, a 7-day challenge, backing-track links, a metronome, and a countdown timer.</p>
       <h2>🕹️ LICK ATTACK</h2>
@@ -229,9 +281,11 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
 
   <script src="data.js"></script>
   <script src="audio.js"></script>
+  <script src="player.js"></script>
   <script src="engine.js"></script>
   <script src="game.js"></script>
   <script src="practice.js"></script>
   <script src="app.js"></script>
+  <script src="hud.js"></script>
 </body>
 </html>

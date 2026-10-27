@@ -1,5 +1,9 @@
-// app.js — state, interactions, theme, wireControls, boot
-// Loaded last; depends on data.js → audio.js → engine.js → game.js → practice.js
+// ---
+// purpose: Global state, note clicks, theme, prefs, control wiring, boot
+// exports: state, onNoteClick, applyTheme, wireControls, loadPrefs, savePrefs
+// depends: data.js → audio.js → player.js → engine.js → game.js → practice.js
+// gotcha: loadPrefs() must run before wireControls() (key labels use spell())
+// ---
 
 // ---------- State ----------
 const state = {
@@ -23,6 +27,9 @@ const state = {
   currentLick:   null,
   scaleChromas: new Set([9,0,2,4,7]),
   activeBoxes:  null,
+  accidentals:  'sharp',
+  blues:        false,
+  paused:       false,
 };
 
 const $ = sel => document.querySelector(sel);
@@ -30,6 +37,7 @@ const $$ = sel => Array.from(document.querySelectorAll(sel));
 
 // ---------- Interactions ----------
 function onNoteClick(e) {
+  if (state.paused && state.mode === 'game') return;
   const g      = e.currentTarget;
   const midi   = +g.dataset.midi;
   const chroma = +g.dataset.chroma;
@@ -41,7 +49,7 @@ function onNoteClick(e) {
 
   playNote(midi); flashNote(g);
   $('#last-note').textContent = `${spell(chroma)} (str ${STRINGS[si].name}, fret ${g.dataset.fret})`;
-  state.score += isInScale(chroma) ? (isRoot(chroma) ? 25 : 10) : 1;
+  state.score += (isInScale(chroma) || isBlue(chroma)) ? (isRoot(chroma) ? 25 : 10) : 1;
   updateScore();
 }
 
@@ -63,6 +71,32 @@ function applyTheme(theme) {
   try { localStorage.setItem('pent-theme', theme); } catch(e) {}
 }
 
+// ---------- Note names, blues, prefs ----------
+function renderKeyLabels() {
+  $$('#key-row .key').forEach(b => { b.textContent = spell(KEYS[+b.dataset.keyIdx].chroma); });
+}
+
+function updateBlueLegend() {
+  $('#legend-blue').hidden = !state.blues;
+  $('#legend-blue-text').textContent = 'BLUE NOTE ' + (state.lens === 'minor' ? '♭5' : '♭3');
+}
+
+function savePrefs() {
+  try { localStorage.setItem('pent-prefs', JSON.stringify({accidentals: state.accidentals, blues: state.blues})); } catch(e) {}
+}
+
+function loadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem('pent-prefs') || '{}');
+    if (p.accidentals === 'sharp' || p.accidentals === 'flat') state.accidentals = p.accidentals;
+    if (typeof p.blues === 'boolean') state.blues = p.blues;
+  } catch(e) {}
+  $$('.acc').forEach(b => { const on = b.dataset.acc === state.accidentals; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+  const bb = $('[data-toggle="blues"]');
+  bb.classList.toggle('active', state.blues); bb.setAttribute('aria-pressed', String(state.blues));
+  updateBlueLegend();
+}
+
 // ---------- Wire controls ----------
 function wireControls() {
   $$('.theme-btn').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme)));
@@ -78,7 +112,7 @@ function wireControls() {
     const btn = document.createElement('button');
     btn.className      = 'arc-btn key' + (i === 0 ? ' active' : '');
     btn.dataset.keyIdx = i;
-    btn.textContent    = k.name;
+    btn.textContent    = spell(k.chroma);
     btn.addEventListener('click', () => {
       $$('.key').forEach(x => x.classList.remove('active'));
       btn.classList.add('active');
@@ -95,6 +129,7 @@ function wireControls() {
     state.lens = b.dataset.lens;
     setKey(state.keyIdx);
     refreshNotes();
+    updateBlueLegend();
   }));
 
   // Box — game restarts lick on switch
@@ -106,17 +141,28 @@ function wireControls() {
     if (state.mode === 'game') { ++playGen; showGamePhase(); }
   }));
 
+  // Note names — refresh relabels the fretboard and key buttons
+  $$('.acc').forEach(b => b.addEventListener('click', () => {
+    state.accidentals = b.dataset.acc;
+    $$('.acc').forEach(x => { const on = x === b; x.classList.toggle('active', on); x.setAttribute('aria-pressed', String(on)); });
+    renderKeyLabels(); setKey(state.keyIdx); refreshNotes(); savePrefs();
+  }));
+
   $$('.toggle').forEach(b => b.addEventListener('click', () => {
     const key = b.dataset.toggle;
     state[key] = !state[key];
     b.classList.toggle('active', state[key]);
-    if (key === 'labels') refreshNotes();
+    b.setAttribute('aria-pressed', String(state[key]));
+    if (key === 'labels' || key === 'blues') refreshNotes();
+    if (key === 'blues') { updateBlueLegend(); savePrefs(); }
   }));
 
   $('#play-scale').addEventListener('click', playCurrentScale);
   $('#game-toggle').addEventListener('click', () => {
     if (state.mode === 'game') exitGame(); else enterGame();
   });
+
+  const pb = $('#pause-btn'); if (pb) pb.addEventListener('click', togglePause);
 
   $('#help-btn').addEventListener('click', toggleHelp);
   $('#help-close').addEventListener('click', closeHelp);
@@ -149,7 +195,8 @@ function wireControls() {
   });
 
   document.addEventListener('keydown', e => {
-    if (e.target.matches('input,textarea,select')) return;
+    if (e.target.matches('input,textarea,select') || e.target.closest('#theme-menu')) return;
+    if (e.code === 'Space' || e.key === 'k' || e.key === 'K') { e.preventDefault(); togglePause(); return; }
     if (e.key==='?'||(e.key==='/'&&e.shiftKey)) { closePractice(); closeLearn(); toggleHelp(); return; }
     if (e.key==='p'||e.key==='P') { closeHelp(); closeLearn(); renderChallenge(); togglePractice(); return; }
     if (e.key==='l'||e.key==='L') { closeHelp(); closePractice(); renderLesson(_learnIdx); toggleLearn(); return; }
@@ -160,6 +207,7 @@ function wireControls() {
 }
 
 // ---------- Boot ----------
+loadPrefs();
 setKey(0);
 buildFretboard();
 refreshNotes();

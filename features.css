@@ -1,0 +1,9 @@
+/* Blue-note styling + note-name / blues controls */
+
+/* Skips flash states so playing/correct/wrong still show on a blue note */
+.fb-note.blue:not(.playing):not(.correct):not(.wrong) circle { fill: var(--blue-note, #4f7bff); filter: drop-shadow(0 0 6px var(--blue-note, #4f7bff)); stroke: var(--text); stroke-width: 1.5; stroke-dasharray: 3 2; }
+.fb-note.blue text { fill: var(--bg); }
+.dot.blue { background: var(--blue-note, #4f7bff); box-shadow: 0 0 8px var(--blue-note, #4f7bff); outline: 1px dashed var(--text); outline-offset: 1px; }
+
+/* .legend-item sets display:flex, which would beat the hidden attribute */
+#legend-blue[hidden] { display: none; }

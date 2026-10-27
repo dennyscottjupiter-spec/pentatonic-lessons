@@ -1,17 +1,19 @@
-// engine.js — music helpers, spelling, fretboard SVG, note refresh
-// Depends on: data.js, audio.js (playNote), app.js (state)
+// ---
+// purpose: Music helpers, note spelling, blue notes, fretboard SVG, note refresh
+// exports: spell, setKey, isInBox, isBlue, refreshNotes, playCurrentScale
+// depends: data.js, audio.js (playNote), player.js (playSteps), app.js (state)
+// gotcha: spell() reads state.accidentals; undefined = sharps (tests stub)
+// ---
 
 function midiToChroma(midi)  { return ((midi % 12) + 12) % 12; }
 function fretMidi(si, f)     { return STRINGS[si].midi + f; }
 function fretChroma(si, f)   { return midiToChroma(fretMidi(si, f)); }
 
 function spell(chroma) {
-  return SHARP_NAMES[chroma];
+  return (state.accidentals === 'flat' ? FLAT_NAMES : SHARP_NAMES)[chroma];
 }
 
-function keyNameByChroma(chroma) {
-  return KEYS.find(k => k.chroma === chroma)?.name ?? SHARP_NAMES[chroma];
-}
+function keyNameByChroma(chroma) { return spell(chroma); }
 
 function getAnchorOffset() {
   const rc     = KEYS[state.keyIdx].chroma;
@@ -72,19 +74,22 @@ function setKey(keyIdx) {
     relName = keyNameByChroma((root.chroma + 9) % 12) + 'm';
   }
   const el = document.getElementById('level-title');
-  if (el) el.textContent = `${root.name} ${state.lens.toUpperCase()} PENTATONIC (rel. ${relName})`;
+  if (el) el.textContent = `${spell(root.chroma)} ${state.lens.toUpperCase()} PENTATONIC (rel. ${relName})`;
 }
 
 function isInScale(chroma) { return state.scaleChromas.has(chroma); }
 function isRoot(chroma)    { return chroma === KEYS[state.keyIdx].chroma; }
+function blueChroma()      { return (KEYS[state.keyIdx].chroma + BLUE_OFFSETS[state.lens]) % 12; }
+function isBlue(chroma)    { return !!state.blues && chroma === blueChroma(); }
 
-function isInBox(stringName, fret) {
+// slack widens the box by N frets on each side (blue notes use 1 so box-edge blues still show)
+function isInBox(stringName, fret, slack = 0) {
   if (state.box === 'all') return true;
   const boxes = state.activeBoxes || BOXES;
   const box   = boxes[state.box];
   if (!box) return true;
   const [lo, hi] = box[stringName];
-  return fret >= lo && fret <= hi;
+  return fret >= lo - slack && fret <= hi + slack;
 }
 
 function transposeFret(f, anchorOffset) {
@@ -137,7 +142,7 @@ function buildFretboard() {
       const cy = FB.pad.top + si*FB.stringH + FB.stringH/2;
       const g = mkSvg('g', {class:'fb-note','data-string':si,'data-fret':f,'data-chroma':chroma,'data-midi':midi});
       g.appendChild(mkSvg('circle', {cx,cy,r:12}));
-      const t = mkSvg('text', {x:cx,y:cy+3}); t.textContent = SHARP_NAMES[chroma];
+      const t = mkSvg('text', {x:cx,y:cy+3}); t.textContent = spell(chroma);
       g.appendChild(t); g.addEventListener('click', onNoteClick); svg.appendChild(g);
     }
   });
@@ -158,19 +163,19 @@ function refreshNotes() {
     const chroma  = +g.dataset.chroma;
     const si      = +g.dataset.string;
     const f       = +g.dataset.fret;
-    const inScale = isInScale(chroma);
     const root    = isRoot(chroma);
-    const inBox   = isInBox(STRINGS[si].name, f);
+    const blue    = isBlue(chroma);
+    const lit     = isInScale(chroma) || blue;
+    const inBox   = isInBox(STRINGS[si].name, f, blue ? 1 : 0);
 
-    g.classList.remove('in-scale','root','out','dimmed');
-    if (!inScale) {
+    g.classList.remove('in-scale','root','out','dimmed','blue');
+    if (!lit) {
       g.classList.add('out');
       if (state.box !== 'all') g.classList.add('dimmed');
-    } else if (!inBox) {
-      g.classList.add('in-scale','dimmed');
-      if (root) g.classList.add('root');
     } else {
-      g.classList.add(root ? 'root' : 'in-scale');
+      const cls = root ? 'root' : (blue ? 'blue' : 'in-scale');
+      if (!inBox) g.classList.add('in-scale', cls, 'dimmed');
+      else g.classList.add(cls);
     }
 
     const text = g.querySelector('text');
@@ -183,21 +188,17 @@ let playGen = 0;
 
 function playCurrentScale() {
   ensureAudio();
-  const gen = ++playGen;
+  ++playGen;   // before resume, so a paused old sequence is dropped instead of emitting one stray note
+  if (state.paused) setPaused(false);
   const notes = [];
   document.querySelectorAll('#fretboard .fb-note').forEach(g => {
     if (g.classList.contains('dimmed')) return;
-    if (!g.classList.contains('in-scale') && !g.classList.contains('root')) return;
+    if (!g.classList.contains('in-scale') && !g.classList.contains('root') && !g.classList.contains('blue')) return;
     const f = +g.dataset.fret;
     if (f === 0 && state.box !== 'all') return;
     notes.push({el:g, midi:+g.dataset.midi});
   });
   notes.sort((a,b) => a.midi - b.midi);
   const seq = notes.concat(notes.slice(0,-1).reverse());
-  seq.forEach((n,i) => {
-    setTimeout(() => {
-      if (playGen !== gen) return;
-      playNote(n.midi, 0.5); flashNote(n.el);
-    }, i * 240);
-  });
+  playSteps(seq, 240, n => { playNote(n.midi, 0.5); flashNote(n.el); });
 }
