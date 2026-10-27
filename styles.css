@@ -312,6 +312,9 @@ body.theme-mission #fretboard {
 .fb-note {
   cursor: pointer;
   transition: transform 0.08s;
+  /* origin must live on the base state, else un-hover animates around the SVG corner (jump) */
+  transform-origin: center;
+  transform-box: fill-box;
 }
 .fb-note circle {
   transition: fill 0.15s, r 0.15s, filter 0.15s;
@@ -333,7 +336,7 @@ body.theme-mission #fretboard {
 .fb-note.dimmed circle { opacity: 0.18; }
 .fb-note.dimmed text { opacity: 0.18; }
 
-.fb-note:hover { transform: scale(1.15); transform-origin: center; transform-box: fill-box; }
+.fb-note:hover { transform: scale(1.15); }
 .fb-note.playing circle {
   fill: var(--yellow);
   filter: drop-shadow(0 0 10px var(--yellow));
