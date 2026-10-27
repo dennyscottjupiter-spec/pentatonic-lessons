@@ -434,14 +434,14 @@
   <!-- FOOTER -->
   <footer class="site-footer">
     <div>Open <span>tests.html</span> directly in Chrome (file://) — no server needed.</div>
-    <div>Source files loaded: <span>data.js → audio.js → engine.js → game.js → practice.js</span></div>
+    <div>Source files loaded: <span>data.js → audio.js → player.js → engine.js → game.js → practice.js → patterns.js</span></div>
     <div style="margin-top:6px;color:rgba(68,68,102,.7)">PENTATONIC ARCADE · SYSTEM DIAGNOSTICS · ALL RIGHTS RESERVED</div>
   </footer>
 
 </div><!-- .page -->
 
 <!-- ═══════════════════════════════════════════════════
-     renderTestReport()  —  called by tests.js after setting
+     renderTestReport()  —  called by tests-report.js after setting
      window._testResults  and  window._scaleGrid
 ═══════════════════════════════════════════════════ -->
 <script>
@@ -597,7 +597,7 @@ function escHtml(s) {
 
 <!-- ═══════════════════════════════════════════════════
      SOURCE FILES (real app code — engine.js / data.js / etc.)
-     tests.js (framework + suites) loaded last
+     tests-*.js (framework, suites, report) loaded last, in tests-lib → report order
 ═══════════════════════════════════════════════════ -->
 
 <!-- Minimal DOM scaffold that engine.js / game.js / audio.js need -->
@@ -608,6 +608,22 @@ function escHtml(s) {
 <button id="timer-toggle" style="display:none">▶ START</button>
 <span   id="timer-display" style="display:none">05:00</span>
 <button id="pause-btn" style="display:none"></button>
+<div id="game-status" style="display:none"></div>
+<!-- game.js updateGameHUD writes these -->
+<div style="display:none"><span id="game-level"></span><span id="game-streak"></span><span id="game-lives"></span><span id="game-level-xp"></span></div>
+<!-- patterns.js wires these at load; inert stand-ins for the index.html controls -->
+<div style="display:none">
+  <button id="pattern-build">✎ BUILD</button>
+  <select id="pattern-select"></select>
+  <input id="pattern-name" type="text" />
+  <button id="pattern-save">SAVE</button>
+  <button id="pattern-delete" disabled>DELETE</button>
+  <button id="pattern-clear">CLEAR</button>
+  <p id="pattern-info"></p>
+  <button class="lens" data-lens="minor">MINOR</button>
+  <button class="lens" data-lens="major">MAJOR</button>
+  <button class="toggle" data-toggle="blues">+ BLUE NOTE</button>
+</div>
 
 <script>
 /* Stub globals that app.js normally provides.
@@ -649,15 +665,26 @@ window.playFanfare   = function(){};
 window.saveGame      = function(){};
 window.loadGame      = function(){};
 window.updateTimerDisplay = function(){};
+/* app.js normally defines these selector helpers; patterns.js and engine.js call them */
+window.$  = function(sel) { return document.querySelector(sel); };
+window.$$ = function(sel) { return Array.from(document.querySelectorAll(sel)); };
 </script>
 
-<script src="data.js"></script>
-<script src="audio.js"></script>
-<script src="player.js"></script>
-<script src="engine.js"></script>
-<script src="game.js"></script>
-<script src="practice.js"></script>
-<script src="tests.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/audio.js"></script>
+<script src="../js/player.js"></script>
+<script src="../js/engine.js"></script>
+<script src="../js/game.js"></script>
+<script src="../js/practice.js"></script>
+<script src="../js/patterns.js"></script>
+<script src="tests-lib.js"></script>
+<script src="tests-core.js"></script>
+<script src="tests-board.js"></script>
+<script src="tests-game.js"></script>
+<script src="tests-features.js"></script>
+<script src="tests-patterns.js"></script>
+<script src="tests-player.js"></script>
+<script src="tests-report.js"></script>
 
 </body>
 </html>

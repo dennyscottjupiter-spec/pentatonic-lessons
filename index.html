@@ -8,15 +8,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%230a0014'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='9'%20fill='%23ff2bd6'/%3E%3C/svg%3E" />
-<link rel="stylesheet" href="themes.css" />
-<link rel="stylesheet" href="styles.css" />
-<link rel="stylesheet" href="hud.css" />
-<link rel="stylesheet" href="modals.css" />
-<link rel="stylesheet" href="features.css" />
-<script>/* early theme — avoids CRT flash before app.js loads */
-try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.classList.add('theme-'+t);}catch(e){}</script>
+<link rel="stylesheet" href="css/themes.css" />
+<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="css/hud.css" />
+<link rel="stylesheet" href="css/modals.css" />
+<link rel="stylesheet" href="css/features.css" />
 </head>
 <body>
+<script>/* early theme — avoids CRT flash before app.js loads; must sit inside <body> (document.body is null in <head>) */
+try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.classList.add('theme-'+t);}catch(e){}</script>
   <div class="scanlines" aria-hidden="true"></div>
 
   <header class="hud">
@@ -293,14 +293,14 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     <span class="mono">▙▟ PRESS ANY FRET TO BEGIN ▙▟</span>
   </footer>
 
-  <script src="data.js"></script>
-  <script src="audio.js"></script>
-  <script src="player.js"></script>
-  <script src="engine.js"></script>
-  <script src="game.js"></script>
-  <script src="practice.js"></script>
-  <script src="app.js"></script>
-  <script src="patterns.js"></script>
-  <script src="hud.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/practice.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/patterns.js"></script>
+  <script src="js/hud.js"></script>
 </body>
 </html>

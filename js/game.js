@@ -47,11 +47,12 @@ function getFretEl(s, f) {
   return document.querySelector(`.fb-note[data-string="${s}"][data-fret="${f}"]`);
 }
 
-function showGamePhase() {
-  const lick = pickLick();
+// replay = same lick again after a first miss (keeps the attempt count)
+function showGamePhase(replay) {
+  const lick = replay && state.currentLick ? state.currentLick : pickLick();
   state.currentLick   = lick;
   state.gameInputStep = 0;
-  state.lickAttempts  = 0;
+  if (!replay) state.lickAttempts = 0;
   state.lickHasError  = false;
   state.gamePhase     = 'show';
   updateGamePanel('👀 WATCH...');
@@ -90,6 +91,7 @@ function onGameNoteClick(g) {
   // Always advance — let the player finish the full sequence
   state.gameInputStep++;
   if (state.gameInputStep >= state.currentLick.steps.length) {
+    state.gamePhase = 'judge';   // clicks during the gap before the next lick must not read past the lick
     if (!state.lickHasError) {
       lickComplete();
     } else {
@@ -97,7 +99,7 @@ function onGameNoteClick(g) {
       state.gameStreak = 0;
       updateGameHUD();
       updateGamePanel(state.lickAttempts >= 2 ? '✗ MISSED — NEW LICK' : '✗ TRY AGAIN — WATCH CAREFULLY');
-      setTimeout(() => { if (state.mode === 'game') showGamePhase(); }, 1800);
+      nextLickAfter(1800, state.lickAttempts < 2);
     }
   }
 }
@@ -110,7 +112,13 @@ function lickComplete() {
   state.highScore  = Math.max(state.highScore, state.gameScore);
   updateScore(); updateGameHUD(); playFanfare(); saveGame();
   updateGamePanel(`✓ +${xp} XP  ×${mult} STREAK`);
-  setTimeout(() => showGamePhase(), 1000);
+  nextLickAfter(1000, false);
+}
+
+// Skipped if the game was left or a key/box change already started a new lick (playGen moved on)
+function nextLickAfter(ms, replay) {
+  const gen = playGen;
+  setTimeout(() => { if (state.mode === 'game' && gen === playGen) showGamePhase(replay); }, ms);
 }
 
 function updateGamePanel(status) {

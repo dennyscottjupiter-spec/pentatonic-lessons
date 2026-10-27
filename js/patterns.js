@@ -60,7 +60,8 @@ function applyPattern() {
   $$('#fretboard .fb-note').forEach(g => {
     const on = !empty && picks.has(g.dataset.string + ':' + g.dataset.fret);
     g.classList.toggle('picked', on);
-    g.classList.toggle('dimmed', !on && !empty);
+    // No pattern: leave refreshNotes' box dimming alone
+    if (!empty) g.classList.toggle('dimmed', !on);
   });
   drawSteps();
 }

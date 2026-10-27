@@ -50,7 +50,11 @@ function setPaused(on) {
   }
   document.body.classList.toggle('is-paused', state.paused);
   const pb = document.getElementById('pause-btn');
-  if (pb) { pb.setAttribute('aria-pressed', String(state.paused)); pb.setAttribute('aria-label', state.paused ? 'Resume' : 'Pause'); }
+  if (pb) {
+    const label = state.paused ? 'Resume' : 'Pause';
+    pb.setAttribute('aria-pressed', String(state.paused)); pb.setAttribute('aria-label', label);
+    pb.dataset.tip = label + ' · Space';
+  }
   updatePlayingFlag();
 }
 
