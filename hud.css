@@ -220,7 +220,8 @@ body.is-paused #pause-btn { animation: pause-ring 1.4s ease-out infinite; }
 /* ---------- Phone width ---------- */
 @media (max-width: 700px) {
   .title { font-size: 12px; }
-  body.scrolled .title { font-size: 11px; }
+  /* Three wrapped rows would eat the screen; scrolled = score + controls only */
+  body.scrolled .title { display: none; }
   .hud-label { display: none; }
   .hud-chip { height: 38px; }
   .hud-btn { width: 36px; height: 36px; }

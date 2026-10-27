@@ -28,10 +28,12 @@ function syncThemeTrigger() {
     const open = e.newState === 'open';
     trigger.setAttribute('aria-expanded', String(open));
     if (!open) return;
+    // Right-align to the trigger, clamped inside the viewport (on phones the rail wraps to the left).
     // clientWidth excludes the scrollbar; innerWidth would shift the menu ~15px left
     const r = trigger.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth;
     menu.style.top = (r.bottom + 8) + 'px';
-    menu.style.right = Math.max(8, document.documentElement.clientWidth - r.right) + 'px';
+    menu.style.left = Math.max(8, Math.min(r.right - menu.offsetWidth, vw - menu.offsetWidth - 8)) + 'px';
     const checked = $('#theme-menu [aria-checked="true"]');
     if (checked) checked.focus();
   });
