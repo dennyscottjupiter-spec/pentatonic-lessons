@@ -30,6 +30,10 @@ const state = {
   accidentals:  'sharp',
   blues:        false,
   paused:       false,
+  patternRef:   null,
+  patternRoots: false,
+  pattern:      [],
+  building:     false,
 };
 
 const $ = sel => document.querySelector(sel);
@@ -47,6 +51,7 @@ function onNoteClick(e) {
     onGameNoteClick(g); return;
   }
 
+  if (state.building) togglePick(g);
   playNote(midi); flashNote(g);
   $('#last-note').textContent = `${spell(chroma)} (str ${STRINGS[si].name}, fret ${g.dataset.fret})`;
   state.score += (isInScale(chroma) || isBlue(chroma)) ? (isRoot(chroma) ? 25 : 10) : 1;
@@ -116,7 +121,9 @@ function wireControls() {
     btn.addEventListener('click', () => {
       $$('.key').forEach(x => x.classList.remove('active'));
       btn.classList.add('active');
-      setKey(i); refreshNotes();
+      setKey(i);
+      if (typeof syncPattern === 'function') syncPattern();
+      refreshNotes();
       if (state.mode === 'game') { ++playGen; showGamePhase(); }
     });
     keyRow.appendChild(btn);
@@ -137,6 +144,7 @@ function wireControls() {
     $$('.box').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
     state.box = b.dataset.box;
+    if (typeof clearPattern === 'function') { stopBuilding(); clearPattern(); }
     refreshNotes();
     if (state.mode === 'game') { ++playGen; showGamePhase(); }
   }));

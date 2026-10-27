@@ -129,6 +129,19 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <button class="arc-btn ghost" id="learn-btn">📚 LEARNING</button>
       </div>
     </fieldset>
+
+    <fieldset class="control-group pattern-group">
+      <legend>PATTERNS</legend>
+      <div class="btn-row">
+        <button class="arc-btn" id="pattern-build" aria-pressed="false">✎ BUILD</button>
+        <select id="pattern-select" aria-label="Load a pattern"></select>
+        <input id="pattern-name" type="text" maxlength="24" placeholder="NAME" aria-label="Pattern name" autocomplete="off" />
+        <button class="arc-btn ghost" id="pattern-save">SAVE</button>
+        <button class="arc-btn" id="pattern-delete" disabled>DELETE</button>
+        <button class="arc-btn" id="pattern-clear">CLEAR</button>
+      </div>
+      <p id="pattern-info" class="pattern-info" aria-live="polite">Load a classic or press BUILD and click notes.</p>
+    </fieldset>
   </section>
 
   <!-- Game panel -->
@@ -185,6 +198,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li>▶ PLAY SCALE plays the box ascending then descending back down.</li>
         <li><b>+ BLUE NOTE</b> adds the blues note (♭5 in minor, ♭3 in major), drawn with a dashed ring.</li>
         <li><b>♯ / ♭</b> switches every note name between sharps and flats.</li>
+        <li><b>PATTERNS:</b> press BUILD and click notes to draw your own shape (numbers = play order), save it by name, or load a classic. Patterns follow the key.</li>
       </ul>
       <h2>🎨 THEMES</h2>
       <p>Pick a theme from the swatch menu at the top right: CRT · 🌴 Tropical Night · 🛰️ Mission Control · 📐 Blueprint. Your choice is saved.</p>
@@ -286,6 +300,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <script src="game.js"></script>
   <script src="practice.js"></script>
   <script src="app.js"></script>
+  <script src="patterns.js"></script>
   <script src="hud.js"></script>
 </body>
 </html>

@@ -7,3 +7,17 @@
 
 /* .legend-item sets display:flex, which would beat the hidden attribute */
 #legend-blue[hidden] { display: none; }
+
+/* Custom patterns: picked notes keep full opacity; numbers show click order */
+.fb-note.picked circle { stroke: var(--yellow); stroke-width: 3; }
+.fb-step { fill: var(--yellow); font-family: var(--font-display); font-size: 8px; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; }
+
+#pattern-select, #pattern-name {
+  font-family: var(--font-display); font-size: 11px; padding: 10px 12px;
+  background: var(--bg-2); color: var(--text);
+  border: 2px solid var(--fret-line); border-radius: 4px;
+}
+#pattern-name { width: 9em; }
+#pattern-select { max-width: 100%; }
+#pattern-select:focus-visible, #pattern-name:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.pattern-info { margin: 8px 0 0; font-size: 18px; opacity: 0.85; max-width: 46ch; }

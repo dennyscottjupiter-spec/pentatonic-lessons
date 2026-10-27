@@ -9,6 +9,15 @@ const FLAT_NAMES  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
 // Blue note as a chroma offset from the root: ♭5 of minor, ♭3 of major (never in the pentatonic)
 const BLUE_OFFSETS = { minor:6, major:3 };
 
+// Classic patterns: frets are key-A reference (s0 = high e); they move with the key
+const PATTERN_PRESETS = [
+  { name:'B.B. KING BOX',     lens:'minor', blues:false, notes:[{s:2,f:12},{s:1,f:10},{s:1,f:13},{s:0,f:10},{s:0,f:12}], tip:'Home base around the root on the B string; bend the flat 3rd up a half step for the B.B. King cry.' },
+  { name:'ALBERT KING BOX',   lens:'minor', blues:false, notes:[{s:2,f:9},{s:1,f:8},{s:1,f:10},{s:0,f:8},{s:0,f:10}], tip:'Top of box 2 with big bends on the G and B strings; lean on the bends for that Albert King sting.' },
+  { name:'BLUES SCALE BOX 1', lens:'minor', blues:true,  notes:[{s:5,f:5},{s:5,f:8},{s:4,f:5},{s:4,f:6},{s:4,f:7},{s:3,f:5},{s:3,f:7},{s:2,f:5},{s:2,f:7},{s:2,f:8},{s:1,f:5},{s:1,f:8},{s:0,f:5},{s:0,f:8}], tip:'Box 1 plus the flat-5 passing tone; slide through the blue note between the 4th and 5th.' },
+  { name:'MAJOR BLUES BOX 1', lens:'major', blues:true,  notes:[{s:5,f:2},{s:5,f:5},{s:4,f:2},{s:4,f:3},{s:4,f:4},{s:3,f:2},{s:3,f:4},{s:2,f:2},{s:2,f:4},{s:2,f:5},{s:1,f:2},{s:1,f:5},{s:0,f:2},{s:0,f:5}], tip:'Major pentatonic with the flat-3 slid into the 3rd for a bluesy major sound; resolve back to the root.' },
+  { name:'ROOT MAP',          lens:'minor', blues:false, roots:true, tip:'Every root on the neck lit up; aim your phrases at them and land on the root to resolve.' },
+];
+
 const STRINGS = [
   { name:'e', midi:64, thick:false },
   { name:'B', midi:59, thick:false },

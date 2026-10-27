@@ -1,7 +1,7 @@
 // ---
 // purpose: Music helpers, note spelling, blue notes, fretboard SVG, note refresh
 // exports: spell, setKey, isInBox, isBlue, refreshNotes, playCurrentScale
-// depends: data.js, audio.js (playNote), player.js (playSteps), app.js (state)
+// depends: data.js, audio.js (playNote), player.js (playSteps), app.js (state), game.js (getFretEl)
 // gotcha: spell() reads state.accidentals; undefined = sharps (tests stub)
 // ---
 
@@ -181,6 +181,7 @@ function refreshNotes() {
     const text = g.querySelector('text');
     if (text) { text.textContent = spell(chroma); text.style.display = state.labels ? '' : 'none'; }
   });
+  if (typeof applyPattern === 'function') applyPattern();   // tests.html does not load patterns.js
 }
 
 // ---------- Play scale — ascending then descending ----------
@@ -190,6 +191,11 @@ function playCurrentScale() {
   ensureAudio();
   ++playGen;   // before resume, so a paused old sequence is dropped instead of emitting one stray note
   if (state.paused) setPaused(false);
+  if (state.pattern.length) {   // a built pattern plays in its click order, no reverse
+    const seq = state.pattern.map(p => { const el = getFretEl(p.s, p.f); return { el, midi: +el.dataset.midi }; });
+    playSteps(seq, 240, n => { playNote(n.midi, 0.5); flashNote(n.el); });
+    return;
+  }
   const notes = [];
   document.querySelectorAll('#fretboard .fb-note').forEach(g => {
     if (g.classList.contains('dimmed')) return;
