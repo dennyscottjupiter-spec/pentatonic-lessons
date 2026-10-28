@@ -1,7 +1,7 @@
 // ---
 // purpose: PLAY IT glue: mic on/off, sound hold, denied message, pause and hidden-tab guards
 // exports: quizListen, quizHoldSound, quizMicNote, quizMicLevel, quizClickSounds, micDeniedText
-// depends: quiz.js (quiz, quizAnswer), mic.js (micStart, micStop), drone.js (drone, droneStart, droneStop), audio.js (metro, metroStart, metroStop), player.js (pauseMemo), engine.js (spell), app.js (state, $)
+// depends: quiz.js (quiz, quizAnswer, quizPlayPrompt), mic.js (micStart, micStop), drone.js (drone, droneStart, droneStop), audio.js (metro, metroStart, metroStop), player.js (pauseMemo), engine.js (spell), app.js (state, $)
 // gotcha: the mic hears the drone and metronome, so quizListen holds them off until PLAY IT is left
 // ---
 
@@ -33,7 +33,7 @@ function quizListen() {
     if (!quiz.on || quiz.mode !== 'play') return;
     quiz.micMsg = okay ? '' : micDeniedText();
     // a round showing its answer keeps that feedback until nextRound
-    if (!quiz.locked) $('#quiz-prompt').textContent = quiz.micMsg || 'Play the glowing note on your guitar';
+    if (!quiz.locked) $('#quiz-prompt').textContent = quizPlayPrompt();
   });
 }
 

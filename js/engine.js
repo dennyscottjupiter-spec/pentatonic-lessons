@@ -1,7 +1,7 @@
 // ---
 // purpose: Music helpers, note spelling, blue notes, fretboard SVG, note refresh
 // exports: spell, setKey, isInBox, isBlue, refreshNotes, playCurrentScale
-// depends: data.js, audio.js (playNote), player.js (playSteps), app.js (state), game.js (getFretEl), patterns.js (chromaticRun), quiz.js (quizRefresh)
+// depends: data.js, audio.js (playNote), player.js (playSteps), app.js (state), game.js (getFretEl), patterns.js (chromaticRun), quiz.js (quizRefresh), stand.js (standFit)
 // gotcha: spell() reads state.accidentals; undefined = sharps (tests stub)
 // ---
 
@@ -186,6 +186,7 @@ function refreshNotes() {
   });
   if (typeof applyPattern === 'function') applyPattern();   // tests.html does not load patterns.js
   if (typeof quizRefresh === 'function') quizRefresh();     // quiz.js loads after app.js boot calls refreshNotes()
+  if (typeof standFit === 'function') standFit();           // stand.js loads later too; zooms the neck in STAND only
 }
 
 // ---------- Play scale — ascending then descending ----------

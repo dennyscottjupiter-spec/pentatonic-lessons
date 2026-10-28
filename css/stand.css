@@ -1,0 +1,98 @@
+/* ---
+purpose: STAND mode layout (full-screen neck, stand bar, quiz dock), WALK order button, next-note hint, HUD STAND button
+exports: none (stylesheet, loaded after quiz-piano.css)
+depends: themes.css (tokens); styles.css, quiz*.css, hud.css (overridden under body.stand)
+gotcha: layout rules are body.stand-scoped; .qm-order and .quiz-next apply in every layout
+--- */
+
+/* ---------- Stand bar: key and box steppers (hidden outside STAND) ---------- */
+.stand-bar { display: none; }
+body.stand .stand-bar { display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 12px 0; }
+.stand-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--fret-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+.stand-step {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  box-shadow: none;
+  color: var(--cyan);
+  font-family: var(--font-body);
+  font-size: 30px;
+  line-height: 1;
+}
+.stand-step:hover { background: color-mix(in srgb, var(--cyan) 14%, transparent); box-shadow: none; }
+.stand-step:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.stand-label {
+  min-width: 96px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--yellow);
+}
+
+/* ---------- STAND layout: the neck fills the screen under the HUD ---------- */
+body.stand { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+body.stand .level-card,
+body.stand .controls,
+body.stand #game-panel,
+body.stand .legend,
+body.stand .lesson,
+body.stand .quiz-hint { display: none; }
+body.stand .fretboard-wrap { flex: 1; min-height: 0; max-width: none; width: 100%; margin: 8px 0; overflow: hidden; }
+body.stand #fretboard { height: 100%; min-width: 0; padding: 6px; }
+body.stand .fb-svg { height: 100%; }
+body.stand .quiz-dock { flex: none; width: calc(100% - 24px); max-width: 900px; margin: 0 auto 12px; }
+body.stand .quiz-prompt { font-size: 15px; }
+body.stand .quiz-keys { height: 150px; }
+/* Phone held sideways: stacked, the neck got ~80 px; side by side it keeps the full height */
+@media (max-height: 560px) and (orientation: landscape) {
+  body.stand { display: grid; grid-template-columns: 1fr minmax(300px, 38%); grid-template-rows: auto auto 1fr; }
+  body.stand .hud { grid-column: 1 / -1; }
+  body.stand .fretboard-wrap { grid-column: 1; grid-row: 2 / 4; margin: 4px 0 6px; padding-right: 8px; }
+  body.stand .stand-bar { grid-column: 2; grid-row: 2; padding: 4px 8px 0 0; gap: 6px; }
+  body.stand .quiz-dock { grid-column: 2; grid-row: 3; align-self: end; width: auto; margin: 0 8px 6px 0; padding: 8px 10px; }
+  body.stand .title, body.stand .quiz-stats, body.stand .pk-cap { display: none; }
+  body.stand .stand-step { min-width: 36px; min-height: 36px; font-size: 24px; }
+  body.stand .stand-label { min-width: 64px; font-size: 10px; }
+  body.stand .quiz-head { margin-bottom: 4px; gap: 6px; }
+  body.stand .qm { white-space: nowrap; padding: 6px 7px; font-size: 8px; letter-spacing: 0; }
+  body.stand .quiz-prompt { font-size: 12px; }
+  body.stand .quiz-keys { height: 64px; }
+}
+
+/* ---------- WALK / RANDOM order button (quiz dock) ---------- */
+.qm-order {
+  padding: 7px 14px;
+  border: 1px solid var(--fret-line);
+  border-radius: 999px;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+.qm-order:hover { border-color: var(--cyan); }
+.qm-order.active { background: var(--magenta); border-color: var(--magenta); color: var(--bg); }
+.qm-order:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* ---------- WALK: the next note, a dashed yellow ring (the target keeps its own rules) ---------- */
+body.quiz-on .fb-note.quiz-next { opacity: .8; }
+body.quiz-on .fb-note.quiz-next circle { stroke: var(--yellow); stroke-width: 2; stroke-dasharray: 3 3; }
+
+/* ---------- HUD STAND button lit like the drone chip when on ---------- */
+#stand-btn[aria-pressed="true"] {
+  color: var(--magenta);
+  border-color: var(--magenta);
+  box-shadow: 0 3px 0 var(--key-edge), 0 0 0 1px var(--magenta), 0 0 18px -4px var(--magenta);
+}

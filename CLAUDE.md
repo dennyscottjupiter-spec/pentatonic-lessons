@@ -3,23 +3,25 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project
-Static, no-build HTML/CSS/JS app that teaches guitar pentatonic scales across all 12 keys with an interactive fretboard, Karplus-Strong plucked-guitar audio, a sticky HUD with a root-drone button and 4 visual themes, sharp/flat note names, a blue-note toggle, custom saved fretboard patterns, a global pause, a Practice Lab (metronome + timer), a Lick Attack game, a 5-lesson LEARNING modal, a NOTE QUIZ (name a glowing or a heard note on a mini piano, or play the glowing note on a real guitar and let the mic name it), and an in-app CHANGELOG popup whose rows spotlight the control they describe.
+Static, no-build HTML/CSS/JS app that teaches guitar pentatonic scales across all 12 keys with an interactive fretboard, Karplus-Strong plucked-guitar audio, a sticky HUD with a root-drone button and 4 visual themes, sharp/flat note names, a blue-note toggle, custom saved fretboard patterns, a global pause, a Practice Lab (metronome + timer), a Lick Attack game, a 5-lesson LEARNING modal, a NOTE QUIZ (name a glowing or a heard note on a mini piano, or play the glowing note on a real guitar and let the mic name it), an in-app CHANGELOG popup whose rows spotlight the control they describe, a STAND mode for a tablet on a music stand (zoomed box + quiz, auto-on for tablets, screen kept awake), a WALK quiz order (box notes up and back down), and a Home Screen app (manifest, icons, offline service worker).
 
 ## How to run
 Open `index.html` directly in a browser — no server, no bundler, no install step. From PowerShell: `Start-Process index.html`. Hard-refresh with **Ctrl+Shift+R** after edits to bypass browser CSS cache (see global LEARNINGS).
 
 **Live site:** https://dennyscottjupiter-spec.github.io/pentatonic-lessons/ (GitHub Pages, `main` branch root, free). Every push to `main` redeploys in about a minute; check the build with `gh api repos/dennyscottjupiter-spec/pentatonic-lessons/pages/builds/latest --jq .status` (`built`). Keep every asset path relative (the site lives under `/pentatonic-lessons/`, not `/`). Phones: the fretboard scrolls sideways at 390 px, iPhone needs the silent switch off for sound, and https is what lets PLAY IT reach the mic.
 
+**Offline + Home Screen app:** `sw.js` (repo root, so its scope is the whole app) is network-first with a cache fallback; `js/pwa.js` registers it only on https, so local http/file dev never serves stale files. **Every new css/js file must be added to `FILES` in `sw.js`**, or it is missing offline. Bump `CACHE` only to force-drop old entries. `manifest.webmanifest` + `icons/` (180/192/512/maskable PNGs) give the app icon; the head metas make iOS open it full screen. Test the service worker on the live site (Playwright `context.setOffline(true)` + reload), never on localhost.
+
 There is no build, lint, or test command. Verification = open the page and interact: click frets, switch keys/themes/note names, toggle blue notes, build or load a pattern, press Space to pause, open Practice Lab, start the game.
 
 ## Test suite
 
-Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>/tests/tests.html`). **351 tests, zero dependencies.** All files live in `tests/`:
+Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>/tests/tests.html`). **362 tests, zero dependencies.** All files live in `tests/`:
 
 - `tests-lib.js` — zero-dep framework + `reset()`, exposed as `window.T`
-- `tests-core.js` (1–5), `tests-board.js` (6–8), `tests-game.js` (9–10), `tests-features.js` (11–12), `tests-patterns.js` (13), `tests-player.js` (14), `tests-changelog.js` (15), `tests-quiz.js` (16), `tests-mic.js` (17), `tests-play.js` (17b) — the suites
+- `tests-core.js` (1–5), `tests-board.js` (6–8), `tests-game.js` (9–10), `tests-features.js` (11–12), `tests-patterns.js` (13), `tests-player.js` (14), `tests-changelog.js` (15), `tests-quiz.js` (16), `tests-mic.js` (17), `tests-play.js` (17b), `tests-stand.js` (18) — the suites
 - `tests-report.js` — hands results to the SYSTEM DIAGNOSTICS report
-- `tests.html` — CRT-arcade "SYSTEM DIAGNOSTICS" report shell; loads `../js/` `data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → patterns.js → quiz-piano.js → mic.js → quiz.js → quiz-play.js` then the test files. **Does NOT load `app.js`** (would boot the full DOM); provides a minimal `state` stub plus `$`/`$$` stubs instead.
+- `tests.html` — CRT-arcade "SYSTEM DIAGNOSTICS" report shell; loads `../js/` `data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → patterns.js → quiz-piano.js → mic.js → quiz.js → quiz-walk.js → quiz-play.js → stand.js` then the test files. It has no `header.hud`, so saved quiz prefs never load and STAND never auto-starts there. **Does NOT load `app.js`** (would boot the full DOM); provides a minimal `state` stub plus `$`/`$$` stubs instead.
 
 ### What is covered
 
@@ -43,6 +45,7 @@ Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>
 | 16 · Note quiz | `quizKeyChroma` (music-app row, Shift ignored), `quizPool` (lit, undimmed), `renderQuizKeys` (7 white + 5 black, keycap letters), held-key light and no answer on repeat, start/answer/stop lifecycle, wrong-answer reveal, HEAR IT (no target until the answer), R replays only in HEAR IT, no quiz during the game |
 | 17 · Mic + intervals | `detectPitch` (YIN) on pure and harmonic tones, silence and quiet noise; `micFeed` onset rule (answer once per pluck, silence and level jumps re-arm); `hzToMidi`; `intervalName` (key root, both lenses); `quizMicLevel`; PLAY IT lifecycle (mic only in PLAY, heard note answers and names its interval, stop releases the mic) |
 | 17b · PLAY IT glue | Drone and metronome held off while PLAY IT listens and back after (leaving PLAY, quizStop, unpause); fret clicks silent in PLAY; denied-mic message stays until an allowed mic clears it; hidden tab releases and retakes the mic; a paused guitar is ignored |
+| 18 · STAND + WALK | `quizWalkSeq` (up then down, no repeated ends), WALK advance on right / stay on wrong, `quiz-next` ring, order toggle, `pent-quiz-prefs` round-trip and junk JSON, `standAuto` (saved choice beats tablet detection), `standOn`/`standOff` save, quizStop leaves STAND, `standFit` viewBox covers the box, box/key steppers wrap, `standWake` without the API |
 
 ### Note spelling
 Sharps by default. The **♯ SHARPS / ♭ FLATS** pair under NOTE NAMES switches. `spell(chroma)` returns `SHARP_NAMES[chroma]` or `FLAT_NAMES[chroma]` by `state.accidentals` (`'sharp'` | `'flat'`). The choice is saved in `pent-prefs`. Scale membership is still by chroma, so spelling never changes which notes are in a scale.
@@ -51,15 +54,17 @@ Sharps by default. The **♯ SHARPS / ♭ FLATS** pair under NOTE NAMES switches
 
 ```
 index.html   entry point (stays at the root so it opens directly)
-css/         themes, styles, hud, modals, features
-js/          the fifteen scripts below
+css/         themes, styles, hud, modals, features, quiz, stand
+js/          the eighteen scripts below
+icons/       Home Screen PNGs (180, 192, 512, maskable 512)
 tests/       tests.html + tests-*.js
+sw.js        service worker (root = whole-app scope); manifest.webmanifest next to it
 ```
 
-Fifteen plain JS files in `js/`, loaded in order by `index.html` (no ES modules — `file://` compatible). All share global scope. Stylesheets in `css/` load in the order themes → styles → hud → modals → changelog → features → quiz → quiz-cue → quiz-piano.
+Eighteen plain JS files in `js/`, loaded in order by `index.html` (no ES modules — `file://` compatible). All share global scope. Stylesheets in `css/` load in the order themes → styles → hud → modals → changelog → features → quiz → quiz-cue → quiz-piano → stand.
 
 ```
-data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → app.js → patterns.js → quiz-piano.js → mic.js → quiz.js → quiz-play.js → hud.js
+data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → app.js → patterns.js → quiz-piano.js → mic.js → quiz.js → quiz-walk.js → quiz-play.js → stand.js → hud.js → pwa.js
 ```
 
 - **`index.html`** — structure: sticky HUD (`header.hud`: root-drone button `#drone-btn` (key + lens readout), title, icon rail with pause `#pause-btn`, theme dropdown `#theme-trigger` + popover `#theme-menu`, Practice Lab, Help), level card with live title, controls (KEY row / SCALE LENS / NOTE NAMES / BOX POSITION / OPTIONS incl. + BLUE NOTE, ▶ PLAY SCALE, ▶ START GAME, 🎯 NOTE QUIZ, 📚 LEARNING, 📜 CHANGELOG; PATTERNS group), game panel, fretboard div, quiz dock `#quiz-dock` (hidden until the quiz runs), legend (incl. `#legend-blue`), help modal, practice modal, learn modal, changelog modal, win screen. A tiny inline `<script>` right after `<body>` opens applies the saved theme before first paint (avoids a CRT flash); it must not move into `<head>`, where `document.body` is still null. JS renders the KEY row at boot via `wireControls`.
@@ -80,6 +85,9 @@ data.js → audio.js → drone.js → player.js → engine.js → game.js → pr
 | `mic.js` | PLAY IT microphone listener: `mic` state, `micStart`/`micStop` (getUserMedia into an analyser, never connected to the speakers; polled every 50 ms), `detectPitch` (YIN, 70–1100 Hz), `micFeed` (note-onset rule), `hzToMidi`, `rms` |
 | `quiz.js` | NOTE QUIZ (`quiz` state incl. `mode` see/hear/play, `quizStart`/`quizStop`/`toggleQuiz`, `setQuizMode`, `quizAnswer`, `quizReplay` (root then note), `quizPool`, `quizRefresh` called by `refreshNotes()`), best streak in `pent-quiz-best`, `intervalName` (interval line after each answer) |
 | `quiz-play.js` | PLAY IT glue: `quizListen` (mic on; drone and metronome held off by `quizHoldSound`), `quizMicNote`/`quizMicLevel` (mic callbacks; a paused guitar is ignored), `quizClickSounds` (silent PLAY clicks), `micDeniedText`, hidden-tab `visibilitychange` guard |
+| `quiz-walk.js` | WALK order (`quizWalkSeq`, `quizWalkTarget`, `setQuizOrder`, `syncQuizOrder`, `#quiz-order`) + saved quiz choices (`quizSavePrefs`/`quizLoadPrefs`, `pent-quiz-prefs` {mode, order}; loads only when `header.hud` exists) |
+| `stand.js` | STAND mode (`stand`, `standOn`/`standOff`/`toggleStand`, `standQuizStopped`), tablet auto-start (`isTablet`, `standAuto`, `pent-stand` '1'/'0'; an auto-start saves nothing), key/box steppers (`standKeyStep`, `standStep` click the real buttons), `standFit` (viewBox zoom only), `standWake` (Screen Wake Lock), M and ←/→ keys |
+| `pwa.js` | Registers `sw.js` on https only |
 | `app.js` | `state` object (incl. `accidentals`, `blues`, `paused`, pattern fields), `$`/`$$`, `onNoteClick`, `flashNote`, `applyTheme`, `renderKeyLabels`, `updateBlueLegend`, `loadPrefs`/`savePrefs` (`pent-prefs`), `wireControls`, boot sequence |
 | `patterns.js` | Custom patterns: BUILD clicks (`togglePick`), `applyPattern` / `drawSteps` (picked notes + step numbers), saved patterns (`readSaved`/`writeSaved`, `pent-patterns`), `loadSelected` (classics + mine), key-A reference conversion (`toRef`/`fromRef`, lens-aware via `patternLens`), `chromaticRun` |
 | `hud.js` | Theme dropdown (`syncThemeTrigger`), popover placement, arrow/Home/End keys, compact-on-scroll (`body.scrolled`) |
@@ -91,6 +99,7 @@ data.js → audio.js → drone.js → player.js → engine.js → game.js → pr
 | `quiz.css` | Quiz board (hidden letters, target reticle), quiz dock, mode buttons, stats, hint |
 | `quiz-cue.css` | Quiz cue row: prompt, interval line, REPLAY, PLAY IT heard readout and level bars (HEAR IT equaliser too) |
 | `quiz-piano.css` | Quiz mini piano (`.pk`): key shapes, keycap letters, held and answer colours |
+| `stand.css` | STAND layout (`body.stand` flex column filling 100dvh; side-by-side grid on short landscape screens), stand bar steppers, `.qm-order`, `.quiz-next` dashed ring, lit `#stand-btn` |
 | `features.css` | Blue-note styling and its controls, pattern UI (`.picked`, `.fb-step`, pattern inputs) |
 
 ### Key model — PARALLEL (v3.1+)
@@ -124,7 +133,9 @@ Each KEY button selects a **root note**; MINOR/MAJOR picks that root's own penta
 - **Popover menu.** `#theme-menu` is a native popover opened by `#theme-trigger` (`popovertarget`). `hud.js` places it on `toggle` (right-aligned under the trigger, clamped to the viewport) and handles ArrowUp/ArrowDown/Home/End. Global keyboard shortcuts skip inputs, selects and `#theme-menu`.
 - **Game follows user's box.** Box buttons stay live in game mode; switching box or key restarts the lick with `++playGen`. Lens, PLAY SCALE and the PATTERNS controls are locked during game. After a sequence with any wrong note: 1.8 s pause, then the SAME lick again (`showGamePhase(true)` keeps `lickAttempts`); a 2nd miss moves to a new lick. Once the last note is clicked `gamePhase` becomes `'judge'`, so clicks in the gap are ordinary note clicks.
 - **Finish-then-judge.** Wrong notes no longer abort the lick mid-sequence — the player finishes the whole sequence, then gets feedback.
-- **NOTE QUIZ.** `body.quiz-on` hides every note letter; one note from `quizPool()` (whatever the board shows lit and undimmed: box, pattern or CHROMATIC) gets `.quiz-target` + a `.quiz-reticle` circle. Answers come from the piano keys or the music-app row (`A S D F G H J` white, `W E T Y U` black, as in GarageBand); the keydown handler routes those keys and R to `quizKeyDown()` before D/K, so the drone key is not available during the quiz. **HEAR IT** (`quiz.mode = 'hear'`, `body.quiz-hear`, not saved) marks nothing at round start and plays the key's root at or below the note, then the note (`quizReplay`); the answer marks the target like SEE IT. In SEE IT fret clicks never reveal the answer (only the target sounds); in HEAR IT any clicked note sounds. PLAY SCALE and BUILD are disabled while it runs; starting the game stops it. `quiz.gen` drops stale next-round timers. **PLAY IT** (`quiz.mode = 'play'`, `body.quiz-play`) glows the note like SEE IT and runs the mic only in that mode: `syncQuizMode()` calls `micStart` there and `micStop` everywhere else, `quizStop` included. The analyser is never connected to `ctx.destination`, so the speakers cannot feed it. `micFeed` emits a note after 3 stable 50 ms polls; a ringing string answers once, and a silence gap, a different note or a 1.6× level jump re-arms it. Any octave counts, and a right PLAY IT answer is not replayed through the speakers. After every answer, `#quiz-interval` shows the distance from the key button's root (`INTERVAL_NAMES`), in both lenses. While PLAY IT listens, `quizHoldSound` holds the drone and metronome off (restored on leaving, stopping or unpausing), its fret clicks are silent (`quizClickSounds`), a hidden tab releases the mic, and a paused guitar is ignored.
+- **NOTE QUIZ.** `body.quiz-on` hides every note letter; one note from `quizPool()` (whatever the board shows lit and undimmed: box, pattern or CHROMATIC) gets `.quiz-target` + a `.quiz-reticle` circle. Answers come from the piano keys or the music-app row (`A S D F G H J` white, `W E T Y U` black, as in GarageBand); the keydown handler routes those keys and R to `quizKeyDown()` before D/K, so the drone key is not available during the quiz. **HEAR IT** (`quiz.mode = 'hear'`, `body.quiz-hear`; the mode is saved in `pent-quiz-prefs`) marks nothing at round start and plays the key's root at or below the note, then the note (`quizReplay`); the answer marks the target like SEE IT. In SEE IT fret clicks never reveal the answer (only the target sounds); in HEAR IT any clicked note sounds. PLAY SCALE and BUILD are disabled while it runs; starting the game stops it. `quiz.gen` drops stale next-round timers. **PLAY IT** (`quiz.mode = 'play'`, `body.quiz-play`) glows the note like SEE IT and runs the mic only in that mode: `syncQuizMode()` calls `micStart` there and `micStop` everywhere else, `quizStop` included. The analyser is never connected to `ctx.destination`, so the speakers cannot feed it. `micFeed` emits a note after 3 stable 50 ms polls; a ringing string answers once, and a silence gap, a different note or a 1.6× level jump re-arms it. Any octave counts, and a right PLAY IT answer is not replayed through the speakers. After every answer, `#quiz-interval` shows the distance from the key button's root (`INTERVAL_NAMES`), in both lenses. While PLAY IT listens, `quizHoldSound` holds the drone and metronome off (restored on leaving, stopping or unpausing), its fret clicks are silent (`quizClickSounds`), a hidden tab releases the mic, and a paused guitar is ignored.
+- **STAND mode.** `body.stand` hides the level card, controls, game panel, legend and lesson; the HUD, `#stand-bar` (‹ key ›, ‹ box ›, EXIT), the neck and the quiz dock remain. `standOn` starts the quiz; any `quizStop` (✕, Q, Esc) calls `standQuizStopped` and leaves STAND. `standFit()` runs at the end of every `refreshNotes()` and on resize: in STAND with a numbered box it sets the SVG viewBox to the box ± 1 fret, widened to the element's aspect; otherwise the full `0 0 W H`. Tablets (`isTablet`: iPad's Mac UA + touch points, or a coarse pointer with a ≥ 600 px short side) auto-start unless `pent-stand` says '0'. The wake lock is re-requested on return to the tab and on the first tap; that tap also calls `ensureAudio()` in PLAY IT, since an auto-start had no gesture.
+- **WALK order.** `quiz.order = 'walk'` makes `nextRound` take `quizWalkSeq()[quiz.step]` (pool sorted by pitch, same pitch lower string first, then back down without repeating the ends). Only a right answer moves `quiz.step`; the next note gets `.quiz-next`. `quiz.step` resets on quizStart, order change, and when the target leaves the board. Right answers wait 450 ms in WALK (750 random).
 - **Autoplay policy.** Every audio path routes through `ensureAudio()` from a user click.
 - **localStorage is always wrapped in try/catch** (throws in private/incognito mode).
 
@@ -160,6 +171,8 @@ The early-theme inline script needs no change (it adds `theme-<saved name>` gene
 | `D` | Root drone on / off |
 | `Q` | NOTE QUIZ on / off |
 | `C` | Open the CHANGELOG |
+| `M` | STAND mode on / off |
+| `←` / `→` | Previous / next box (STAND only) |
 | `A W S E D F T G Y H U J` | Quiz piano keys C to B while the quiz runs (held key lights up) |
 | `R` | Replay root + note in HEAR IT |
 | `Esc` | Close any modal, stop the quiz |
@@ -188,10 +201,11 @@ The early-theme inline script needs no change (it adds `theme-<saved name>` gene
 | `v4.5.0-ear-quiz-wide-panels` | HEAR IT quiz mode, music-app piano typing, wider popups |
 | `v4.6.0-guitar-mic-intervals` | PLAY IT mic quiz mode + interval names |
 | `v4.6.1-play-it-fixes` | PLAY IT fixes: sound hold, silent clicks, mic message, hidden tab |
+| `v4.7.0-ipad-stand` | STAND mode (tablet auto-on, zoomed box, wake lock), WALK quiz order, saved quiz choices, Home Screen app + offline, faster taps |
 
 ## Conventions
 - Surgical changes only. No build step, no framework, no dependencies beyond CDN fonts.
-- Fifteen plain `<script>` files (not ES modules — no server needed). Boot order matters: `data → audio → drone → player → engine → game → practice → changelog → app → patterns → quiz-piano → mic → quiz → quiz-play → hud`. Inside `app.js`, `loadPrefs()` runs before `wireControls()` because key labels read `spell()`.
+- Eighteen plain `<script>` files (not ES modules — no server needed). Boot order matters: `data → audio → drone → player → engine → game → practice → changelog → app → patterns → quiz-piano → mic → quiz → quiz-walk → quiz-play → stand → hud → pwa`. `stand.js` must stay after every quiz script: its last line may auto-start STAND. Inside `app.js`, `loadPrefs()` runs before `wireControls()` because key labels read `spell()`.
 - Arcade/retro theme is intentional. Don't migrate to "modern clean" without asking.
 - The boot-time LICK validator stays in `game.js` permanently — it costs nothing at runtime.
 - Tooltips use the `data-tip` attribute (styled in `hud.css`), never `title=`.

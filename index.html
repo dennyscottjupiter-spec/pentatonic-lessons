@@ -14,6 +14,13 @@ gotcha: the early-theme inline script must stay inside body (document.body is nu
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&family=Fredoka:wght@500;600&family=Nunito:wght@500;700&family=Chakra+Petch:wght@500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%230a0014'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='9'%20fill='%23ff2bd6'/%3E%3C/svg%3E" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<meta name="theme-color" content="#0a0014" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="apple-mobile-web-app-title" content="Pentatonic" />
 <link rel="stylesheet" href="css/themes.css" />
 <link rel="stylesheet" href="css/styles.css" />
 <link rel="stylesheet" href="css/hud.css" />
@@ -23,6 +30,7 @@ gotcha: the early-theme inline script must stay inside body (document.body is nu
 <link rel="stylesheet" href="css/quiz.css" />
 <link rel="stylesheet" href="css/quiz-cue.css" />
 <link rel="stylesheet" href="css/quiz-piano.css" />
+<link rel="stylesheet" href="css/stand.css" />
 </head>
 <body>
 <script>/* early theme — avoids CRT flash before app.js loads; must sit inside <body> (document.body is null in <head>) */
@@ -74,6 +82,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         </div>
       </div>
 
+      <button class="hud-btn hud-btn--wide" id="stand-btn" aria-pressed="false" aria-label="Stand mode" data-tip="Big neck + quiz for a music stand · M"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v9H4z"/><path d="M12 13v8M8 21h8"/></svg><span class="hud-label">Stand</span></button>
       <button class="hud-btn hud-btn--wide" id="practice-btn" aria-label="Practice Lab" data-tip="Metronome + timer · P">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3h5L18.5 21h-13z"/><path d="M6.5 16.5h11"/><path d="M12 16.5 16.5 7"/><circle cx="15.2" cy="9.8" r="1.3"/></svg>
         <span class="hud-label">Practice</span>
@@ -165,6 +174,19 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     <div class="game-stat">BEST <span id="game-best">0</span></div>
   </div>
 
+  <nav id="stand-bar" class="stand-bar" aria-label="Stand mode">
+    <div class="stand-group">
+      <button class="arc-btn stand-step" id="stand-key-prev" aria-label="Previous key">‹</button>
+      <span class="stand-label" id="stand-key">A min</span>
+      <button class="arc-btn stand-step" id="stand-key-next" aria-label="Next key">›</button>
+    </div>
+    <div class="stand-group">
+      <button class="arc-btn stand-step" id="stand-box-prev" aria-label="Previous box">‹</button>
+      <span class="stand-label" id="stand-box">BOX 1</span>
+      <button class="arc-btn stand-step" id="stand-box-next" aria-label="Next box">›</button>
+    </div>
+    <button class="arc-btn ghost" id="stand-exit">✕ EXIT STAND</button>
+  </nav>
   <section class="fretboard-wrap">
     <div id="fretboard" aria-label="Interactive guitar fretboard"></div>
   </section>
@@ -177,6 +199,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <button class="qm" data-qmode="hear" aria-pressed="false">👂 HEAR IT</button>
         <button class="qm" data-qmode="play" aria-pressed="false">🎸 PLAY IT</button>
       </div>
+      <button class="qm-order" id="quiz-order" aria-pressed="false" data-tip="Random notes from the board">🔀 RANDOM</button>
       <div class="quiz-stats">
         <span>SCORE <b id="quiz-score">0/0</b></span>
         <span>STREAK <b id="quiz-streak">0</b></span>
@@ -224,6 +247,8 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <div><dt><kbd class="wide">Space</kbd><i>or</i><kbd>K</kbd></dt><dd>Pause / resume</dd></div>
         <div><dt><kbd>D</kbd></dt><dd>Root drone</dd></div>
         <div><dt><kbd>Q</kbd></dt><dd>Note quiz</dd></div>
+        <div><dt><kbd>M</kbd></dt><dd>Stand mode</dd></div>
+        <div><dt><kbd>←</kbd><i>/</i><kbd>→</kbd></dt><dd>Box (stand mode)</dd></div>
         <div><dt><kbd>P</kbd></dt><dd>Practice Lab</dd></div>
         <div><dt><kbd>L</kbd></dt><dd>Learning</dd></div>
         <div><dt><kbd>C</kbd></dt><dd>Changelog</dd></div>
@@ -243,6 +268,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li><b>PATTERNS:</b> press BUILD and click notes to draw your own shape (numbers = play order), save it by name, or load a classic. Patterns follow the key.</li>
         <li>The <b>drone</b> button (top left) holds the key's root and fifth so you can hear how each note sounds against it.</li>
         <li><b>🎯 NOTE QUIZ</b> hides the note names and makes one note glow. Name it on the mini piano. Switch to <b>👂 HEAR IT</b> to name a note by ear: you hear the root, then the mystery note. Or pick <b>🎸 PLAY IT</b> to play the glowing note on your real guitar and let the mic name it.</li>
+        <li><b>🎼 STAND</b> (top bar, or <span class="mono">M</span>) turns the screen into a music stand: a big zoomed box, the quiz piano, and ‹ › arrows for key and box. Tablets open in STAND by themselves; leave it once and that device remembers. <b>🪜 WALK</b> in the quiz lights the box notes in order, up and back down, so you practice the real scale.</li>
       </ul>
       <h2>🎨 THEMES</h2>
       <p>Pick a theme from the swatch menu at the top right: CRT · 🌴 Tropical Night · 🛰️ Mission Control · 📐 Blueprint. Your choice is saved.</p>
@@ -355,7 +381,10 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <script src="js/quiz-piano.js"></script>
   <script src="js/mic.js"></script>
   <script src="js/quiz.js"></script>
+  <script src="js/quiz-walk.js"></script>
   <script src="js/quiz-play.js"></script>
+  <script src="js/stand.js"></script>
   <script src="js/hud.js"></script>
+  <script src="js/pwa.js"></script>
 </body>
 </html>

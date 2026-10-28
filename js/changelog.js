@@ -3,6 +3,14 @@
 
 // Items are [name, text] or [name, text, selector]; a selector makes the row a "show me" link
 const CHANGELOG = [
+  { version: 'v4.7.0', date: '2026-10-28', title: 'Stand mode, scale walk, Home Screen app', items: [
+    ['Stand mode', '🎼 STAND (or M) turns the screen into a music stand: a big zoomed box, the quiz piano, and ‹ › arrows for key and box. Tablets open in it by themselves; leave it once and that device remembers.', '#stand-btn'],
+    ['Scale walk', '🪜 WALK in the quiz lights the box notes in order, up and back down. In PLAY IT the next note glows only after you play this one on your guitar.', '#quiz-btn'],
+    ['Screen stays awake', 'While STAND is on, the iPad or phone screen does not dim or lock.', '#stand-btn'],
+    ['Remembers your quiz', 'The quiz starts in the mode and order you used last on that device.', '#quiz-btn'],
+    ['Home Screen app', 'Add to Home Screen gives a real icon, opens full screen, and works offline after one visit.', 'header.hud'],
+    ['Faster taps', 'Quick taps on the piano or the neck no longer zoom the page, and a long press no longer selects text.', '#fretboard'],
+  ]},
   { version: 'v4.6.1', date: '2026-10-28', title: 'PLAY IT fixes', items: [
     ['Sound hold', 'In PLAY IT the drone and metronome pause while the mic listens and come back after, so the mic hears only your string.', '#quiz-btn'],
     ['Silent clicks', 'In PLAY IT a fret click makes no sound, so the speakers cannot answer for the guitar.', '#quiz-btn'],

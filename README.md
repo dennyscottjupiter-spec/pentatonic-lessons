@@ -41,7 +41,9 @@ Project layout:
 index.html   the app (open this)
 css/         stylesheets
 js/          scripts
+icons/       Home Screen app icons
 tests/       test page and suites
+sw.js, manifest.webmanifest   offline copy + Home Screen app settings
 ```
 
 ## Usage
@@ -72,12 +74,12 @@ Once it's open:
 
 Press **Space** (or **K**) to pause or resume everything that is playing. It does nothing when nothing is playing.
 
-Keyboard shortcuts: `1`–`5` select a box, `0` shows all positions, `?` toggles help, `P` toggles the Practice Lab, `Space` or `K` pauses and resumes, `D` toggles the root drone, `Q` starts or stops the note quiz, `L` toggles the learning modal, `C` opens the changelog, `Esc` closes any open panel. During the quiz, `A W S E D F T G Y H U J` play the piano keys instead and `R` replays in HEAR IT.
+Keyboard shortcuts: `1`–`5` select a box, `0` shows all positions, `?` toggles help, `P` toggles the Practice Lab, `Space` or `K` pauses and resumes, `D` toggles the root drone, `Q` starts or stops the note quiz, `L` toggles the learning modal, `C` opens the changelog, `M` turns STAND on or off (`←` `→` change the box there), `Esc` closes any open panel. During the quiz, `A W S E D F T G Y H U J` play the piano keys instead and `R` replays in HEAR IT.
 
-### On a phone (Android or iPhone)
+### On a phone or tablet (Android, iPhone, iPad)
 
-1. Open the live link above in Chrome (Android) or Safari (iPhone).
-2. Browser menu → **Add to Home Screen** to get an app icon.
+1. Open the live link above in Chrome (Android) or Safari (iPhone, iPad).
+2. Browser menu → **Add to Home Screen**: you get an app icon, it opens full screen without the browser bar, and after one visit it works offline.
 3. Swipe the fretboard sideways to see the whole neck, or turn the phone sideways for a bigger neck.
 4. iPhone: switch the side silent switch off, or there is no sound.
 5. Tap works like a click. Keyboard shortcuts need a keyboard, but every feature also has an on-screen button.
@@ -85,15 +87,24 @@ Keyboard shortcuts: `1`–`5` select a box, `0` shows all positions, `?` toggles
 
 Saved patterns, scores and settings stay on each device; nothing syncs between them.
 
+### Stand mode (iPad on a music stand)
+
+**🎼 STAND** in the top bar (or `M`) turns the screen into a music stand: the neck zooms in on your box, the quiz piano sits under it, and big ‹ › arrows change the key and the box (`←` `→` change the box on a keyboard). The screen stays awake while it is on.
+
+- Tablets (iPad, Android tablets) open in STAND by themselves. Leave it once (✕ EXIT STAND, the quiz ✕, `Q` or `Esc`) and that device remembers; turn it back on and it remembers that too.
+- A phone held sideways shows the neck on the left and the quiz on the right.
+- **🪜 WALK** in the quiz lights the box notes in order, up the box and back down. A miss keeps the same note, and a dashed ring shows the next one. With **🎸 PLAY IT** the app follows you as you play the scale on your guitar.
+- The quiz starts in the mode and order you used last on that device.
+
 ### Hosting
 
-The live site is GitHub Pages, serving the `main` branch root. Every push to `main` updates it within about a minute. There is no build step and nothing to configure.
+The live site is GitHub Pages, serving the `main` branch root. Every push to `main` updates it within about a minute. There is no build step and nothing to configure. A small service worker (`sw.js`, https only) keeps a copy for offline use; it always tries the network first, so updates still arrive.
 
 If you edit the source files, hard-refresh the browser tab (Ctrl+Shift+R) — a normal reload can serve a cached copy of the CSS/JS.
 
 ### Running the test suite
 
-The project ships its own zero-dependency test suite (351 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause, the game, the changelog, the note quiz and the PLAY IT mic listener). It lives in `tests/`; serve the project folder locally to run it:
+The project ships its own zero-dependency test suite (362 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause, the game, the changelog, the note quiz, the PLAY IT mic listener, STAND mode and the WALK order). It lives in `tests/`; serve the project folder locally to run it:
 
 ```bash
 cd pentatonic-lessons
@@ -113,7 +124,8 @@ There are no files produced. Everything is on-screen:
   - your saved patterns (`pent-patterns`)
   - your high score and game XP (`pent-game`)
   - the newest changelog version you have opened (`pent-changelog-seen`)
-  - your best note-quiz streak (`pent-quiz-best`)
+  - your best note-quiz streak (`pent-quiz-best`), and the quiz mode and order you used last (`pent-quiz-prefs`)
+  - whether that device opens in STAND (`pent-stand`)
 
 ## Limitations
 
@@ -122,4 +134,5 @@ There are no files produced. Everything is on-screen:
 - Only pentatonic scales (minor and major) are covered — no other scale types, modes, or chords.
 - Requires a browser with Web Audio API support; very old browsers won't play sound.
 - Opening `index.html` directly as a file works for normal use; run the test page through a local HTTP server (see above).
-- On phones the fretboard is wider than the screen and scrolls sideways.
+- On phones the fretboard is wider than the screen and scrolls sideways (STAND zooms it instead).
+- The screen-awake lock needs a browser with the Screen Wake Lock API (Safari 16.4+, Chrome); elsewhere STAND works but the screen may dim.

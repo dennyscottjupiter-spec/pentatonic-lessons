@@ -629,7 +629,11 @@ function escHtml(s) {
   <button class="lens" data-lens="major">MAJOR</button>
   <button class="toggle" data-toggle="blues">+ BLUE NOTE</button>
 </div>
-<div style="display:none"><button id="quiz-btn"></button><section id="quiz-dock" hidden><button id="quiz-close"></button><p id="quiz-prompt"></p><span id="quiz-interval"></span><span id="quiz-heard"></span><b id="quiz-score"></b><b id="quiz-streak"></b><b id="quiz-best"></b><div id="quiz-keys"></div><button class="qm" data-qmode="see"></button><button class="qm" data-qmode="hear"></button><button class="qm" data-qmode="play"></button><span id="quiz-wave"></span><button id="quiz-replay" hidden></button></section></div>
+<div style="display:none"><button id="quiz-btn"></button><section id="quiz-dock" hidden><button id="quiz-close"></button><button id="quiz-order"></button><p id="quiz-prompt"></p><span id="quiz-interval"></span><span id="quiz-heard"></span><b id="quiz-score"></b><b id="quiz-streak"></b><b id="quiz-best"></b><div id="quiz-keys"></div><button class="qm" data-qmode="see"></button><button class="qm" data-qmode="hear"></button><button class="qm" data-qmode="play"></button><span id="quiz-wave"></span><button id="quiz-replay" hidden></button></section></div>
+<!-- STAND scaffold: no header.hud, so stand.js never auto-starts here -->
+<div style="display:none"><button id="stand-btn"></button><nav id="stand-bar"><span id="stand-key"></span><span id="stand-box"></span><button id="stand-exit"></button></nav></div>
+<div style="display:none"><button class="box" data-box="1"></button><button class="box" data-box="2"></button><button class="box" data-box="3"></button><button class="box" data-box="4"></button><button class="box" data-box="5"></button><button class="box" data-box="all"></button>
+<div id="key-row"><button class="key" data-key-idx="0"></button><button class="key" data-key-idx="1"></button><button class="key" data-key-idx="2"></button><button class="key" data-key-idx="3"></button><button class="key" data-key-idx="4"></button><button class="key" data-key-idx="5"></button><button class="key" data-key-idx="6"></button><button class="key" data-key-idx="7"></button><button class="key" data-key-idx="8"></button><button class="key" data-key-idx="9"></button><button class="key" data-key-idx="10"></button><button class="key" data-key-idx="11"></button></div></div>
 
 <script>
 /* Stub globals that app.js normally provides.
@@ -686,7 +690,9 @@ window.$$ = function(sel) { return Array.from(document.querySelectorAll(sel)); }
 <script src="../js/quiz-piano.js"></script>
 <script src="../js/mic.js"></script>
 <script src="../js/quiz.js"></script>
+<script src="../js/quiz-walk.js"></script>
 <script src="../js/quiz-play.js"></script>
+<script src="../js/stand.js"></script>
 <script src="tests-lib.js"></script>
 <script src="tests-core.js"></script>
 <script src="tests-board.js"></script>
@@ -698,6 +704,7 @@ window.$$ = function(sel) { return Array.from(document.querySelectorAll(sel)); }
 <script src="tests-quiz.js"></script>
 <script src="tests-mic.js"></script>
 <script src="tests-play.js"></script>
+<script src="tests-stand.js"></script>
 <script src="tests-report.js"></script>
 
 </body>

@@ -1,11 +1,11 @@
 // ---
-// purpose: NOTE QUIZ rounds: target pick, SEE/HEAR/PLAY modes, answers, score, interval line, board pool
-// exports: quiz, quizStart, quizStop, toggleQuiz, quizAnswer, quizReplay, setQuizMode, quizPool, quizRefresh, intervalName
-// depends: app.js (state, $, $$), data.js (KEYS, INTERVAL_NAMES), engine.js (spell, mkSvg, refreshNotes), audio.js (playNote, playBuzz), quiz-piano.js (renderQuizKeys), mic.js (micStop), quiz-play.js (quizListen, quizHoldSound)
+// purpose: NOTE QUIZ rounds: target pick (random or WALK), SEE/HEAR/PLAY modes, answers, score, interval line, board pool
+// exports: quiz, quizStart, quizStop, toggleQuiz, quizAnswer, quizReplay, setQuizMode, quizPool, quizRefresh, intervalName, quizPlayPrompt
+// depends: app.js (state, $, $$), data.js (KEYS, INTERVAL_NAMES), engine.js (spell, mkSvg, refreshNotes), audio.js (playNote, playBuzz), quiz-piano.js (renderQuizKeys), mic.js (micStop), quiz-play.js (quizListen, quizHoldSound), quiz-walk.js (quizWalkTarget, quizSavePrefs), stand.js (standQuizStopped)
 // gotcha: quiz.gen drops stale next-round timers after stop/restart
 // ---
 
-const quiz = { on:false, target:null, score:0, tries:0, streak:0, best:0, locked:false, gen:0, acc:null, mode:'see', micMsg:'', held:{ drone:false, metro:false } };
+const quiz = { on:false, target:null, score:0, tries:0, streak:0, best:0, locked:false, gen:0, acc:null, mode:'see', micMsg:'', held:{ drone:false, metro:false }, order:'random', step:0 };
 const QUIZ_LIT = ['in-scale', 'root', 'blue', 'chromatic'];
 const QUIZ_BEST_KEY = 'pent-quiz-best';
 const QUIZ_LOCKS = ['#play-scale', '#pattern-build'];
@@ -24,6 +24,7 @@ function clearTarget() {
   }
   quiz.target = null;
   $$('#quiz-keys .pk').forEach(k => k.classList.remove('right', 'wrong', 'reveal'));
+  $$('#fretboard .fb-note.quiz-next').forEach(g => g.classList.remove('quiz-next'));
 }
 
 // Glowing circle + reticle on the target, scrolled into view on phones
@@ -38,13 +39,21 @@ function markTarget(t) {
   }
 }
 
+// Prompt while PLAY IT listens: the mic's reason wins, else the round's instruction
+function quizPlayPrompt() {
+  return quiz.micMsg || (quiz.order === 'walk' ? 'Walk the box: play the glowing note' : 'Play the glowing note on your guitar');
+}
+
 function nextRound() {
   const prev = quiz.target;
   clearTarget();
-  let cands = quizPool();
-  if (!cands.length) cands = $$('#fretboard .fb-note');
-  if (cands.length > 1) cands = cands.filter(g => g !== prev);
-  const t = cands[Math.floor(Math.random() * cands.length)];
+  let t = quiz.order === 'walk' ? quizWalkTarget() : null;   // WALK: the next note in scale order
+  if (!t) {
+    let cands = quizPool();
+    if (!cands.length) cands = $$('#fretboard .fb-note');
+    if (cands.length > 1) cands = cands.filter(g => g !== prev);
+    t = cands[Math.floor(Math.random() * cands.length)];
+  }
   quiz.target = t; quiz.locked = false;
   quizIntervalLine('');
   if (quiz.mode === 'hear') {   // HEAR IT: the note stays unmarked until the answer
@@ -52,7 +61,7 @@ function nextRound() {
     quizReplay();
   } else {   // SEE IT and PLAY IT both glow the note
     markTarget(t);
-    $('#quiz-prompt').textContent = quiz.mode === 'play' ? (quiz.micMsg || 'Play the glowing note on your guitar') : 'Name the glowing note';
+    $('#quiz-prompt').textContent = quiz.mode === 'play' ? quizPlayPrompt() : (quiz.order === 'walk' ? 'Walk the box: name the glowing note' : 'Name the glowing note');
   }
   updateQuizStats();
 }
@@ -90,6 +99,7 @@ function quizAnswer(chroma) {
   const pressed = $(`#quiz-keys .pk[data-chroma="${chroma}"]`);
   if (right) {
     quiz.score++; quiz.streak++;
+    if (quiz.order === 'walk') quiz.step++;   // WALK: a right note moves on; a miss keeps the same note
     quiz.best = Math.max(quiz.best, quiz.streak);
     try { localStorage.setItem(QUIZ_BEST_KEY, String(quiz.best)); } catch (e) {}
     pressed.classList.add('right');
@@ -107,13 +117,13 @@ function quizAnswer(chroma) {
   quizIntervalLine(intervalName(want) + ' from ' + spell(KEYS[state.keyIdx].chroma));
   updateQuizStats();
   const g = quiz.gen;
-  setTimeout(() => { if (quiz.on && quiz.gen === g) nextRound(); }, right ? 750 : 1500);
+  setTimeout(() => { if (quiz.on && quiz.gen === g) nextRound(); }, right ? (quiz.order === 'walk' ? 450 : 750) : 1500);   // WALK: 450 ms keeps up with playing
 }
 
 function quizStart() {
   if (quiz.on || state.mode === 'game') return;   // the lick game owns the board
   try { quiz.best = parseInt(localStorage.getItem(QUIZ_BEST_KEY), 10) || 0; } catch (e) {}
-  quiz.on = true; quiz.score = quiz.tries = quiz.streak = 0; ++quiz.gen;
+  quiz.on = true; quiz.score = quiz.tries = quiz.streak = quiz.step = 0; ++quiz.gen;
   document.body.classList.add('quiz-on');
   const dock = $('#quiz-dock'), btn = $('#quiz-btn');
   dock.hidden = false;
@@ -136,6 +146,7 @@ function quizStop() {
   const btn = $('#quiz-btn');
   btn.classList.remove('active'); btn.setAttribute('aria-pressed', 'false');
   QUIZ_LOCKS.forEach(s => { const el = $(s); if (el) el.disabled = false; });
+  if (typeof standQuizStopped === 'function') standQuizStopped();   // closing the quiz also leaves STAND
 }
 
 function toggleQuiz() { if (quiz.on) quizStop(); else quizStart(); }
@@ -153,6 +164,7 @@ function syncQuizMode() {
 function setQuizMode(m) {
   if (!['see', 'hear', 'play'].includes(m)) return;
   quiz.mode = m; syncQuizMode();
+  if (typeof quizSavePrefs === 'function') quizSavePrefs();
   if (quiz.on) { ++quiz.gen; nextRound(); }   // ++gen drops the old round's pending timer
 }
 
@@ -161,7 +173,7 @@ function quizRefresh() {
   if (!quiz.on) return;
   if (quiz.acc !== state.accidentals) renderQuizKeys();   // only on respell, so feedback colours survive a box/key change
   const t = quiz.target;
-  if (!quiz.locked && (!t || t.classList.contains('dimmed') || !quizPool().includes(t))) nextRound();
+  if (!quiz.locked && (!t || t.classList.contains('dimmed') || !quizPool().includes(t))) { quiz.step = 0; nextRound(); }   // the WALK restarts when its note leaves the board
 }
 
 (function wireQuiz() {
