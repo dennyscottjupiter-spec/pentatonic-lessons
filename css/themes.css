@@ -9,6 +9,7 @@
   --green: #00ff8c;
   --blue-note: #1e50ff;
   --blue-rim: #8fb4ff;
+  --marker: #f4d35e; /* fret side dots: one soft yellow on every theme */
   --dim: #4a3a6a;
   --fret-wood: #1a0a2e;
   --fret-line: #6a4ec9;
@@ -34,8 +35,8 @@ body.theme-tropical {
   --fret-line: #0e4a44;
   --string: #4dd9c8;
   --text: #d4f5ee;
-  --font-display: 'Press Start 2P', monospace;
-  --font-body: 'Press Start 2P', monospace;
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Nunito', sans-serif;
   --scanline-alpha: 0.07;
   background:
     radial-gradient(ellipse 120% 60% at 20% 0%,   rgba(34, 224, 200, 0.10) 0%, transparent 55%),
@@ -59,8 +60,8 @@ body.theme-mission {
   --fret-line: #1a2a4a;
   --string: #3a6080;
   --text: #cde4f8;
-  --font-display: 'Press Start 2P', monospace;
-  --font-body: 'Press Start 2P', monospace;
+  --font-display: 'Chakra Petch', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
   --scanline-alpha: 0.09;
   background:
     repeating-linear-gradient(0deg,   transparent, transparent 39px, rgba(61, 214, 255, 0.03) 40px),

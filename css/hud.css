@@ -38,41 +38,43 @@ body.scrolled .hud { padding: 6px 16px; }
 .title .accent { color: var(--magenta); text-shadow: 0 0 8px var(--magenta); }
 body.scrolled .title { font-size: 14px; }
 
-/* ---------- Chip + rail frame (one shared look) ---------- */
+/* ---------- Keycaps: drone chip + rail buttons share one raised-key look ---------- */
+.hud { --key-line: color-mix(in srgb, var(--cyan) 30%, transparent); --key-edge: color-mix(in srgb, var(--cyan) 30%, var(--bg)); }
+.hud-rail { display: flex; align-items: center; gap: 6px; }
 .hud-chip,
-.hud-rail {
-  display: flex;
-  align-items: center;
-  border: 1px solid color-mix(in srgb, var(--cyan) 28%, transparent);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--bg-2) 70%, transparent);
+.hud-btn {
+  border: 1px solid var(--key-line);
+  border-radius: 12px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 7%, var(--bg-2)), var(--bg-2));
+  box-shadow: 0 3px 0 var(--key-edge);
 }
-.hud-chip { gap: 10px; height: 42px; padding: 0 14px; }
+.hud-chip { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; }
 
 /* ---------- Root drone chip (a button; first HUD element, left edge) ---------- */
 .hud-chip.drone {
   position: relative;
   height: 42px;
-  padding: 0 14px 0 12px;
-  gap: 8px;
+  padding: 0 16px 0 12px;
+  gap: 9px;
   font: inherit;
   color: var(--text);
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, color 0.15s, transform 0.05s;
 }
 .hud-chip.drone:hover { border-color: var(--cyan); color: var(--cyan); }
+.hud-chip.drone:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--key-edge); }
 .hud-chip.drone:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
-.hud-chip.drone .ico-wave { opacity: 0.55; }
-.hud-chip.drone:disabled { opacity: 0.45; cursor: not-allowed; border-color: color-mix(in srgb, var(--cyan) 28%, transparent); color: var(--text); }
-.drone-key  { font-family: var(--font-display); font-size: 13px; color: var(--yellow); }
-.drone-lens { font-family: var(--font-display); font-size: 8px; color: var(--cyan); opacity: 0.8; }
+.hud-chip.drone .ico-wave { width: 24px; height: 24px; opacity: 0.55; }
+.hud-chip.drone:disabled { opacity: 0.45; cursor: not-allowed; border-color: var(--key-line); color: var(--text); }
+.drone-key  { font-family: var(--font-display); font-size: 17.5px; color: var(--yellow); }
+.drone-lens { font-family: var(--font-display); font-size: 11px; color: var(--cyan); opacity: 0.8; }
 /* Anchored to the chip's left edge so the bubble stays on screen */
 .hud-chip.drone[data-tip]::after { left: 0; transform: none; }
 
 /* ON: magenta ring, icon lit, wave dashes flow along the path */
 .hud-chip.drone[aria-pressed="true"] {
   border-color: var(--magenta);
-  box-shadow: 0 0 0 1px var(--magenta), 0 0 18px -4px var(--magenta);
+  box-shadow: 0 3px 0 var(--key-edge), 0 0 0 1px var(--magenta), 0 0 18px -4px var(--magenta);
 }
 .hud-chip.drone[aria-pressed="true"] .ico-wave { color: var(--magenta); opacity: 1; }
 .hud-chip.drone[aria-pressed="true"] .ico-wave path {
@@ -91,24 +93,22 @@ body.scrolled .title { font-size: 14px; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
   color: var(--text);
   cursor: pointer;
-  transition: color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.05s;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.05s;
 }
 .hud-btn:hover {
   color: var(--cyan);
-  background: color-mix(in srgb, var(--cyan) 12%, transparent);
-  box-shadow: inset 0 0 12px color-mix(in srgb, var(--cyan) 22%, transparent);
+  border-color: var(--cyan);
+  box-shadow: 0 3px 0 var(--key-edge), 0 0 14px -4px var(--cyan);
 }
-.hud-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: -3px; }
-.hud-btn:active { transform: translateY(1px); }
-.hud-btn--wide { width: auto; padding: 0 10px; }
+.hud-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.hud-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--key-edge); }
+.hud-btn--wide { width: auto; padding: 0 13px 0 11px; }
+.hud-label { font-family: var(--font-display); font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
 
 .ico {
   width: 18px;
@@ -120,11 +120,6 @@ body.scrolled .title { font-size: 14px; }
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
-/* Rounded outer corners and 1px dividers between rail controls */
-.hud-rail > :first-child { border-radius: 13px 0 0 13px; }
-.hud-rail > :last-child { border-radius: 0 13px 13px 0; }
-.hud-rail > * + * { border-left: 1px solid color-mix(in srgb, var(--cyan) 28%, transparent); }
 
 /* ---------- Tooltips (data-tip, never title=) ---------- */
 [data-tip]::after {
@@ -171,8 +166,8 @@ body.is-paused #pause-btn .eq { display: none; }
 body.is-paused #pause-btn .ico-play { display: block; color: var(--yellow); }
 body.is-paused #pause-btn { animation: pause-ring 1.4s ease-out infinite; }
 @keyframes pause-ring {
-  0% { box-shadow: inset 0 0 0 0 color-mix(in srgb, var(--yellow) 70%, transparent); }
-  70%, 100% { box-shadow: inset 0 0 0 9px transparent; }
+  0% { box-shadow: 0 3px 0 var(--key-edge), inset 0 0 0 0 color-mix(in srgb, var(--yellow) 70%, transparent); }
+  70%, 100% { box-shadow: 0 3px 0 var(--key-edge), inset 0 0 0 9px transparent; }
 }
 
 .eq { align-items: flex-end; gap: 3px; height: 18px; }
@@ -254,8 +249,10 @@ body.is-paused #pause-btn { animation: pause-ring 1.4s ease-out infinite; }
   body.scrolled .title { display: none; }
   .hud-chip.drone { height: 38px; }
   .drone-lens { display: none; }
+  .hud-rail { gap: 4px; }
   .hud-btn { width: 36px; height: 36px; }
-  .hud-btn--wide { width: auto; }
-  #theme-name { display: none; }
+  .hud-btn--wide { width: auto; padding: 0 8px; }
+  #practice-btn, #help-btn { width: 36px; padding: 0; }
+  #theme-name, .hud-label { display: none; }
   .theme-btn { font-size: 12px; }
 }

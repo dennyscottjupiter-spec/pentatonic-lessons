@@ -58,7 +58,7 @@ Once it's open:
 6. Click any fret to hear and see that note.
 7. Click **▶ PLAY SCALE** to hear the box played ascending then descending.
 8. Click **▶ START GAME** to play Lick Attack: watch a short lick light up, then replay it by clicking the same frets in order. The lens, PLAY SCALE and PATTERNS are locked during the game.
-9. The button at the top left shows the key and starts or stops the **root drone** (`D`). Use the icon bar at the top right: the **pause** button, the **theme menu** (switches between CRT, Tropical Night, Mission Control and Blueprint), the **metronome icon** (opens the Practice Lab), and the **?** button (opens help). **📚 LEARNING** under OPTIONS opens the theory lessons.
+9. The button at the top left shows the key and starts or stops the **root drone** (`D`). Use the icon bar at the top right: the **pause** button, the **theme menu** (switches between CRT, Tropical Night, Mission Control and Blueprint), **PRACTICE** (opens the Practice Lab: metronome + timer), and **HELP** (shortcuts and how-to). **📚 LEARNING** under OPTIONS opens the theory lessons.
 10. Under **PATTERNS** you can draw your own shape:
     - Press **✎ BUILD**, then click notes to add or remove them. The numbers show the play order (first click plays first).
     - Type a name (up to 24 characters) and press **SAVE**. Your shapes appear under **MY PATTERNS** in the LOAD dropdown.
