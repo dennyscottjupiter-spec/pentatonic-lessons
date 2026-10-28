@@ -17,6 +17,8 @@
   --text: #e8e0ff;
   --font-display: 'Press Start 2P', monospace;
   --font-body: 'VT323', monospace;
+  --title-drop: 3px 3px 0 var(--magenta); /* offset title shadow: suits the pixel font only */
+  --note-size: 8px; /* fret-note letters */
   --scanline-alpha: 0.18;
 }
 
@@ -37,6 +39,8 @@ body.theme-tropical {
   --text: #d4f5ee;
   --font-display: 'Fredoka', sans-serif;
   --font-body: 'Nunito', sans-serif;
+  --title-drop: 0 0 0 transparent;
+  --note-size: 10px;
   --scanline-alpha: 0.07;
   background:
     radial-gradient(ellipse 120% 60% at 20% 0%,   rgba(34, 224, 200, 0.10) 0%, transparent 55%),
@@ -62,6 +66,8 @@ body.theme-mission {
   --text: #cde4f8;
   --font-display: 'Chakra Petch', sans-serif;
   --font-body: 'IBM Plex Sans', sans-serif;
+  --title-drop: 0 0 0 transparent;
+  --note-size: 10px;
   --scanline-alpha: 0.09;
   background:
     repeating-linear-gradient(0deg,   transparent, transparent 39px, rgba(61, 214, 255, 0.03) 40px),
@@ -90,6 +96,7 @@ body.theme-blueprint {
   --text: #e8f4fd;
   --font-display: 'JetBrains Mono', monospace;
   --font-body: 'JetBrains Mono', monospace;
+  --title-drop: 0 0 0 transparent;
   --scanline-alpha: 0.02;
   background:
     repeating-linear-gradient(0deg,  transparent, transparent 19px, rgba(0,212,255,0.055) 20px),

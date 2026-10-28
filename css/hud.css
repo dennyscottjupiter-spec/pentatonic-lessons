@@ -32,7 +32,7 @@ body.scrolled .hud { padding: 6px 16px; }
   text-shadow:
     0 0 8px var(--cyan),
     0 0 18px rgba(0,240,255,0.5),
-    3px 3px 0 var(--magenta);
+    var(--title-drop);
   transition: font-size 0.2s;
 }
 .title .accent { color: var(--magenta); text-shadow: 0 0 8px var(--magenta); }

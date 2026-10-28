@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project
-Static, no-build HTML/CSS/JS app that teaches guitar pentatonic scales across all 12 keys with an interactive fretboard, Karplus-Strong plucked-guitar audio, a sticky HUD with a root-drone button and 4 visual themes, sharp/flat note names, a blue-note toggle, custom saved fretboard patterns, a global pause, a Practice Lab (metronome + timer), a Lick Attack game, and a 5-lesson LEARNING modal.
+Static, no-build HTML/CSS/JS app that teaches guitar pentatonic scales across all 12 keys with an interactive fretboard, Karplus-Strong plucked-guitar audio, a sticky HUD with a root-drone button and 4 visual themes, sharp/flat note names, a blue-note toggle, custom saved fretboard patterns, a global pause, a Practice Lab (metronome + timer), a Lick Attack game, a 5-lesson LEARNING modal, and an in-app CHANGELOG popup.
 
 ## How to run
 Open `index.html` directly in a browser — no server, no bundler, no install step. From PowerShell: `Start-Process index.html`. Hard-refresh with **Ctrl+Shift+R** after edits to bypass browser CSS cache (see global LEARNINGS).
@@ -12,12 +12,12 @@ There is no build, lint, or test command. Verification = open the page and inter
 
 ## Test suite
 
-Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>/tests/tests.html`). **312 tests, zero dependencies.** All files live in `tests/`:
+Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>/tests/tests.html`). **317 tests, zero dependencies.** All files live in `tests/`:
 
 - `tests-lib.js` — zero-dep framework + `reset()`, exposed as `window.T`
-- `tests-core.js` (1–5), `tests-board.js` (6–8), `tests-game.js` (9–10), `tests-features.js` (11–12), `tests-patterns.js` (13), `tests-player.js` (14) — the suites
+- `tests-core.js` (1–5), `tests-board.js` (6–8), `tests-game.js` (9–10), `tests-features.js` (11–12), `tests-patterns.js` (13), `tests-player.js` (14), `tests-changelog.js` (15) — the suites
 - `tests-report.js` — hands results to the SYSTEM DIAGNOSTICS report
-- `tests.html` — CRT-arcade "SYSTEM DIAGNOSTICS" report shell; loads `../js/` `data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → patterns.js` then the test files. **Does NOT load `app.js`** (would boot the full DOM); provides a minimal `state` stub plus `$`/`$$` stubs instead.
+- `tests.html` — CRT-arcade "SYSTEM DIAGNOSTICS" report shell; loads `../js/` `data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → patterns.js` then the test files. **Does NOT load `app.js`** (would boot the full DOM); provides a minimal `state` stub plus `$`/`$$` stubs instead.
 
 ### What is covered
 
@@ -37,6 +37,7 @@ Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>
 | 12 · Blue notes | `blueChroma()` / `isBlue()` per lens (♭5 minor, ♭3 major); blue never inside the pentatonic |
 | 13 · Patterns | Key-A reference round-trip (`toRef` → `fromRef`) across keys; cross-lens presets stay in scale; `chromaticRun`; CHROMATIC view; presets well-formed; `cleanSaved` rejects bad saved data |
 | 14 · Player + pause | `playSteps`/`playerTick` order and stop; pause freezes and resumes at the same step; `togglePause` no-op when idle; 14b root drone start/stop/toggle, pause stops and resume restarts it |
+| 15 · Changelog | `CHANGELOG` shape (vX.Y.Z, ISO date, `[name, text]` items), newest first, `renderChangelog` output, new-release dot |
 
 ### Note spelling
 Sharps by default. The **♯ SHARPS / ♭ FLATS** pair under NOTE NAMES switches. `spell(chroma)` returns `SHARP_NAMES[chroma]` or `FLAT_NAMES[chroma]` by `state.accidentals` (`'sharp'` | `'flat'`). The choice is saved in `pent-prefs`. Scale membership is still by chroma, so spelling never changes which notes are in a scale.
@@ -46,17 +47,17 @@ Sharps by default. The **♯ SHARPS / ♭ FLATS** pair under NOTE NAMES switches
 ```
 index.html   entry point (stays at the root so it opens directly)
 css/         themes, styles, hud, modals, features
-js/          the ten scripts below
+js/          the eleven scripts below
 tests/       tests.html + tests-*.js
 ```
 
-Ten plain JS files in `js/`, loaded in order by `index.html` (no ES modules — `file://` compatible). All share global scope. Stylesheets in `css/` load in the order themes → styles → hud → modals → features.
+Eleven plain JS files in `js/`, loaded in order by `index.html` (no ES modules — `file://` compatible). All share global scope. Stylesheets in `css/` load in the order themes → styles → hud → modals → features.
 
 ```
-data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → app.js → patterns.js → hud.js
+data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → app.js → patterns.js → hud.js
 ```
 
-- **`index.html`** — structure: sticky HUD (`header.hud`: root-drone button `#drone-btn` (key + lens readout), title, icon rail with pause `#pause-btn`, theme dropdown `#theme-trigger` + popover `#theme-menu`, Practice Lab, Help), level card with live title, controls (KEY row / SCALE LENS / NOTE NAMES / BOX POSITION / OPTIONS incl. + BLUE NOTE, ▶ PLAY SCALE, ▶ START GAME, 📚 LEARNING; PATTERNS group), game panel, fretboard div, legend (incl. `#legend-blue`), help modal, practice modal, learn modal, win screen. A tiny inline `<script>` right after `<body>` opens applies the saved theme before first paint (avoids a CRT flash); it must not move into `<head>`, where `document.body` is still null. JS renders the KEY row at boot via `wireControls`.
+- **`index.html`** — structure: sticky HUD (`header.hud`: root-drone button `#drone-btn` (key + lens readout), title, icon rail with pause `#pause-btn`, theme dropdown `#theme-trigger` + popover `#theme-menu`, Practice Lab, Help), level card with live title, controls (KEY row / SCALE LENS / NOTE NAMES / BOX POSITION / OPTIONS incl. + BLUE NOTE, ▶ PLAY SCALE, ▶ START GAME, 📚 LEARNING, 📜 CHANGELOG; PATTERNS group), game panel, fretboard div, legend (incl. `#legend-blue`), help modal, practice modal, learn modal, changelog modal, win screen. A tiny inline `<script>` right after `<body>` opens applies the saved theme before first paint (avoids a CRT flash); it must not move into `<head>`, where `document.body` is still null. JS renders the KEY row at boot via `wireControls`.
 
 ### File responsibilities
 
@@ -69,13 +70,14 @@ data.js → audio.js → drone.js → player.js → engine.js → game.js → pr
 | `engine.js` | Music helpers (`midiToChroma`, `fretMidi`, `fretChroma`, `spell`, `getAnchorOffset`, `computeScaleChromas`, `boxOctaveShift`, `computeActiveBoxes`, `transposeFretInBox`, `setKey`, `isInScale`, `isRoot`, `blueChroma`, `isBlue`, `isInBox` (with slack), `transposeFret`), fretboard SVG (`buildFretboard`, `refreshNotes`), `playCurrentScale`, `playGen` |
 | `game.js` | Boot validator IIFE, game engine (`pickLick`, `showGamePhase`, `onGameNoteClick`, `lickComplete`, `updateGamePanel`, `updateGameHUD`, `enterGame`, `exitGame`), persistence (`saveGame`, `loadGame`) |
 | `practice.js` | Modal helpers (`toggleHelp`, `closeHelp`, `togglePractice`, `closePractice`, `renderChallenge`), learning modal (`LESSONS`, `toggleLearn`, `closeLearn`, `renderLesson`) |
+| `changelog.js` | `CHANGELOG` (releases newest first, `[name, text]` items), `toggleChangelog`/`closeChangelog`/`renderChangelog`, new-release dot (`syncChangelogBadge`/`markChangelogSeen`, `pent-changelog-seen`). Add a release here on every tag |
 | `app.js` | `state` object (incl. `accidentals`, `blues`, `paused`, pattern fields), `$`/`$$`, `onNoteClick`, `flashNote`, `applyTheme`, `renderKeyLabels`, `updateBlueLegend`, `loadPrefs`/`savePrefs` (`pent-prefs`), `wireControls`, boot sequence |
 | `patterns.js` | Custom patterns: BUILD clicks (`togglePick`), `applyPattern` / `drawSteps` (picked notes + step numbers), saved patterns (`readSaved`/`writeSaved`, `pent-patterns`), `loadSelected` (classics + mine), key-A reference conversion (`toRef`/`fromRef`, lens-aware via `patternLens`), `chromaticRun` |
 | `hud.js` | Theme dropdown (`syncThemeTrigger`), popover placement, arrow/Home/End keys, compact-on-scroll (`body.scrolled`) |
-| `themes.css` | Theme tokens: `:root` (CRT default) + `body.theme-tropical/mission/blueprint`, incl. `--blue-note` (cobalt), `--blue-rim` and `--marker` (soft yellow fret dots, `:root` only). The only file that sets theme colours |
+| `themes.css` | Theme tokens: `:root` (CRT default) + `body.theme-tropical/mission/blueprint`, incl. `--blue-note` (cobalt), `--blue-rim`, `--marker` (soft yellow fret dots, `:root` only), `--title-drop` (offset title shadow, CRT only) and `--note-size` (fret-note letters, 10px on Tropical/Mission). The only file that sets theme colours |
 | `styles.css` | Layout, controls, fretboard, legend, lesson, game panel; phone breakpoint at 700px |
 | `hud.css` | Sticky header, keycap look shared by the drone chip and rail buttons (`--key-line`/`--key-edge`), `.hud-label` text (hidden on phones), `data-tip` tooltips, pause button states, theme popover, phone rules |
-| `modals.css` | Modal shell, Practice Lab, Learning lessons, win screen |
+| `modals.css` | Modal shell, Practice Lab, Learning lessons, changelog (incl. the pulsing new-release dot), win screen |
 | `features.css` | Blue-note styling and its controls, pattern UI (`.picked`, `.fb-step`, pattern inputs) |
 
 ### Key model — PARALLEL (v3.1+)
@@ -163,10 +165,11 @@ The early-theme inline script needs no change (it adds `theme-<saved name>` gene
 | `v3.8.0-learning` | LEARNING modal — 5 lessons, prev/next nav, L keybind |
 | `v4.0.0-all-sharps` | All-sharps spelling, tests + docs sync |
 | `v4.1.0-hud-pause-blues-patterns` | Sticky HUD + theme menu, global pause, flats toggle, blue notes, custom patterns |
+| `v4.3.0-drone-chromatic-changelog` | Root drone, CHROMATIC preset, fret side dots, cobalt blue, new theme fonts, keycap HUD, CHANGELOG popup |
 
 ## Conventions
 - Surgical changes only. No build step, no framework, no dependencies beyond CDN fonts.
-- Ten plain `<script>` files (not ES modules — no server needed). Boot order matters: `data → audio → drone → player → engine → game → practice → app → patterns → hud`. Inside `app.js`, `loadPrefs()` runs before `wireControls()` because key labels read `spell()`.
+- Eleven plain `<script>` files (not ES modules — no server needed). Boot order matters: `data → audio → drone → player → engine → game → practice → changelog → app → patterns → hud`. Inside `app.js`, `loadPrefs()` runs before `wireControls()` because key labels read `spell()`.
 - Arcade/retro theme is intentional. Don't migrate to "modern clean" without asking.
 - The boot-time LICK validator stays in `game.js` permanently — it costs nothing at runtime.
 - Tooltips use the `data-tip` attribute (styled in `hud.css`), never `title=`.

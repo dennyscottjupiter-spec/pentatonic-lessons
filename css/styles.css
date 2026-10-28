@@ -168,7 +168,7 @@ body.theme-mission #fretboard {
 }
 .fb-note text {
   font-family: var(--font-display);
-  font-size: 8px;
+  font-size: var(--note-size);
   text-anchor: middle;
   pointer-events: none;
   user-select: none;

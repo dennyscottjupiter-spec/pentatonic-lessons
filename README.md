@@ -58,7 +58,7 @@ Once it's open:
 6. Click any fret to hear and see that note.
 7. Click **▶ PLAY SCALE** to hear the box played ascending then descending.
 8. Click **▶ START GAME** to play Lick Attack: watch a short lick light up, then replay it by clicking the same frets in order. The lens, PLAY SCALE and PATTERNS are locked during the game.
-9. The button at the top left shows the key and starts or stops the **root drone** (`D`). Use the icon bar at the top right: the **pause** button, the **theme menu** (switches between CRT, Tropical Night, Mission Control and Blueprint), **PRACTICE** (opens the Practice Lab: metronome + timer), and **HELP** (shortcuts and how-to). **📚 LEARNING** under OPTIONS opens the theory lessons.
+9. The button at the top left shows the key and starts or stops the **root drone** (`D`). Use the icon bar at the top right: the **pause** button, the **theme menu** (switches between CRT, Tropical Night, Mission Control and Blueprint), **PRACTICE** (opens the Practice Lab: metronome + timer), and **HELP** (shortcuts and how-to). **📚 LEARNING** under OPTIONS opens the theory lessons, and **📜 CHANGELOG** lists what changed in each version (a glowing dot marks a release you have not opened yet).
 10. Under **PATTERNS** you can draw your own shape:
     - Press **✎ BUILD**, then click notes to add or remove them. The numbers show the play order (first click plays first).
     - Type a name (up to 24 characters) and press **SAVE**. Your shapes appear under **MY PATTERNS** in the LOAD dropdown.
@@ -74,7 +74,7 @@ If you edit the source files, hard-refresh the browser tab (Ctrl+Shift+R) — a 
 
 ### Running the test suite
 
-The project ships its own zero-dependency test suite (312 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause and the game). It lives in `tests/`; serve the project folder locally to run it:
+The project ships its own zero-dependency test suite (317 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause, the game and the changelog). It lives in `tests/`; serve the project folder locally to run it:
 
 ```bash
 cd pentatonic-lessons
@@ -93,6 +93,7 @@ There are no files produced. Everything is on-screen:
   - your theme (`pent-theme`) and your note-name and blue-note choices (`pent-prefs`)
   - your saved patterns (`pent-patterns`)
   - your high score and game XP (`pent-game`)
+  - the newest changelog version you have opened (`pent-changelog-seen`)
 
 ## Limitations
 

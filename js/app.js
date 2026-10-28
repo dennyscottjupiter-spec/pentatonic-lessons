@@ -186,6 +186,11 @@ function wireControls() {
   $('#learn-prev').addEventListener('click', () => renderLesson(_learnIdx - 1));
   $('#learn-next').addEventListener('click', () => renderLesson(_learnIdx + 1));
 
+  $('#changelog-btn').addEventListener('click', () => { renderChangelog(); markChangelogSeen(); toggleChangelog(); });
+  syncChangelogBadge();
+  $('#changelog-close').addEventListener('click', closeChangelog);
+  $('#changelog-modal').addEventListener('click', e => { if (e.target === $('#changelog-modal')) closeChangelog(); });
+
   const slider = $('#metro-slider'), bpmIn = $('#metro-bpm');
   slider.addEventListener('input', () => { metro.bpm = +slider.value; bpmIn.value = slider.value; });
   bpmIn.addEventListener('input', () => { const v=Math.max(40,Math.min(240,+bpmIn.value||80)); metro.bpm=v; slider.value=v; });
@@ -209,7 +214,7 @@ function wireControls() {
     if (e.key==='?'||(e.key==='/'&&e.shiftKey)) { closePractice(); closeLearn(); toggleHelp(); return; }
     if (e.key==='p'||e.key==='P') { closeHelp(); closeLearn(); renderChallenge(); togglePractice(); return; }
     if (e.key==='l'||e.key==='L') { closeHelp(); closePractice(); renderLesson(_learnIdx); toggleLearn(); return; }
-    if (e.key==='Escape') { closeHelp(); closePractice(); closeLearn(); return; }
+    if (e.key==='Escape') { closeHelp(); closePractice(); closeLearn(); closeChangelog(); return; }
     if (e.key>='1'&&e.key<='5') { const b=$$('.box[data-box="'+e.key+'"]')[0]; if(b&&!b.disabled)b.click(); return; }
     if (e.key==='0') { const b=$$('.box[data-box="all"]')[0]; if(b&&!b.disabled)b.click(); return; }
   });
