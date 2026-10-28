@@ -12,7 +12,9 @@
 <link rel="stylesheet" href="css/styles.css" />
 <link rel="stylesheet" href="css/hud.css" />
 <link rel="stylesheet" href="css/modals.css" />
+<link rel="stylesheet" href="css/changelog.css" />
 <link rel="stylesheet" href="css/features.css" />
+<link rel="stylesheet" href="css/quiz.css" />
 </head>
 <body>
 <script>/* early theme — avoids CRT flash before app.js loads; must sit inside <body> (document.body is null in <head>) */
@@ -125,6 +127,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <button class="arc-btn toggle" data-toggle="blues" aria-pressed="false">+ BLUE NOTE</button>
         <button class="arc-btn ghost" id="play-scale">▶ PLAY SCALE</button>
         <button class="arc-btn ghost" id="game-toggle">▶ START GAME</button>
+        <button class="arc-btn ghost" id="quiz-btn" aria-pressed="false">🎯 NOTE QUIZ</button>
         <button class="arc-btn ghost" id="learn-btn">📚 LEARNING</button>
         <button class="arc-btn ghost" id="changelog-btn">📜 CHANGELOG</button>
       </div>
@@ -158,6 +161,20 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     <div id="fretboard" aria-label="Interactive guitar fretboard"></div>
   </section>
 
+  <section id="quiz-dock" class="quiz-dock" hidden aria-label="Note quiz">
+    <button class="modal-close" id="quiz-close" aria-label="Close quiz">✕</button>
+    <div class="quiz-head">
+      <p class="quiz-prompt" id="quiz-prompt" aria-live="polite">Name the glowing note</p>
+      <div class="quiz-stats">
+        <span>SCORE <b id="quiz-score">0/0</b></span>
+        <span>STREAK <b id="quiz-streak">0</b></span>
+        <span>BEST <b id="quiz-best">0</b></span>
+      </div>
+    </div>
+    <div class="quiz-keys" id="quiz-keys"><!-- rendered by quiz.js --></div>
+    <p class="quiz-hint">Click a key or type the letter · Shift + letter adds ♯ (♭ in flats) · Q or Esc to stop</p>
+  </section>
+
   <section class="legend">
     <div class="legend-item"><span class="dot root"></span> ROOT</div>
     <div class="legend-item"><span class="dot note"></span> SCALE NOTE</div>
@@ -182,15 +199,19 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     <div class="modal-box">
       <button class="modal-close" id="help-close" aria-label="Close">✕</button>
       <h2>⌨️ KEYBOARD SHORTCUTS</h2>
-      <ul>
-        <li><span class="kbd">1</span>–<span class="kbd">5</span> → select box position</li>
-        <li><span class="kbd">0</span> → show ALL positions</li>
-        <li><span class="kbd">?</span> → toggle this help</li>
-        <li><span class="kbd">P</span> → toggle Practice Lab</li>
-        <li><span class="kbd">Space</span> or <span class="kbd">K</span> → pause / resume everything playing</li>
-        <li><span class="kbd">D</span> → root drone on / off</li>
-        <li><span class="kbd">Esc</span> → close any panel</li>
-      </ul>
+      <dl class="keymap">
+        <div><dt><kbd>1</kbd><i>–</i><kbd>5</kbd></dt><dd>Box position</dd></div>
+        <div><dt><kbd>0</kbd></dt><dd>All positions</dd></div>
+        <div><dt><kbd class="wide">Space</kbd><i>or</i><kbd>K</kbd></dt><dd>Pause / resume</dd></div>
+        <div><dt><kbd>D</kbd></dt><dd>Root drone</dd></div>
+        <div><dt><kbd>Q</kbd></dt><dd>Note quiz</dd></div>
+        <div><dt><kbd>P</kbd></dt><dd>Practice Lab</dd></div>
+        <div><dt><kbd>L</kbd></dt><dd>Learning</dd></div>
+        <div><dt><kbd>C</kbd></dt><dd>Changelog</dd></div>
+        <div><dt><kbd>?</kbd></dt><dd>This help</dd></div>
+        <div><dt><kbd class="wide">Esc</kbd></dt><dd>Close any panel</dd></div>
+      </dl>
+      <p class="keymap-note">In the note quiz, <kbd>A</kbd>–<kbd>G</kbd> answer instead (<kbd class="wide">Shift</kbd> adds ♯, or ♭ in flats).</p>
       <h2>🎸 HOW TO USE</h2>
       <ul>
         <li>Pick a <b>ROOT</b> from the 12 key buttons (A–G#). That's your tonal center.</li>
@@ -202,6 +223,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li><b>♯ / ♭</b> switches every note name between sharps and flats.</li>
         <li><b>PATTERNS:</b> press BUILD and click notes to draw your own shape (numbers = play order), save it by name, or load a classic. Patterns follow the key.</li>
         <li>The <b>drone</b> button (top left) holds the key's root and fifth so you can hear how each note sounds against it.</li>
+        <li><b>🎯 NOTE QUIZ</b> hides the note names and makes one note glow. Name it on the mini piano or type the letter.</li>
       </ul>
       <h2>🎨 THEMES</h2>
       <p>Pick a theme from the swatch menu at the top right: CRT · 🌴 Tropical Night · 🛰️ Mission Control · 📐 Blueprint. Your choice is saved.</p>
@@ -311,6 +333,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <script src="js/changelog.js"></script>
   <script src="js/app.js"></script>
   <script src="js/patterns.js"></script>
+  <script src="js/quiz.js"></script>
   <script src="js/hud.js"></script>
 </body>
 </html>

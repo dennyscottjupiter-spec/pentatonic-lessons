@@ -1,0 +1,112 @@
+/* Changelog list, new-release dot, show-me rows and the spotlight cut-out. */
+.cl-release { margin-bottom: 16px; }
+.cl-release h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--fret-line);
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--yellow);
+}
+.cl-release time { margin-left: auto; color: var(--text); opacity: 0.6; }
+.cl-release ul { list-style: none; padding-left: 0; }
+.cl-release li { margin: 2px 0; font-size: 17px; line-height: 1.4; }
+.cl-release li:not(:has(.cl-item)), .cl-item { padding: 6px 36px 6px 10px; }
+.cl-release b { display: block; color: var(--cyan); }
+/* A change with a selector is a "show me" row; the crosshair hints it points somewhere */
+.cl-item {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cl-item:hover, .cl-item:focus-visible { background: color-mix(in srgb, var(--cyan) 10%, transparent); outline: none; }
+.cl-item:focus-visible { box-shadow: inset 0 0 0 1px var(--cyan); }
+.cl-go {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--yellow);
+  background: radial-gradient(circle, var(--yellow) 0 2px, transparent 2.5px);
+  opacity: 0.3;
+  transition: opacity 0.15s, transform 0.3s;
+}
+.cl-item:hover .cl-go, .cl-item:focus-visible .cl-go { opacity: 1; transform: rotate(90deg) scale(1.15); }
+
+/* Spotlight cut-out: one giant shadow dims the page, leaving a lit hole around the control */
+#spotlight {
+  position: fixed;
+  z-index: 1500;
+  pointer-events: none;
+  border-radius: 10px;
+  opacity: 0;
+  box-shadow: 0 0 0 200vmax rgba(0,0,0,0.62), 0 0 0 2px var(--yellow), 0 0 28px 6px color-mix(in srgb, var(--yellow) 50%, transparent);
+}
+#spotlight.on { animation: spot-in 2.8s ease forwards; }
+#spotlight::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--yellow);
+  border-radius: inherit;
+  opacity: 0;
+}
+#spotlight.on::before { animation: spot-ring 0.9s ease-out 0.45s 2; }
+#spotlight::after {
+  content: attr(data-label);
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: var(--yellow);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 1px;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--yellow) 60%, transparent);
+}
+@keyframes spot-in {
+  0%   { opacity: 0; transform: scale(1.5); }
+  14%  { opacity: 1; transform: scale(1); }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes spot-ring { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(1.35); } }
+@media (prefers-reduced-motion: reduce) {
+  #spotlight.on { animation: spot-fade 2.8s linear forwards; }
+  #spotlight.on::before { animation: none; }
+}
+@keyframes spot-fade { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
+#changelog-btn { position: relative; }
+#changelog-btn.has-new::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--magenta);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 12px var(--magenta);
+  animation: new-pulse 1.6s ease-in-out infinite;
+}
+@keyframes new-pulse { 50% { box-shadow: 0 0 0 2px var(--bg), 0 0 3px var(--magenta); } }
+@media (prefers-reduced-motion: reduce) { #changelog-btn.has-new::after { animation: none; } }

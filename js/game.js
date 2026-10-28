@@ -1,7 +1,7 @@
 // ---
 // purpose: Lick Attack game engine + boot-time lick validator
 // exports: showGamePhase, onGameNoteClick, enterGame, exitGame, saveGame
-// depends: data.js, audio.js, engine.js, player.js (playSteps), app.js (state), patterns.js (clearPattern, stopBuilding)
+// depends: data.js, audio.js, engine.js, player.js (playSteps), app.js (state), patterns.js (clearPattern, stopBuilding), quiz.js (quizStop)
 // ---
 
 // ---------- Boot validator (permanent) ----------
@@ -145,6 +145,7 @@ function showWinScreen() {
 }
 
 function enterGame() {
+  if (typeof quizStop === 'function') quizStop();
   if (typeof clearPattern === 'function') { stopBuilding(); clearPattern(); }
   state.exploreSavedBox = state.box;
   state.mode            = 'game';
@@ -157,7 +158,7 @@ function enterGame() {
   document.getElementById('game-panel').classList.add('visible');
   document.getElementById('game-toggle').textContent = '◀ EXPLORE';
   // PLAY SCALE would bump playGen and strand the lick in its 'show' phase
-  document.querySelectorAll('.lens, #play-scale, #pattern-build, #pattern-select, #pattern-save, #pattern-delete, #pattern-clear, #pattern-name').forEach(b => b.disabled = true);
+  document.querySelectorAll('.lens, #play-scale, #pattern-build, #pattern-select, #pattern-save, #pattern-delete, #pattern-clear, #pattern-name, #quiz-btn').forEach(b => b.disabled = true);
   refreshNotes(); updateGameHUD();
   document.getElementById('game-best').textContent = String(state.highScore);
   showGamePhase();
@@ -171,7 +172,7 @@ function exitGame() {
   document.getElementById('game-panel').classList.remove('visible');
   document.getElementById('game-toggle').textContent = '▶ START GAME';
   // #pattern-delete stays disabled: it re-enables only when a saved pattern is selected
-  document.querySelectorAll('.box, .lens, #key-row .arc-btn, #play-scale, #pattern-build, #pattern-select, #pattern-save, #pattern-clear, #pattern-name').forEach(b => b.disabled = false);
+  document.querySelectorAll('.box, .lens, #key-row .arc-btn, #play-scale, #pattern-build, #pattern-select, #pattern-save, #pattern-clear, #pattern-name, #quiz-btn').forEach(b => b.disabled = false);
   document.querySelectorAll('.box').forEach(b => b.classList.toggle('active', b.dataset.box===state.box));
   refreshNotes();
 }

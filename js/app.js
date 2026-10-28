@@ -1,7 +1,7 @@
 // ---
 // purpose: Global state, note clicks, theme, prefs, control wiring, boot
 // exports: state, onNoteClick, applyTheme, wireControls, loadPrefs, savePrefs
-// depends: data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js
+// depends: data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js, quiz.js (quizKeyChroma, quizAnswer, toggleQuiz, quizStop)
 // gotcha: loadPrefs() must run before wireControls() (key labels use spell())
 // ---
 
@@ -47,6 +47,7 @@ function onNoteClick(e) {
   const midi   = +g.dataset.midi;
   const chroma = +g.dataset.chroma;
   const si     = +g.dataset.string;
+  if (typeof quiz !== 'undefined' && quiz.on) { if (g.classList.contains('quiz-target')) playNote(midi); return; }   // clicks never reveal the answer
 
   if (state.mode === 'game' && state.gamePhase === 'input') {
     onGameNoteClick(g); return;
@@ -186,7 +187,7 @@ function wireControls() {
   $('#learn-prev').addEventListener('click', () => renderLesson(_learnIdx - 1));
   $('#learn-next').addEventListener('click', () => renderLesson(_learnIdx + 1));
 
-  $('#changelog-btn').addEventListener('click', () => { renderChangelog(); markChangelogSeen(); toggleChangelog(); });
+  $('#changelog-btn').addEventListener('click', openChangelog);
   syncChangelogBadge();
   $('#changelog-close').addEventListener('click', closeChangelog);
   $('#changelog-modal').addEventListener('click', e => { if (e.target === $('#changelog-modal')) closeChangelog(); });
@@ -209,12 +210,15 @@ function wireControls() {
 
   document.addEventListener('keydown', e => {
     if (e.target.matches('input,textarea,select') || e.target.closest('#theme-menu')) return;
+    if (typeof quiz !== 'undefined' && quiz.on && !e.ctrlKey && !e.metaKey && !e.altKey) { const c = quizKeyChroma(e); if (c !== null) { e.preventDefault(); if (!e.repeat) quizAnswer(c); return; } }   // a held key must not answer the next round
     if (e.code === 'Space' || e.key === 'k' || e.key === 'K') { e.preventDefault(); togglePause(); return; }
     if (e.key==='d'||e.key==='D') { toggleDrone(); return; }
-    if (e.key==='?'||(e.key==='/'&&e.shiftKey)) { closePractice(); closeLearn(); toggleHelp(); return; }
-    if (e.key==='p'||e.key==='P') { closeHelp(); closeLearn(); renderChallenge(); togglePractice(); return; }
-    if (e.key==='l'||e.key==='L') { closeHelp(); closePractice(); renderLesson(_learnIdx); toggleLearn(); return; }
-    if (e.key==='Escape') { closeHelp(); closePractice(); closeLearn(); closeChangelog(); return; }
+    if (e.key==='?'||(e.key==='/'&&e.shiftKey)) { closePractice(); closeLearn(); closeChangelog(); toggleHelp(); return; }
+    if (e.key==='p'||e.key==='P') { closeHelp(); closeLearn(); closeChangelog(); renderChallenge(); togglePractice(); return; }
+    if (e.key==='l'||e.key==='L') { closeHelp(); closePractice(); closeChangelog(); renderLesson(_learnIdx); toggleLearn(); return; }
+    if (e.key==='c'||e.key==='C') { closeHelp(); closePractice(); closeLearn(); openChangelog(); return; }
+    if (e.key==='q'||e.key==='Q') { toggleQuiz(); return; }
+    if (e.key==='Escape') { closeHelp(); closePractice(); closeLearn(); closeChangelog(); quizStop(); return; }
     if (e.key>='1'&&e.key<='5') { const b=$$('.box[data-box="'+e.key+'"]')[0]; if(b&&!b.disabled)b.click(); return; }
     if (e.key==='0') { const b=$$('.box[data-box="all"]')[0]; if(b&&!b.disabled)b.click(); return; }
   });

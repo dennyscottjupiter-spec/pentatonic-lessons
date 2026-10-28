@@ -1,7 +1,7 @@
 // ---
 // purpose: Suite 15: CHANGELOG data is well-formed, newest first, and renders one block per release
 // exports: none (registers suites)
-// depends: tests-lib.js (window.T), changelog.js (CHANGELOG, renderChangelog, syncChangelogBadge, markChangelogSeen)
+// depends: tests-lib.js (window.T), changelog.js (CHANGELOG, renderChangelog, syncChangelogBadge, markChangelogSeen, spotlight)
 // ---
 (function () {
   'use strict';
@@ -17,10 +17,14 @@
       });
     });
 
-    test('every item is a [name, text] pair of non-empty strings', function() {
+    test('every item is [name, text] or [name, text, selector] of non-empty strings', function() {
       CHANGELOG.forEach(function(r) {
         r.items.forEach(function(it) {
-          ok(it.length === 2 && it[0] && it[1], 'bad item in ' + r.version);
+          ok((it.length === 2 || it.length === 3) && it[0] && it[1], 'bad item in ' + r.version);
+          if (it.length === 3) {
+            ok(typeof it[2] === 'string' && it[2], 'empty selector in ' + r.version);
+            document.querySelector(it[2]);   // throws on an invalid selector
+          }
         });
       });
     });
@@ -40,8 +44,34 @@
         var total = CHANGELOG.reduce(function(n, r) { return n + r.items.length; }, 0);
         eq(host.querySelectorAll('.cl-release').length, CHANGELOG.length, 'sections');
         eq(host.querySelectorAll('li').length, total, 'items');
+        var links = CHANGELOG.reduce(function(n, r) { return n + r.items.filter(function(it) { return it[2]; }).length; }, 0);
+        eq(host.querySelectorAll('.cl-item').length, links, 'show-me rows');
       } finally {
         host.remove();
+      }
+    });
+
+    test('spotlight() lights a hole on a real control, ignores a missing one', function() {
+      var modal = document.createElement('div');
+      modal.id = 'changelog-modal';
+      var target = document.createElement('button');
+      target.id = 'spot-test-target';
+      document.body.append(modal, target);
+      var old = document.getElementById('spotlight');
+      if (old) old.remove();
+      try {
+        spotlight('#no-such-control', 'x');
+        ok(!document.getElementById('spotlight'), 'spotlight shown for a missing control');
+        spotlight('#spot-test-target', 'Root drone');
+        var spot = document.getElementById('spotlight');
+        ok(spot && spot.classList.contains('on'), 'spotlight not on');
+        eq(spot.dataset.label, 'Root drone', 'caption');
+        ok(modal.classList.contains('hidden'), 'changelog not closed');
+      } finally {
+        cancelAnimationFrame(_spotRaf);
+        var s = document.getElementById('spotlight');
+        if (s) s.remove();
+        modal.remove(); target.remove();
       }
     });
 

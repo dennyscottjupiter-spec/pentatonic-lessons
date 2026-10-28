@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project
-Static, no-build HTML/CSS/JS app that teaches guitar pentatonic scales across all 12 keys with an interactive fretboard, Karplus-Strong plucked-guitar audio, a sticky HUD with a root-drone button and 4 visual themes, sharp/flat note names, a blue-note toggle, custom saved fretboard patterns, a global pause, a Practice Lab (metronome + timer), a Lick Attack game, a 5-lesson LEARNING modal, and an in-app CHANGELOG popup.
+Static, no-build HTML/CSS/JS app that teaches guitar pentatonic scales across all 12 keys with an interactive fretboard, Karplus-Strong plucked-guitar audio, a sticky HUD with a root-drone button and 4 visual themes, sharp/flat note names, a blue-note toggle, custom saved fretboard patterns, a global pause, a Practice Lab (metronome + timer), a Lick Attack game, a 5-lesson LEARNING modal, a NOTE QUIZ (name the glowing note on a mini piano), and an in-app CHANGELOG popup whose rows spotlight the control they describe.
 
 ## How to run
 Open `index.html` directly in a browser — no server, no bundler, no install step. From PowerShell: `Start-Process index.html`. Hard-refresh with **Ctrl+Shift+R** after edits to bypass browser CSS cache (see global LEARNINGS).
@@ -12,12 +12,12 @@ There is no build, lint, or test command. Verification = open the page and inter
 
 ## Test suite
 
-Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>/tests/tests.html`). **317 tests, zero dependencies.** All files live in `tests/`:
+Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>/tests/tests.html`). **324 tests, zero dependencies.** All files live in `tests/`:
 
 - `tests-lib.js` — zero-dep framework + `reset()`, exposed as `window.T`
-- `tests-core.js` (1–5), `tests-board.js` (6–8), `tests-game.js` (9–10), `tests-features.js` (11–12), `tests-patterns.js` (13), `tests-player.js` (14), `tests-changelog.js` (15) — the suites
+- `tests-core.js` (1–5), `tests-board.js` (6–8), `tests-game.js` (9–10), `tests-features.js` (11–12), `tests-patterns.js` (13), `tests-player.js` (14), `tests-changelog.js` (15), `tests-quiz.js` (16) — the suites
 - `tests-report.js` — hands results to the SYSTEM DIAGNOSTICS report
-- `tests.html` — CRT-arcade "SYSTEM DIAGNOSTICS" report shell; loads `../js/` `data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → patterns.js` then the test files. **Does NOT load `app.js`** (would boot the full DOM); provides a minimal `state` stub plus `$`/`$$` stubs instead.
+- `tests.html` — CRT-arcade "SYSTEM DIAGNOSTICS" report shell; loads `../js/` `data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → patterns.js → quiz.js` then the test files. **Does NOT load `app.js`** (would boot the full DOM); provides a minimal `state` stub plus `$`/`$$` stubs instead.
 
 ### What is covered
 
@@ -37,7 +37,8 @@ Open `tests/tests.html` (via `python3 -m http.server` + `http://localhost:<port>
 | 12 · Blue notes | `blueChroma()` / `isBlue()` per lens (♭5 minor, ♭3 major); blue never inside the pentatonic |
 | 13 · Patterns | Key-A reference round-trip (`toRef` → `fromRef`) across keys; cross-lens presets stay in scale; `chromaticRun`; CHROMATIC view; presets well-formed; `cleanSaved` rejects bad saved data |
 | 14 · Player + pause | `playSteps`/`playerTick` order and stop; pause freezes and resumes at the same step; `togglePause` no-op when idle; 14b root drone start/stop/toggle, pause stops and resume restarts it |
-| 15 · Changelog | `CHANGELOG` shape (vX.Y.Z, ISO date, `[name, text]` items), newest first, `renderChangelog` output, new-release dot |
+| 15 · Changelog | `CHANGELOG` shape (vX.Y.Z, ISO date, `[name, text]` or `[name, text, selector]` items), newest first, `renderChangelog` output incl. show-me rows, new-release dot, `spotlight()` |
+| 16 · Note quiz | `quizKeyChroma` (letters, Shift, flats), `quizPool` (lit, undimmed), `renderQuizKeys` (7 white + 5 black), start/answer/stop lifecycle, wrong-answer reveal, no quiz during the game |
 
 ### Note spelling
 Sharps by default. The **♯ SHARPS / ♭ FLATS** pair under NOTE NAMES switches. `spell(chroma)` returns `SHARP_NAMES[chroma]` or `FLAT_NAMES[chroma]` by `state.accidentals` (`'sharp'` | `'flat'`). The choice is saved in `pent-prefs`. Scale membership is still by chroma, so spelling never changes which notes are in a scale.
@@ -47,17 +48,17 @@ Sharps by default. The **♯ SHARPS / ♭ FLATS** pair under NOTE NAMES switches
 ```
 index.html   entry point (stays at the root so it opens directly)
 css/         themes, styles, hud, modals, features
-js/          the eleven scripts below
+js/          the twelve scripts below
 tests/       tests.html + tests-*.js
 ```
 
-Eleven plain JS files in `js/`, loaded in order by `index.html` (no ES modules — `file://` compatible). All share global scope. Stylesheets in `css/` load in the order themes → styles → hud → modals → features.
+Twelve plain JS files in `js/`, loaded in order by `index.html` (no ES modules — `file://` compatible). All share global scope. Stylesheets in `css/` load in the order themes → styles → hud → modals → changelog → features → quiz.
 
 ```
-data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → app.js → patterns.js → hud.js
+data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js → changelog.js → app.js → patterns.js → quiz.js → hud.js
 ```
 
-- **`index.html`** — structure: sticky HUD (`header.hud`: root-drone button `#drone-btn` (key + lens readout), title, icon rail with pause `#pause-btn`, theme dropdown `#theme-trigger` + popover `#theme-menu`, Practice Lab, Help), level card with live title, controls (KEY row / SCALE LENS / NOTE NAMES / BOX POSITION / OPTIONS incl. + BLUE NOTE, ▶ PLAY SCALE, ▶ START GAME, 📚 LEARNING, 📜 CHANGELOG; PATTERNS group), game panel, fretboard div, legend (incl. `#legend-blue`), help modal, practice modal, learn modal, changelog modal, win screen. A tiny inline `<script>` right after `<body>` opens applies the saved theme before first paint (avoids a CRT flash); it must not move into `<head>`, where `document.body` is still null. JS renders the KEY row at boot via `wireControls`.
+- **`index.html`** — structure: sticky HUD (`header.hud`: root-drone button `#drone-btn` (key + lens readout), title, icon rail with pause `#pause-btn`, theme dropdown `#theme-trigger` + popover `#theme-menu`, Practice Lab, Help), level card with live title, controls (KEY row / SCALE LENS / NOTE NAMES / BOX POSITION / OPTIONS incl. + BLUE NOTE, ▶ PLAY SCALE, ▶ START GAME, 🎯 NOTE QUIZ, 📚 LEARNING, 📜 CHANGELOG; PATTERNS group), game panel, fretboard div, quiz dock `#quiz-dock` (hidden until the quiz runs), legend (incl. `#legend-blue`), help modal, practice modal, learn modal, changelog modal, win screen. A tiny inline `<script>` right after `<body>` opens applies the saved theme before first paint (avoids a CRT flash); it must not move into `<head>`, where `document.body` is still null. JS renders the KEY row at boot via `wireControls`.
 
 ### File responsibilities
 
@@ -70,14 +71,17 @@ data.js → audio.js → drone.js → player.js → engine.js → game.js → pr
 | `engine.js` | Music helpers (`midiToChroma`, `fretMidi`, `fretChroma`, `spell`, `getAnchorOffset`, `computeScaleChromas`, `boxOctaveShift`, `computeActiveBoxes`, `transposeFretInBox`, `setKey`, `isInScale`, `isRoot`, `blueChroma`, `isBlue`, `isInBox` (with slack), `transposeFret`), fretboard SVG (`buildFretboard`, `refreshNotes`), `playCurrentScale`, `playGen` |
 | `game.js` | Boot validator IIFE, game engine (`pickLick`, `showGamePhase`, `onGameNoteClick`, `lickComplete`, `updateGamePanel`, `updateGameHUD`, `enterGame`, `exitGame`), persistence (`saveGame`, `loadGame`) |
 | `practice.js` | Modal helpers (`toggleHelp`, `closeHelp`, `togglePractice`, `closePractice`, `renderChallenge`), learning modal (`LESSONS`, `toggleLearn`, `closeLearn`, `renderLesson`) |
-| `changelog.js` | `CHANGELOG` (releases newest first, `[name, text]` items), `toggleChangelog`/`closeChangelog`/`renderChangelog`, new-release dot (`syncChangelogBadge`/`markChangelogSeen`, `pent-changelog-seen`). Add a release here on every tag |
+| `changelog.js` | `CHANGELOG` (releases newest first, `[name, text]` or `[name, text, selector]` items), `openChangelog`/`toggleChangelog`/`closeChangelog`/`renderChangelog`, new-release dot (`syncChangelogBadge`/`markChangelogSeen`, `pent-changelog-seen`), `spotlight(sel, label)` (a row with a selector closes the list and spotlights that control). Add a release here on every tag; give each item the selector of its control |
+| `quiz.js` | NOTE QUIZ (`quiz` state, `quizStart`/`quizStop`/`toggleQuiz`, `quizAnswer`, `quizKeyChroma`, `quizPool`, `renderQuizKeys`, `quizRefresh` called by `refreshNotes()`), best streak in `pent-quiz-best` |
 | `app.js` | `state` object (incl. `accidentals`, `blues`, `paused`, pattern fields), `$`/`$$`, `onNoteClick`, `flashNote`, `applyTheme`, `renderKeyLabels`, `updateBlueLegend`, `loadPrefs`/`savePrefs` (`pent-prefs`), `wireControls`, boot sequence |
 | `patterns.js` | Custom patterns: BUILD clicks (`togglePick`), `applyPattern` / `drawSteps` (picked notes + step numbers), saved patterns (`readSaved`/`writeSaved`, `pent-patterns`), `loadSelected` (classics + mine), key-A reference conversion (`toRef`/`fromRef`, lens-aware via `patternLens`), `chromaticRun` |
 | `hud.js` | Theme dropdown (`syncThemeTrigger`), popover placement, arrow/Home/End keys, compact-on-scroll (`body.scrolled`) |
 | `themes.css` | Theme tokens: `:root` (CRT default) + `body.theme-tropical/mission/blueprint`, incl. `--blue-note` (cobalt), `--blue-rim`, `--marker` (soft yellow fret dots, `:root` only), `--title-drop` (offset title shadow, CRT only) and `--note-size` (fret-note letters, 10px on Tropical/Mission). The only file that sets theme colours |
 | `styles.css` | Layout, controls, fretboard, legend, lesson, game panel; phone breakpoint at 700px |
 | `hud.css` | Sticky header, keycap look shared by the drone chip and rail buttons (`--key-line`/`--key-edge`), `.hud-label` text (hidden on phones), `data-tip` tooltips, pause button states, theme popover, phone rules |
-| `modals.css` | Modal shell, Practice Lab, Learning lessons, changelog (incl. the pulsing new-release dot), win screen |
+| `modals.css` | Modal shell, Help keycap grid (`.keymap`), Practice Lab, Learning lessons, win screen |
+| `changelog.css` | Changelog list, pulsing new-release dot, show-me rows (`.cl-item`), `#spotlight` cut-out + caption |
+| `quiz.css` | Quiz board (hidden letters, target reticle), quiz dock and mini piano (`.pk`) |
 | `features.css` | Blue-note styling and its controls, pattern UI (`.picked`, `.fb-step`, pattern inputs) |
 
 ### Key model — PARALLEL (v3.1+)
@@ -111,6 +115,7 @@ Each KEY button selects a **root note**; MINOR/MAJOR picks that root's own penta
 - **Popover menu.** `#theme-menu` is a native popover opened by `#theme-trigger` (`popovertarget`). `hud.js` places it on `toggle` (right-aligned under the trigger, clamped to the viewport) and handles ArrowUp/ArrowDown/Home/End. Global keyboard shortcuts skip inputs, selects and `#theme-menu`.
 - **Game follows user's box.** Box buttons stay live in game mode; switching box or key restarts the lick with `++playGen`. Lens, PLAY SCALE and the PATTERNS controls are locked during game. After a sequence with any wrong note: 1.8 s pause, then the SAME lick again (`showGamePhase(true)` keeps `lickAttempts`); a 2nd miss moves to a new lick. Once the last note is clicked `gamePhase` becomes `'judge'`, so clicks in the gap are ordinary note clicks.
 - **Finish-then-judge.** Wrong notes no longer abort the lick mid-sequence — the player finishes the whole sequence, then gets feedback.
+- **NOTE QUIZ.** `body.quiz-on` hides every note letter; one note from `quizPool()` (whatever the board shows lit and undimmed: box, pattern or CHROMATIC) gets `.quiz-target` + a `.quiz-reticle` circle. Answers come from the piano keys or A–G (Shift = ♯, or ♭ in flats); the keydown handler routes those letters to the quiz before D/C. Fret clicks never reveal the answer (only the target replays its sound). PLAY SCALE and BUILD are disabled while it runs; starting the game stops it. `quiz.gen` drops stale next-round timers.
 - **Autoplay policy.** Every audio path routes through `ensureAudio()` from a user click.
 - **localStorage is always wrapped in try/catch** (throws in private/incognito mode).
 
@@ -144,7 +149,10 @@ The early-theme inline script needs no change (it adds `theme-<saved name>` gene
 | `L` | Toggle LEARNING modal |
 | `Space` or `K` | Pause / resume everything playing (does nothing when idle) |
 | `D` | Root drone on / off |
-| `Esc` | Close any modal |
+| `Q` | NOTE QUIZ on / off |
+| `C` | Open the CHANGELOG |
+| `A`–`G` | Quiz answer while the quiz runs (Shift = ♯, or ♭ in flats) |
+| `Esc` | Close any modal, stop the quiz |
 
 ## Git tags
 
@@ -166,10 +174,11 @@ The early-theme inline script needs no change (it adds `theme-<saved name>` gene
 | `v4.0.0-all-sharps` | All-sharps spelling, tests + docs sync |
 | `v4.1.0-hud-pause-blues-patterns` | Sticky HUD + theme menu, global pause, flats toggle, blue notes, custom patterns |
 | `v4.3.0-drone-chromatic-changelog` | Root drone, CHROMATIC preset, fret side dots, cobalt blue, new theme fonts, keycap HUD, CHANGELOG popup |
+| `v4.4.0-quiz-spotlight` | NOTE QUIZ with mini piano, changelog show-me spotlight, Help keycap grid + C key |
 
 ## Conventions
 - Surgical changes only. No build step, no framework, no dependencies beyond CDN fonts.
-- Eleven plain `<script>` files (not ES modules — no server needed). Boot order matters: `data → audio → drone → player → engine → game → practice → changelog → app → patterns → hud`. Inside `app.js`, `loadPrefs()` runs before `wireControls()` because key labels read `spell()`.
+- Twelve plain `<script>` files (not ES modules — no server needed). Boot order matters: `data → audio → drone → player → engine → game → practice → changelog → app → patterns → quiz → hud`. Inside `app.js`, `loadPrefs()` runs before `wireControls()` because key labels read `spell()`.
 - Arcade/retro theme is intentional. Don't migrate to "modern clean" without asking.
 - The boot-time LICK validator stays in `game.js` permanently — it costs nothing at runtime.
 - Tooltips use the `data-tip` attribute (styled in `hud.css`), never `title=`.

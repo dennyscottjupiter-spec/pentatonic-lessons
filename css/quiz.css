@@ -1,0 +1,179 @@
+/* NOTE QUIZ: hidden note letters, target reticle, piano answer dock. */
+
+/* ---------- Board in quiz mode ---------- */
+body.quiz-on .fb-note text { visibility: hidden; }
+body.quiz-on .fb-note.quiz-reveal text { visibility: visible; }
+body.quiz-on .fb-note:not(.quiz-target) { opacity: 0.45; }   /* context stays, the target pops */
+
+/* !important beats the per-note colour rules (root, blue, chromatic) so every target looks alike */
+body.quiz-on .fb-note.quiz-target circle:not(.quiz-reticle) {
+  fill: var(--text) !important;
+  stroke: none !important;
+  filter: drop-shadow(0 0 6px var(--yellow)) !important;
+  transform-box: fill-box;
+  transform-origin: center;
+  r: 14;
+  animation: quiz-breathe 1.6s ease-in-out infinite;
+}
+.fb-note.quiz-target text { fill: var(--bg); }   /* dark letter on the light target, once revealed */
+
+/* Rotating ring; !important beats the blue and chromatic circle rules that also match it */
+body.quiz-on .fb-note.quiz-target .quiz-reticle {
+  fill: none !important;
+  stroke: var(--yellow) !important;
+  stroke-opacity: 1;
+  stroke-width: 2;
+  stroke-dasharray: 5 4 !important;
+  filter: none !important;
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: quiz-spin 3.2s linear infinite;
+}
+
+@keyframes quiz-spin { to { transform: rotate(360deg); } }
+@keyframes quiz-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+
+/* ---------- Dock ---------- */
+.quiz-dock {
+  position: relative;
+  max-width: 720px;
+  margin: -8px auto 24px;
+  padding: 18px 22px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--fret-line);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--bg) 70%, transparent),
+              0 0 0 1px color-mix(in srgb, var(--text) 3%, transparent) inset;
+  animation: quiz-rise .28s ease-out;
+}
+.quiz-dock[hidden] { display: none; }
+.quiz-dock::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 12px; right: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--magenta), var(--cyan));
+}
+@keyframes quiz-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.quiz-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-right: 28px;   /* room for the ✕ */
+}
+.quiz-prompt {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--yellow);
+  letter-spacing: 1px;
+}
+.quiz-stats {
+  display: flex;
+  gap: 16px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--text);
+  opacity: .85;
+}
+.quiz-stats b { display: inline-block; color: var(--cyan); font-weight: inherit; }
+#quiz-streak.bump { animation: quiz-bump .35s ease-out; }
+@keyframes quiz-bump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.5); color: var(--green); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Mini piano ---------- */
+.quiz-keys {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  height: 128px;
+  user-select: none;
+}
+.pk {
+  padding: 0 0 10px;
+  margin: 0;
+  border: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 10px;
+  cursor: pointer;
+  transition: transform .06s, box-shadow .15s, background .15s;
+}
+.pk.white {
+  background: linear-gradient(180deg, var(--text) 0%, color-mix(in srgb, var(--text) 82%, var(--bg)) 100%);
+  color: var(--bg);
+  border-radius: 0 0 7px 7px;
+  box-shadow: inset 0 -6px 0 color-mix(in srgb, var(--bg) 18%, transparent), 0 3px 0 var(--fret-line);
+}
+/* Gap-corrected: boundary i of the 7 white columns sits at i * (100% + gap) / 7 */
+.pk.black {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  width: 9%;
+  height: 60%;
+  left: calc(var(--slot) * (100% + 4px) / 7);
+  transform: translateX(-50%);
+  padding-bottom: 8px;
+  font-size: 8px;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  color: var(--text);
+  border: 1px solid var(--fret-line);
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--bg) 50%, transparent);
+}
+.pk.white:hover { filter: brightness(1.06); }
+.pk.black:hover { border-color: var(--cyan); }
+.pk:active { transform: translateY(2px); }
+.pk.black:active { transform: translateX(-50%) translateY(2px); }
+.pk:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* Feedback states come last so they beat the key shapes above */
+.pk.right { background: var(--green); color: var(--bg); box-shadow: 0 0 18px var(--green); }
+.pk.wrong { background: #ff3030; color: var(--bg); animation: quiz-shake .3s; }
+.pk.reveal { box-shadow: 0 0 0 3px var(--green), 0 0 16px var(--green); }
+@keyframes quiz-shake {
+  20%, 60% { translate: -4px 0; }
+  40%, 80% { translate: 4px 0; }
+}
+
+.quiz-hint {
+  margin: 12px 0 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text);
+  opacity: .55;
+}
+
+@media (max-width: 700px) {
+  .quiz-dock { margin: 0 12px 20px; padding: 14px; }
+  .quiz-keys { height: 104px; }
+  .quiz-stats { font-size: 16px; }
+  .quiz-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.quiz-on .fb-note.quiz-target .quiz-reticle,
+  body.quiz-on .fb-note.quiz-target circle:not(.quiz-reticle) { animation: none; }
+  .quiz-dock, #quiz-streak.bump, .pk.wrong { animation: none; }
+}
