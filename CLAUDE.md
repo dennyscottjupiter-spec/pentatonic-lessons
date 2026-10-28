@@ -8,6 +8,8 @@ Static, no-build HTML/CSS/JS app that teaches guitar pentatonic scales across al
 ## How to run
 Open `index.html` directly in a browser — no server, no bundler, no install step. From PowerShell: `Start-Process index.html`. Hard-refresh with **Ctrl+Shift+R** after edits to bypass browser CSS cache (see global LEARNINGS).
 
+**Live site:** https://dennyscottjupiter-spec.github.io/pentatonic-lessons/ (GitHub Pages, `main` branch root, free). Every push to `main` redeploys in about a minute; check the build with `gh api repos/dennyscottjupiter-spec/pentatonic-lessons/pages/builds/latest --jq .status` (`built`). Keep every asset path relative (the site lives under `/pentatonic-lessons/`, not `/`). Phones: the fretboard scrolls sideways at 390 px, iPhone needs the silent switch off for sound, and https is what lets PLAY IT reach the mic.
+
 There is no build, lint, or test command. Verification = open the page and interact: click frets, switch keys/themes/note names, toggle blue notes, build or load a pattern, press Space to pause, open Practice Lab, start the game.
 
 ## Test suite

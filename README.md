@@ -8,6 +8,8 @@ updated: 2026-10-28
 
 An interactive, browser-based guitar lesson tool for learning the pentatonic scale across all 12 keys. It shows a clickable fretboard, plays real plucked-guitar audio for every note, and includes a memorization game so you can test what you've learned.
 
+**Play it now:** https://dennyscottjupiter-spec.github.io/pentatonic-lessons/ (free, no install, works on phones and computers).
+
 ## What it does
 
 Pick a root note (A through G#) and a MINOR or MAJOR pentatonic lens, and the fretboard lights up with that scale — root notes in one color, scale notes in another, everything else dimmed. Click any fret to hear it played. Five "box" positions let you focus on one region of the neck at a time, or view the whole fretboard at once.
@@ -72,6 +74,21 @@ Press **Space** (or **K**) to pause or resume everything that is playing. It doe
 
 Keyboard shortcuts: `1`–`5` select a box, `0` shows all positions, `?` toggles help, `P` toggles the Practice Lab, `Space` or `K` pauses and resumes, `D` toggles the root drone, `Q` starts or stops the note quiz, `L` toggles the learning modal, `C` opens the changelog, `Esc` closes any open panel. During the quiz, `A W S E D F T G Y H U J` play the piano keys instead and `R` replays in HEAR IT.
 
+### On a phone (Android or iPhone)
+
+1. Open the live link above in Chrome (Android) or Safari (iPhone).
+2. Browser menu → **Add to Home Screen** to get an app icon.
+3. Swipe the fretboard sideways to see the whole neck, or turn the phone sideways for a bigger neck.
+4. iPhone: switch the side silent switch off, or there is no sound.
+5. Tap works like a click. Keyboard shortcuts need a keyboard, but every feature also has an on-screen button.
+6. The PLAY IT mic quiz works on the live link, because it is https.
+
+Saved patterns, scores and settings stay on each device; nothing syncs between them.
+
+### Hosting
+
+The live site is GitHub Pages, serving the `main` branch root. Every push to `main` updates it within about a minute. There is no build step and nothing to configure.
+
 If you edit the source files, hard-refresh the browser tab (Ctrl+Shift+R) — a normal reload can serve a cached copy of the CSS/JS.
 
 ### Running the test suite
@@ -105,3 +122,4 @@ There are no files produced. Everything is on-screen:
 - Only pentatonic scales (minor and major) are covered — no other scale types, modes, or chords.
 - Requires a browser with Web Audio API support; very old browsers won't play sound.
 - Opening `index.html` directly as a file works for normal use; run the test page through a local HTTP server (see above).
+- On phones the fretboard is wider than the screen and scrolls sideways.
