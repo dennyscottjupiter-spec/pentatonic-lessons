@@ -7,7 +7,8 @@
   --magenta: #ff2bd6;
   --yellow: #ffe600;
   --green: #00ff8c;
-  --blue-note: #4f7bff;
+  --blue-note: #1e50ff;
+  --blue-rim: #8fb4ff;
   --dim: #4a3a6a;
   --fret-wood: #1a0a2e;
   --fret-line: #6a4ec9;
@@ -26,7 +27,8 @@ body.theme-tropical {
   --magenta: #ff5d73;
   --yellow: #ffd166;
   --green: #00e5a0;
-  --blue-note: #7aa2ff;
+  --blue-note: #1e50ff;
+  --blue-rim: #8fb4ff;
   --dim: #3a5a55;
   --fret-wood: #031019;
   --fret-line: #0e4a44;
@@ -50,7 +52,8 @@ body.theme-mission {
   --magenta: #ff5b41;
   --yellow: #ffb000;
   --green: #39e87a;
-  --blue-note: #8c9cff;
+  --blue-note: #1e50ff;
+  --blue-rim: #8fb4ff;
   --dim: #2a3346;
   --fret-wood: #030509;
   --fret-line: #1a2a4a;
@@ -77,7 +80,8 @@ body.theme-blueprint {
   --magenta: #ff6b9d;
   --yellow: #ffd166;
   --green: #06d6a0;
-  --blue-note: #c08cff;
+  --blue-note: #1e50ff;
+  --blue-rim: #8fb4ff;
   --dim: #1e3a5a;
   --fret-wood: #081424;
   --fret-line: #1a5a8a;

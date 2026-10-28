@@ -13,7 +13,7 @@
   var KEY_NAMES = ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'];
   var ROOTS     = [9,10,11,0,1,2,3,4,5,6,7,8];
   var STR_MIDI  = [64,59,55,50,45,40];   // high e first
-  var PRESET_NAMES = ['B.B. KING BOX','ALBERT KING BOX','BLUES SCALE BOX 1','MAJOR BLUES BOX 1','ROOT MAP'];
+  var PRESET_NAMES = ['B.B. KING BOX','ALBERT KING BOX','BLUES SCALE BOX 1','MAJOR BLUES BOX 1','ROOT MAP','CHROMATIC'];
   // A-reference frets (key A), copied literally from PATTERN_PRESETS
   var REF = {
     'B.B. KING BOX':    [{s:2,f:12},{s:1,f:10},{s:1,f:13},{s:0,f:10},{s:0,f:12}],
@@ -38,15 +38,79 @@
   }
 
   suite('13 · Patterns (presets, key-relative frets, root map, validation, drawing)', function() {
-    test('PATTERN_PRESETS has 5 items with the expected names', function() {
+    test('PATTERN_PRESETS has 6 items with the expected names', function() {
       arrEq(PATTERN_PRESETS.map(function(p) { return p.name; }), PRESET_NAMES);
     });
 
-    test('preset notes equal the literal A-reference lists; ROOT MAP is the roots flag', function() {
+    test('preset notes equal the literal A-reference lists; ROOT MAP / CHROMATIC are flags', function() {
       PRESET_NAMES.slice(0, 4).forEach(function(name, i) {
         arrEq(PATTERN_PRESETS[i].notes, REF[name], name);
       });
       eq(PATTERN_PRESETS[4].roots, true, 'ROOT MAP roots flag');
+      eq(PATTERN_PRESETS[5].chromatic, true, 'CHROMATIC flag');
+      eq(PATTERN_PRESETS[5].blues, undefined, 'CHROMATIC leaves blues alone');
+    });
+
+    // Regression: loading a minor preset in MAJOR flipped the lens back to MINOR
+    test('fromRef across lenses: every note stays in the current scale (4 presets x 12 keys x 2 lenses)', function() {
+      var bad = [];
+      try {
+        ['minor', 'major'].forEach(function(lens) {
+          for (var ki = 0; ki < 12; ki++) {
+            applyKey(ki, lens);
+            PRESET_NAMES.slice(0, 4).forEach(function(name, i) {
+              var p = PATTERN_PRESETS[i], disp = fromRef(p.notes, p.lens);
+              disp.forEach(function(n) {
+                var c = chromaOf(n.s, n.f);
+                if (n.f < 0 || n.f > 17) bad.push(lens + ' ' + KEY_NAMES[ki] + ' ' + name + ' fret ' + n.f);
+                if (!isInScale(c) && !(p.blues && c === blueChroma()))
+                  bad.push(lens + ' ' + KEY_NAMES[ki] + ' ' + name + ' chroma ' + c);
+              });
+            });
+          }
+        });
+        ok(bad.length === 0, bad.slice(0, 3).join('; '));
+      } finally { reset(); }
+    });
+
+    test('fromRef: B.B. KING in C MAJOR sits on the A minor frets (relative minor), lens untouched', function() {
+      try {
+        applyKey(3, 'major');
+        arrEq(fromRef(REF['B.B. KING BOX'], 'minor'), REF['B.B. KING BOX'], 'C major = A minor frets');
+        eq(state.lens, 'major', 'lens');
+      } finally { reset(); }
+    });
+
+    test('chromaticRun: 12 semitones up from the low-E root and back, frets 0-17, every key', function() {
+      var bad = [];
+      try {
+        for (var ki = 0; ki < 12; ki++) {
+          applyKey(ki, 'minor');
+          var run = chromaticRun(), midi = run.map(function(n) { return STR_MIDI[n.s] + n.f; });
+          if (run.length !== 25) { bad.push(KEY_NAMES[ki] + ' length ' + run.length); continue; }
+          if (midi[0] % 12 !== ROOTS[ki] || run[0].s !== 5) bad.push(KEY_NAMES[ki] + ' start');
+          for (var i = 0; i < 12; i++) {
+            if (midi[i + 1] - midi[i] !== 1) bad.push(KEY_NAMES[ki] + ' step up ' + i);
+            if (midi[13 + i] - midi[12 + i] !== -1) bad.push(KEY_NAMES[ki] + ' step down ' + i);
+          }
+          run.forEach(function(n) { if (n.f < 0 || n.f > 17) bad.push(KEY_NAMES[ki] + ' fret ' + n.f); });
+        }
+        ok(bad.length === 0, bad.slice(0, 3).join('; '));
+      } finally { reset(); }
+    });
+
+    test('CHROMATIC view: nothing dimmed, out-of-scale notes get .chromatic, scale notes keep colours', function() {
+      try {
+        applyKey(0, 'minor'); state.box = '1'; state.patternChromatic = true;
+        refreshNotes();
+        var all = document.querySelectorAll('#fretboard .fb-note');
+        eq(document.querySelectorAll('#fretboard .fb-note.dimmed').length, 0, 'dimmed');
+        eq(document.querySelectorAll('#fretboard .fb-note.out').length, 0, 'out');
+        eq(document.querySelectorAll('#fretboard .fb-note.chromatic').length +
+           document.querySelectorAll('#fretboard .fb-note.in-scale, #fretboard .fb-note.root').length, all.length, 'every note lit');
+        state.patternChromatic = false; refreshNotes();
+        eq(document.querySelectorAll('#fretboard .fb-note.chromatic').length, 0, 'cleared');
+      } finally { reset(); }
     });
 
     test('fromRef: count, string order, frets 0-17, chroma moves with key, span <= 5 (4 presets x 12 keys)', function() {

@@ -1,8 +1,8 @@
 // ---
 // purpose: Custom note patterns: build by clicking, save/load by name, classic presets
-// exports: applyPattern(), togglePick(), clearPattern(), syncPattern(), stopBuilding()
+// exports: applyPattern(), togglePick(), clearPattern(), syncPattern(), stopBuilding(), chromaticRun()
 // depends: data.js (PATTERN_PRESETS), engine.js (refreshNotes, mkSvg, fretChroma), game.js (getFretEl), app.js (state, $, $$)
-// gotcha: saved frets are key-A reference (raw, may be negative); state.pattern is the current-key copy
+// gotcha: saved frets are key-A reference in state.patternLens (raw, may be negative); state.pattern is the current-key copy
 // ---
 
 const PATTERN_KEY  = 'pent-patterns';
@@ -10,7 +10,12 @@ const PATTERN_HINT = 'Load a classic or press BUILD and click notes.';
 const BUILD_HINT   = 'BUILD: click notes to add or remove them. Order = play order.';
 
 // ---------- Key-relative frets ----------
-function patternDelta() { return (KEYS[state.keyIdx].chroma - 9 + 12) % 12; }
+// lens = the lens the reference was made in. A minor shape shown in a major lens moves to the
+// relative minor (-3), a major shape in a minor lens to the relative major (+3), so notes stay in the scale.
+function patternDelta(lens = state.lens) {
+  const fix = lens === state.lens ? 0 : (lens === 'minor' ? 9 : 3);
+  return (KEYS[state.keyIdx].chroma - 9 + fix + 12) % 12;
+}
 
 // Octave-wrap one fret into 0..TOTAL_FRETS (fallback when a rigid move cannot fit)
 function wrapFret(f) { while (f > TOTAL_FRETS) f -= 12; while (f < 0) f += 12; return f; }
@@ -29,8 +34,8 @@ function dedupe(notes) {
 
 // Saved A-reference frets -> display frets for the current key.
 // Prefers the plain shift (same rule as boxOctaveShift), so the key a pattern was built in gets it back exactly.
-function fromRef(ref) {
-  const d = patternDelta(), sh = rigidShift(ref.map(n => n.f), [d, d - 12, d + 12]);
+function fromRef(ref, lens) {
+  const d = patternDelta(lens), sh = rigidShift(ref.map(n => n.f), [d, d - 12, d + 12]);
   return dedupe(ref.map(n => ({ s: n.s, f: sh !== null ? n.f + sh : wrapFret(n.f + d) })));
 }
 
@@ -49,7 +54,20 @@ function rootMap() {
 }
 
 function syncPattern() {
-  state.pattern = state.patternRoots ? rootMap() : (state.patternRef ? fromRef(state.patternRef) : []);
+  state.pattern = state.patternRoots ? rootMap() : (state.patternRef ? fromRef(state.patternRef, state.patternLens) : []);
+}
+
+// One octave up from the lowest root on the low E string, then back down. Each note goes on the
+// lowest string whose fret sits in the root's 5-fret window, like a one-position chromatic run.
+function chromaticRun() {
+  const rf = (KEYS[state.keyIdx].chroma - STRINGS[5].midi % 12 + 12) % 12, base = STRINGS[5].midi + rf, up = [];
+  for (let m = base; m <= base + 12; m++) {
+    for (let s = STRINGS.length - 1; s >= 0; s--) {
+      const f = m - STRINGS[s].midi;
+      if (f >= rf && f <= rf + 4) { up.push({ s, f }); break; }
+    }
+  }
+  return up.concat(up.slice(0, -1).reverse());
 }
 
 // ---------- Fretboard drawing ----------
@@ -108,13 +126,13 @@ function togglePick(g) {
   const p = { s: +g.dataset.string, f: +g.dataset.fret };
   const i = state.pattern.findIndex(n => n.s === p.s && n.f === p.f);
   if (i >= 0) state.pattern.splice(i, 1); else state.pattern.push(p);
-  state.patternRoots = false;
-  state.patternRef = toRef(state.pattern);
+  state.patternRoots = false; state.patternChromatic = false;
+  state.patternRef = toRef(state.pattern); state.patternLens = state.lens;
   setSelect(''); refreshNotes();
 }
 
 function clearPattern() {
-  state.patternRef = null; state.patternRoots = false; state.pattern = [];
+  state.patternRef = null; state.patternRoots = false; state.patternChromatic = false; state.pattern = [];
   setSelect(''); setInfo(idleHint()); refreshNotes();
 }
 
@@ -156,11 +174,11 @@ function loadSelected(value) {
   const isPreset = value.startsWith('preset:');
   const item = isPreset ? PATTERN_PRESETS[+value.slice(7)] : readSaved().find(p => 'user:' + p.name === value);
   if (!item) return;
-  // The existing lens/blues handlers recompute scale, boxes and blue legend
-  if (item.lens !== state.lens) $(`.lens[data-lens="${item.lens}"]`).click();
-  if (item.blues !== state.blues) $('.toggle[data-toggle="blues"]').click();
-  state.patternRoots = !!item.roots;
-  state.patternRef = item.roots ? null : item.notes;
+  // The lens is the user's choice and stays; fromRef moves the shape to fit it.
+  // The existing blues handler recomputes the notes and blue legend.
+  if (item.blues !== undefined && item.blues !== state.blues) $('.toggle[data-toggle="blues"]').click();
+  state.patternRoots = !!item.roots; state.patternChromatic = !!item.chromatic;
+  state.patternRef = item.notes || null; state.patternLens = item.lens;
   syncPattern(); setSelect(value); refreshNotes();
   setInfo(isPreset ? item.tip : `${item.name}: ${item.notes.length} notes. ▶ PLAY SCALE plays them in order.`);
 }

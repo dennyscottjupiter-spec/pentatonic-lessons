@@ -16,6 +16,7 @@ const PATTERN_PRESETS = [
   { name:'BLUES SCALE BOX 1', lens:'minor', blues:true,  notes:[{s:5,f:5},{s:5,f:8},{s:4,f:5},{s:4,f:6},{s:4,f:7},{s:3,f:5},{s:3,f:7},{s:2,f:5},{s:2,f:7},{s:2,f:8},{s:1,f:5},{s:1,f:8},{s:0,f:5},{s:0,f:8}], tip:'Box 1 plus the flat-5 passing tone; slide through the blue note between the 4th and 5th.' },
   { name:'MAJOR BLUES BOX 1', lens:'major', blues:true,  notes:[{s:5,f:2},{s:5,f:5},{s:4,f:2},{s:4,f:3},{s:4,f:4},{s:3,f:2},{s:3,f:4},{s:2,f:2},{s:2,f:4},{s:2,f:5},{s:1,f:2},{s:1,f:5},{s:0,f:2},{s:0,f:5}], tip:'Major pentatonic with the flat-3 slid into the 3rd for a bluesy major sound; resolve back to the root.' },
   { name:'ROOT MAP',          lens:'minor', blues:false, roots:true, tip:'Every root on the neck lit up; aim your phrases at them and land on the root to resolve.' },
+  { name:'CHROMATIC',         lens:'minor', chromatic:true, tip:'All 12 notes on every fret. Scale notes keep their colours; ▶ PLAY SCALE runs one octave up from the root and back.' },
 ];
 
 const STRINGS = [

@@ -1,7 +1,7 @@
 // ---
 // purpose: Music helpers, note spelling, blue notes, fretboard SVG, note refresh
 // exports: spell, setKey, isInBox, isBlue, refreshNotes, playCurrentScale
-// depends: data.js, audio.js (playNote), player.js (playSteps), app.js (state), game.js (getFretEl)
+// depends: data.js, audio.js (playNote), player.js (playSteps), app.js (state), game.js (getFretEl), patterns.js (chromaticRun)
 // gotcha: spell() reads state.accidentals; undefined = sharps (tests stub)
 // ---
 
@@ -100,7 +100,8 @@ function transposeFret(f, anchorOffset) {
 }
 
 // ---------- Fretboard SVG ----------
-const FB = { pad:{left:44,top:14,right:14,bottom:24}, fretW:50, stringH:30 };
+const FB = { pad:{left:44,top:14,right:14,bottom:32}, fretW:50, stringH:30 };
+const MARKER_FRETS = [3,5,7,9,12,15,17];
 
 function buildFretboard() {
   const root = document.getElementById('fretboard');
@@ -108,12 +109,12 @@ function buildFretboard() {
   const h = FB.pad.top  + FB.stringH * STRINGS.length  + FB.pad.bottom;
   const svg = mkSvg('svg', {class:'fb-svg', viewBox:`0 0 ${w} ${h}`, preserveAspectRatio:'xMidYMid meet'});
 
-  [3,5,7,9,15].forEach(f => {
-    svg.appendChild(mkSvg('circle', {cx:fretCenterX(f), cy:FB.pad.top+(FB.stringH*STRINGS.length)/2, r:7, class:'fb-marker'}));
+  // Side dots below the low E, like the edge of a real neck (face inlays would hide under notes)
+  const dotY = FB.pad.top + FB.stringH * STRINGS.length + 7;
+  MARKER_FRETS.forEach(f => {
+    const xs = f === 12 ? [fretCenterX(f) - 6, fretCenterX(f) + 6] : [fretCenterX(f)];
+    xs.forEach(cx => svg.appendChild(mkSvg('circle', {cx, cy:dotY, r:2.6, class:'fb-marker'})));
   });
-  const cx12 = fretCenterX(12);
-  svg.appendChild(mkSvg('circle', {cx:cx12, cy:FB.pad.top+FB.stringH*STRINGS.length*0.32, r:7, class:'fb-marker'}));
-  svg.appendChild(mkSvg('circle', {cx:cx12, cy:FB.pad.top+FB.stringH*STRINGS.length*0.68, r:7, class:'fb-marker'}));
 
   for (let f = 0; f <= TOTAL_FRETS+1; f++) {
     const x = FB.pad.left + f * FB.fretW;
@@ -130,7 +131,8 @@ function buildFretboard() {
   });
 
   for (let f = 1; f <= TOTAL_FRETS; f++) {
-    const t = mkSvg('text', {x:fretCenterX(f),y:FB.pad.top+STRINGS.length*FB.stringH+16,class:'fb-fretnum'});
+    const t = mkSvg('text', {x:fretCenterX(f),y:FB.pad.top+STRINGS.length*FB.stringH+24,
+      class:'fb-fretnum'+(MARKER_FRETS.includes(f)?' mark':'')});
     t.textContent = f; svg.appendChild(t);
   }
 
@@ -166,12 +168,13 @@ function refreshNotes() {
     const root    = isRoot(chroma);
     const blue    = isBlue(chroma);
     const lit     = isInScale(chroma) || blue;
-    const inBox   = isInBox(STRINGS[si].name, f, blue ? 1 : 0);
+    const chromatic = !!state.patternChromatic;   // CHROMATIC preset: whole neck, no box dimming
+    const inBox   = chromatic || isInBox(STRINGS[si].name, f, blue ? 1 : 0);
 
-    g.classList.remove('in-scale','root','out','dimmed','blue');
+    g.classList.remove('in-scale','root','out','dimmed','blue','chromatic');
     if (!lit) {
-      g.classList.add('out');
-      if (state.box !== 'all') g.classList.add('dimmed');
+      g.classList.add(chromatic ? 'chromatic' : 'out');
+      if (!chromatic && state.box !== 'all') g.classList.add('dimmed');
     } else {
       const cls = root ? 'root' : (blue ? 'blue' : 'in-scale');
       if (!inBox) g.classList.add('in-scale', cls, 'dimmed');
@@ -191,8 +194,8 @@ function playCurrentScale() {
   ensureAudio();
   ++playGen;   // before resume, so a paused old sequence is dropped instead of emitting one stray note
   if (state.paused) setPaused(false);
-  if (state.pattern.length) {   // a built pattern plays in its click order, no reverse
-    const seq = state.pattern.map(p => { const el = getFretEl(p.s, p.f); return { el, midi: +el.dataset.midi }; });
+  if (state.pattern.length || state.patternChromatic) {   // a built pattern plays in its click order, no reverse
+    const seq = (state.patternChromatic ? chromaticRun() : state.pattern).map(p => { const el = getFretEl(p.s, p.f); return { el, midi: +el.dataset.midi }; });
     playSteps(seq, 240, n => { playNote(n.midi, 0.5); flashNote(n.el); });
     return;
   }

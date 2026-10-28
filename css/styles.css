@@ -138,12 +138,14 @@ body.theme-mission #fretboard {
 .fb-fret-line.nut { stroke: var(--yellow); stroke-width: 6; }
 .fb-string { stroke: var(--string); stroke-width: 1.5; opacity: 0.8; }
 .fb-string.thick { stroke-width: 2.5; }
-.fb-marker { fill: var(--fret-line); opacity: 0.55; }
+.fb-marker { fill: var(--string); opacity: 0.6; }
+.fb-fretnum.mark { opacity: 1; }
 .fb-fretnum {
   fill: var(--cyan);
   font-family: var(--font-display);
   font-size: 9px;
   text-anchor: middle;
+  opacity: 0.55;
 }
 .fb-stringlabel {
   fill: var(--text);

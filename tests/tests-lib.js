@@ -110,6 +110,8 @@
     state.pattern = [];
     state.patternRef = null;
     state.patternRoots = false;
+    state.patternChromatic = false;
+    state.patternLens = undefined;
     state.building = false;
     applyKey(0, 'minor');
     stopSteps();
