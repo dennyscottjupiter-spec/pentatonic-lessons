@@ -1,0 +1,80 @@
+/* ---
+purpose: NOTE QUIZ cue row: prompt, interval line, PLAY IT heard readout, REPLAY, equaliser bars
+exports: none (stylesheet, loaded after quiz.css)
+depends: quiz.css (dock layout), quiz.js (sets --lvl on #quiz-wave, text of #quiz-interval and #quiz-heard)
+--- */
+
+.quiz-prompt {
+  flex: 1 1 0;   /* takes the spare width, so the prompt wraps instead of pushing the readouts */
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--yellow);
+  letter-spacing: 1px;
+}
+.quiz-cue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  margin-bottom: 14px;
+}
+.quiz-replay { margin-left: auto; }
+.quiz-replay[hidden] { display: none; }
+
+/* Interval under the prompt: fades in after each answer, never wraps */
+.quiz-interval {
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.quiz-interval.show { opacity: .75; }
+
+/* PLAY IT: the note the mic last heard */
+.quiz-heard {
+  display: none;
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--cyan);
+  white-space: nowrap;
+}
+body.quiz-play .quiz-heard { display: inline; }
+
+/* HEAR IT: a little equaliser that bounces when a note plays; PLAY IT: it shows the mic level */
+.quiz-wave { display: none; align-items: flex-end; gap: 3px; height: 16px; }
+body.quiz-hear .quiz-wave, body.quiz-play .quiz-wave { display: inline-flex; }
+.quiz-wave i { width: 3px; height: 4px; border-radius: 2px; background: var(--cyan); }
+.quiz-wave.playing i { animation: quiz-wave .9s ease-in-out; }
+.quiz-wave.playing i:nth-child(2) { animation-delay: .08s; }
+.quiz-wave.playing i:nth-child(3) { animation-delay: .16s; }
+.quiz-wave.playing i:nth-child(4) { animation-delay: .24s; }
+.quiz-wave.playing i:nth-child(5) { animation-delay: .32s; }
+@keyframes quiz-wave { 50% { height: 16px; } }
+
+/* PLAY IT: bars scale with --lvl (0..1, from JS); the outer bars are shorter */
+body.quiz-play .quiz-wave i {
+  height: 16px;
+  transform-origin: 50% 100%;
+  transform: scaleY(calc(.15 + var(--lvl, 0) * var(--k, 1) * .85));
+  transition: transform .08s linear;
+}
+body.quiz-play .quiz-wave.playing i { animation: none; }
+body.quiz-play .quiz-wave i:nth-child(1), body.quiz-play .quiz-wave i:nth-child(5) { --k: .6; }
+body.quiz-play .quiz-wave i:nth-child(2), body.quiz-play .quiz-wave i:nth-child(4) { --k: .85; }
+
+@media (max-width: 700px) {
+  .quiz-cue { flex-wrap: wrap; }
+  .quiz-interval { order: 2; flex-basis: 100%; min-height: 1.4em; }   /* own row: no jump when it appears */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.quiz-play .quiz-wave i, .quiz-interval { transition: none; }
+  .quiz-wave.playing i { animation: none; }
+}

@@ -17,7 +17,7 @@ Extras on the same page:
 - **Blue note** adds the blues note (♭5 in minor, ♭3 in major).
 - **Patterns** let you draw your own shape on the neck, save it by name, or load one of six classics (one is a chromatic map of every note).
 - **Root drone** (top left) holds the key's root and fifth so you can hear each note against it.
-- **Note quiz** hides the note names and makes one note glow (SEE IT), or plays the root and then a mystery note (HEAR IT); name it on a mini piano, by click or with the music-app keyboard row.
+- **Note quiz** hides the note names and makes one note glow (SEE IT), or plays the root and then a mystery note (HEAR IT); name it on a mini piano, by click or with the music-app keyboard row. PLAY IT makes the note glow and lets your real guitar answer through the microphone, and every answer names the interval from the root.
 - **Pause** freezes anything that is playing (scales, the game, the drone, the metronome, the timer) and resumes at the same note.
 - A sticky top bar keeps the drone, the pause button, a theme menu (four themes), the Practice Lab and help within reach while you scroll.
 
@@ -60,7 +60,7 @@ Once it's open:
 7. Click **▶ PLAY SCALE** to hear the box played ascending then descending.
 8. Click **▶ START GAME** to play Lick Attack: watch a short lick light up, then replay it by clicking the same frets in order. The lens, PLAY SCALE and PATTERNS are locked during the game.
 9. The button at the top left shows the key and starts or stops the **root drone** (`D`). Use the icon bar at the top right: the **pause** button, the **theme menu** (switches between CRT, Tropical Night, Mission Control and Blueprint), **PRACTICE** (opens the Practice Lab: metronome + timer), and **HELP** (shortcuts and how-to). **📚 LEARNING** under OPTIONS opens the theory lessons, and **📜 CHANGELOG** lists what changed in each version (a glowing dot marks a release you have not opened yet). Click a change in the list and the app scrolls to that control and spotlights it.
-11. Press **🎯 NOTE QUIZ** (or `Q`) to train reading the neck. Note names disappear and one note in the current box glows with a spinning ring. Click its name on the mini piano under the fretboard, or play the piano from your keyboard like a music app: `A S D F G H J` are the white keys (C to B), `W E T Y U` the black ones. Switch the panel to **👂 HEAR IT** to train by ear: nothing glows, you hear the key's root and then the mystery note, and **REPLAY** (or `R`) plays both again. After you answer, the note is shown on the neck. The panel keeps your score, streak and best streak. `Q`, `Esc` or ✕ stops it; starting the game stops it too.
+11. Press **🎯 NOTE QUIZ** (or `Q`) to train reading the neck. Note names disappear and one note in the current box glows with a spinning ring. Click its name on the mini piano under the fretboard, or play the piano from your keyboard like a music app: `A S D F G H J` are the white keys (C to B), `W E T Y U` the black ones. Switch the panel to **👂 HEAR IT** to train by ear: nothing glows, you hear the key's root and then the mystery note, and **REPLAY** (or `R`) plays both again. After you answer, the note is shown on the neck. **🎸 PLAY IT** makes the note glow and listens to your guitar through the microphone (allow it when the browser asks): play the glowing note on any string and any octave counts. Each answer also names the interval from the key's root, like `5 · perfect 5th`. The panel keeps your score, streak and best streak. `Q`, `Esc` or ✕ stops it; starting the game stops it too.
 10. Under **PATTERNS** you can draw your own shape:
     - Press **✎ BUILD**, then click notes to add or remove them. The numbers show the play order (first click plays first).
     - Type a name (up to 24 characters) and press **SAVE**. Your shapes appear under **MY PATTERNS** in the LOAD dropdown.
@@ -76,7 +76,7 @@ If you edit the source files, hard-refresh the browser tab (Ctrl+Shift+R) — a 
 
 ### Running the test suite
 
-The project ships its own zero-dependency test suite (327 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause, the game, the changelog and the note quiz). It lives in `tests/`; serve the project folder locally to run it:
+The project ships its own zero-dependency test suite (338 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause, the game, the changelog, the note quiz and the PLAY IT mic listener). It lives in `tests/`; serve the project folder locally to run it:
 
 ```bash
 cd pentatonic-lessons
@@ -101,7 +101,7 @@ There are no files produced. Everything is on-screen:
 ## Limitations
 
 - No backend, no accounts, no sync between devices or browsers — progress, saved patterns and settings live only in that browser's local storage and are lost if it's cleared.
-- No audio recording, MIDI input, or real-guitar pitch detection — it's a visual/playback reference tool, not a tuner or ear-trainer that listens to you.
+- No audio recording and no MIDI input. The note quiz's PLAY IT mode listens to your microphone live while it is on; nothing is recorded, stored or sent. It is a reference and quiz tool, not a tuner.
 - Only pentatonic scales (minor and major) are covered — no other scale types, modes, or chords.
 - Requires a browser with Web Audio API support; very old browsers won't play sound.
 - Opening `index.html` directly as a file works for normal use; run the test page through a local HTTP server (see above).

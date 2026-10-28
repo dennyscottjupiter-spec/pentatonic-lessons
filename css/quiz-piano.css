@@ -1,0 +1,95 @@
+/* ---
+purpose: NOTE QUIZ mini piano: key shapes, keycap letters, held and answer colours
+exports: none (stylesheet, loaded after quiz-cue.css)
+depends: quiz-piano.js (.pk markup and states), quiz.css (dock)
+--- */
+
+/* ---------- Mini piano ---------- */
+.quiz-keys {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  height: 128px;
+  user-select: none;
+}
+.pk {
+  padding: 0 0 10px;
+  margin: 0;
+  border: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 10px;
+  cursor: pointer;
+  transition: transform .06s, box-shadow .15s, background .15s;
+}
+.pk.white {
+  position: relative;
+  background: linear-gradient(180deg, var(--text) 0%, color-mix(in srgb, var(--text) 82%, var(--bg)) 100%);
+  color: var(--bg);
+  border-radius: 0 0 7px 7px;
+  box-shadow: inset 0 -6px 0 color-mix(in srgb, var(--bg) 18%, transparent), 0 3px 0 var(--fret-line);
+}
+/* Gap-corrected: boundary i of the 7 white columns sits at i * (100% + gap) / 7 */
+.pk.black {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  width: 9%;
+  height: 60%;
+  left: calc(var(--slot) * (100% + 4px) / 7);
+  transform: translateX(-50%);
+  padding-bottom: 8px;
+  font-size: 8px;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  color: var(--text);
+  border: 1px solid var(--fret-line);
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--bg) 50%, transparent);
+}
+/* Keyboard letter on each key (the music-app row) */
+.pk-cap {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 4px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-size: 7px;
+  line-height: 1;
+  opacity: .45;
+  pointer-events: none;
+}
+.pk.white:hover { filter: brightness(1.06); }
+.pk.black:hover { border-color: var(--cyan); }
+.pk:active { transform: translateY(2px); }
+.pk.black:active { transform: translateX(-50%) translateY(2px); }
+.pk:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* Key held on the keyboard */
+.pk.held { transform: translateY(2px); box-shadow: 0 0 16px var(--cyan); }
+.pk.black.held { transform: translateX(-50%) translateY(2px); border-color: var(--cyan); }
+.pk.white.held { filter: brightness(1.08); }
+
+/* Feedback states come last so they beat the key shapes above */
+.pk.right { background: var(--green); color: var(--bg); box-shadow: 0 0 18px var(--green); }
+.pk.wrong { background: #ff3030; color: var(--bg); animation: quiz-shake .3s; }
+.pk.reveal { box-shadow: 0 0 0 3px var(--green), 0 0 16px var(--green); }
+@keyframes quiz-shake {
+  20%, 60% { translate: -4px 0; }
+  40%, 80% { translate: 4px 0; }
+}
+
+@media (max-width: 700px) {
+  .quiz-keys { height: 104px; }
+  .pk-cap { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pk.wrong { animation: none; }
+}

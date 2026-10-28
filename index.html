@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- ---
+purpose: app shell: HUD, controls, fretboard, quiz dock, help/practice/learn/changelog modals
+exports: none (markup; ids and classes used by js/*.js and css/*.css)
+depends: css/*.css (ordered in head), js/*.js (ordered at end of body)
+gotcha: the early-theme inline script must stay inside body (document.body is null in head)
+--- -->
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PENTATONIC ARCADE</title>
@@ -15,6 +21,8 @@
 <link rel="stylesheet" href="css/changelog.css" />
 <link rel="stylesheet" href="css/features.css" />
 <link rel="stylesheet" href="css/quiz.css" />
+<link rel="stylesheet" href="css/quiz-cue.css" />
+<link rel="stylesheet" href="css/quiz-piano.css" />
 </head>
 <body>
 <script>/* early theme — avoids CRT flash before app.js loads; must sit inside <body> (document.body is null in <head>) */
@@ -167,6 +175,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
       <div class="quiz-mode" role="group" aria-label="Quiz mode">
         <button class="qm active" data-qmode="see" aria-pressed="true">👁 SEE IT</button>
         <button class="qm" data-qmode="hear" aria-pressed="false">👂 HEAR IT</button>
+        <button class="qm" data-qmode="play" aria-pressed="false">🎸 PLAY IT</button>
       </div>
       <div class="quiz-stats">
         <span>SCORE <b id="quiz-score">0/0</b></span>
@@ -177,10 +186,12 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     <div class="quiz-cue">
       <span class="quiz-wave" id="quiz-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
       <p class="quiz-prompt" id="quiz-prompt" aria-live="polite">Name the glowing note</p>
+      <span class="quiz-interval" id="quiz-interval" aria-live="polite"></span>
       <button class="arc-btn ghost quiz-replay" id="quiz-replay" hidden>🔊 REPLAY</button>
+      <span class="quiz-heard" id="quiz-heard" aria-live="polite"></span>
     </div>
     <div class="quiz-keys" id="quiz-keys"><!-- rendered by quiz-piano.js --></div>
-    <p class="quiz-hint">Click a key or play it on your keyboard: A W S E D F T G Y H U J · R replays in HEAR IT · Q or Esc stops</p>
+    <p class="quiz-hint">Click a key or play it on your keyboard: A W S E D F T G Y H U J · PLAY IT listens to your guitar · R replays in HEAR IT · Q or Esc stops</p>
   </section>
 
   <section class="legend">
@@ -231,7 +242,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li><b>♯ / ♭</b> switches every note name between sharps and flats.</li>
         <li><b>PATTERNS:</b> press BUILD and click notes to draw your own shape (numbers = play order), save it by name, or load a classic. Patterns follow the key.</li>
         <li>The <b>drone</b> button (top left) holds the key's root and fifth so you can hear how each note sounds against it.</li>
-        <li><b>🎯 NOTE QUIZ</b> hides the note names and makes one note glow. Name it on the mini piano. Switch to <b>👂 HEAR IT</b> to name a note by ear: you hear the root, then the mystery note.</li>
+        <li><b>🎯 NOTE QUIZ</b> hides the note names and makes one note glow. Name it on the mini piano. Switch to <b>👂 HEAR IT</b> to name a note by ear: you hear the root, then the mystery note. Or pick <b>🎸 PLAY IT</b> to play the glowing note on your real guitar and let the mic name it.</li>
       </ul>
       <h2>🎨 THEMES</h2>
       <p>Pick a theme from the swatch menu at the top right: CRT · 🌴 Tropical Night · 🛰️ Mission Control · 📐 Blueprint. Your choice is saved.</p>
@@ -342,6 +353,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <script src="js/app.js"></script>
   <script src="js/patterns.js"></script>
   <script src="js/quiz-piano.js"></script>
+  <script src="js/mic.js"></script>
   <script src="js/quiz.js"></script>
   <script src="js/hud.js"></script>
 </body>

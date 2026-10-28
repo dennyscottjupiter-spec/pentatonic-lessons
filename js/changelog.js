@@ -3,6 +3,10 @@
 
 // Items are [name, text] or [name, text, selector]; a selector makes the row a "show me" link
 const CHANGELOG = [
+  { version: 'v4.6.0', date: '2026-10-28', title: 'Guitar mic quiz, interval names', items: [
+    ['PLAY IT', 'In the note quiz, pick 🎸 PLAY IT: play the glowing note on your real guitar. The app listens through the mic, any octave counts, and nothing is recorded or saved.', '#quiz-btn'],
+    ['Interval names', 'After every answer the quiz names how far the note sits from the root, like "5 · perfect 5th".', '#quiz-btn'],
+  ]},
   { version: 'v4.5.0', date: '2026-10-28', title: 'Ear quiz, piano typing, wider panels', items: [
     ['Hear it', 'In the note quiz, pick 👂 HEAR IT: you hear the root, then a mystery note, and name it. REPLAY (or R) plays both again.', '#quiz-btn'],
     ['Piano typing', 'Play the quiz piano on your keyboard like a music app: A S D F G H J are the white keys, W E T Y U the black ones. A held key lights up.', '#quiz-btn'],

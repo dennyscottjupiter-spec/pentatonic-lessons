@@ -9,6 +9,9 @@ const FLAT_NAMES  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
 // Blue note as a chroma offset from the root: ♭5 of minor, ♭3 of major (never in the pentatonic)
 const BLUE_OFFSETS = { minor:6, major:3 };
 
+// Index = semitones above the root; shown after each note quiz answer
+const INTERVAL_NAMES = ['1 · root', '♭2 · minor 2nd', '2 · major 2nd', '♭3 · minor 3rd', '3 · major 3rd', '4 · perfect 4th', '♭5 · tritone', '5 · perfect 5th', '♭6 · minor 6th', '6 · major 6th', '♭7 · minor 7th', '7 · major 7th'];
+
 // Classic patterns: frets are key-A reference (s0 = high e); they move with the key
 const PATTERN_PRESETS = [
   { name:'B.B. KING BOX',     lens:'minor', blues:false, notes:[{s:2,f:12},{s:1,f:10},{s:1,f:13},{s:0,f:10},{s:0,f:12}], tip:'Home base around the root on the B string; bend the flat 3rd up a half step for the B.B. King cry.' },

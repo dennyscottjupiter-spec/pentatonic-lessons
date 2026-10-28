@@ -1,7 +1,7 @@
 // ---
-// purpose: NOTE QUIZ rounds: target pick, SEE/HEAR modes, answers, score, board pool
-// exports: quiz, quizStart, quizStop, toggleQuiz, quizAnswer, quizReplay, setQuizMode, quizPool, quizRefresh
-// depends: app.js (state, $, $$), data.js (KEYS), engine.js (spell, mkSvg, refreshNotes), audio.js (playNote, playBuzz), quiz-piano.js (renderQuizKeys)
+// purpose: NOTE QUIZ rounds: target pick, SEE/HEAR/PLAY modes, answers, score, interval line, board pool
+// exports: quiz, quizStart, quizStop, toggleQuiz, quizAnswer, quizReplay, setQuizMode, quizPool, quizRefresh, quizMicNote, quizMicLevel, intervalName
+// depends: app.js (state, $, $$), data.js (KEYS, INTERVAL_NAMES), engine.js (spell, mkSvg, refreshNotes), audio.js (playNote, playBuzz), quiz-piano.js (renderQuizKeys), mic.js (micStart, micStop)
 // gotcha: quiz.gen drops stale next-round timers after stop/restart
 // ---
 
@@ -46,12 +46,13 @@ function nextRound() {
   if (cands.length > 1) cands = cands.filter(g => g !== prev);
   const t = cands[Math.floor(Math.random() * cands.length)];
   quiz.target = t; quiz.locked = false;
-  if (quiz.mode === 'see') {
-    markTarget(t);
-    $('#quiz-prompt').textContent = 'Name the glowing note';
-  } else {   // HEAR IT: the note stays unmarked until the answer
+  quizIntervalLine('');
+  if (quiz.mode === 'hear') {   // HEAR IT: the note stays unmarked until the answer
     $('#quiz-prompt').textContent = state.sound ? 'Name the note you hear' : 'Turn SOUND on to hear the note';
     quizReplay();
+  } else {   // SEE IT and PLAY IT both glow the note
+    markTarget(t);
+    $('#quiz-prompt').textContent = quiz.mode === 'play' ? 'Play the glowing note on your guitar' : 'Name the glowing note';
   }
   updateQuizStats();
 }
@@ -74,12 +75,18 @@ function updateQuizStats() {
   $('#quiz-best').textContent = quiz.best;
 }
 
-// Clicks and keys both land here; `locked` holds the board still while the feedback shows
+// Semitones from the key's root (the key button, in both lenses), e.g. '5 · perfect 5th'
+function intervalName(chroma) { return INTERVAL_NAMES[((chroma - KEYS[state.keyIdx].chroma) % 12 + 12) % 12]; }
+
+// The interval line under the prompt; '' hides it
+function quizIntervalLine(text) { const el = $('#quiz-interval'); el.textContent = text; el.classList.toggle('show', text !== ''); }
+
+// Clicks, keys and the mic all land here; `locked` holds the board still while the feedback shows
 function quizAnswer(chroma) {
   if (!quiz.on || quiz.locked || !quiz.target) return;
   const t = quiz.target, want = +t.dataset.chroma, right = chroma === want;
   quiz.locked = true; quiz.tries++;
-  playNote(+t.dataset.midi);
+  if (!right || quiz.mode !== 'play') playNote(+t.dataset.midi);   // PLAY IT: the guitar just rang it; a speaker copy would feed the mic
   const pressed = $(`#quiz-keys .pk[data-chroma="${chroma}"]`);
   if (right) {
     quiz.score++; quiz.streak++;
@@ -97,6 +104,7 @@ function quizAnswer(chroma) {
   }
   if (!t.classList.contains('quiz-target')) markTarget(t);   // HEAR mode: show where it was
   t.classList.add('quiz-reveal');
+  quizIntervalLine(intervalName(want) + ' from ' + spell(KEYS[state.keyIdx].chroma));
   updateQuizStats();
   const g = quiz.gen;
   setTimeout(() => { if (quiz.on && quiz.gen === g) nextRound(); }, right ? 750 : 1500);
@@ -120,8 +128,9 @@ function quizStart() {
 function quizStop() {
   if (!quiz.on) return;
   quiz.on = false; quiz.locked = false; ++quiz.gen;
-  clearTarget();
-  document.body.classList.remove('quiz-on', 'quiz-hear');
+  clearTarget(); micStop();
+  quizIntervalLine(''); $('#quiz-heard').textContent = '';
+  document.body.classList.remove('quiz-on', 'quiz-hear', 'quiz-play');
   $$('#quiz-keys .pk.held').forEach(k => k.classList.remove('held'));
   $('#quiz-dock').hidden = true;
   const btn = $('#quiz-btn');
@@ -131,15 +140,27 @@ function quizStop() {
 
 function toggleQuiz() { if (quiz.on) quizStop(); else quizStart(); }
 
-// Applies quiz.mode to the body class, the mode buttons and the REPLAY button
+// Applies quiz.mode to the body classes, the mode buttons, REPLAY, and the mic (PLAY IT only)
 function syncQuizMode() {
   document.body.classList.toggle('quiz-hear', quiz.mode === 'hear');
+  document.body.classList.toggle('quiz-play', quiz.mode === 'play');
   $$('.qm').forEach(b => { const on = b.dataset.qmode === quiz.mode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
   const rep = $('#quiz-replay'); if (rep) rep.hidden = quiz.mode !== 'hear';
+  if (quiz.on && quiz.mode === 'play') {
+    micStart(quizMicNote, quizMicLevel).then(okay => {
+      if (!okay && quiz.on && quiz.mode === 'play') $('#quiz-prompt').textContent = 'Mic blocked: allow the microphone for this page, or pick SEE IT';
+    });
+  } else micStop();
 }
 
+// The mic heard a pitch class: show it, then answer like a click (quizAnswer ignores it when locked or off)
+function quizMicNote(chroma) { $('#quiz-heard').textContent = '🎤 ' + spell(chroma); quizAnswer(chroma); }
+
+// Live level 0..1 drives the PLAY IT bars (CSS --lvl); RMS 0.125 is already full
+function quizMicLevel(level) { $('#quiz-wave').style.setProperty('--lvl', Math.min(1, level * 8).toFixed(2)); }
+
 function setQuizMode(m) {
-  if (m !== 'see' && m !== 'hear') return;
+  if (!['see', 'hear', 'play'].includes(m)) return;
   quiz.mode = m; syncQuizMode();
   if (quiz.on) { ++quiz.gen; nextRound(); }   // ++gen drops the old round's pending timer
 }
