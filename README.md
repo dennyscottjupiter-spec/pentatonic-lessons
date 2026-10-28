@@ -17,7 +17,7 @@ Extras on the same page:
 - **Blue note** adds the blues note (♭5 in minor, ♭3 in major).
 - **Patterns** let you draw your own shape on the neck, save it by name, or load one of six classics (one is a chromatic map of every note).
 - **Root drone** (top left) holds the key's root and fifth so you can hear each note against it.
-- **Note quiz** hides the note names and makes one note glow; name it on a mini piano or by typing the letter.
+- **Note quiz** hides the note names and makes one note glow (SEE IT), or plays the root and then a mystery note (HEAR IT); name it on a mini piano, by click or with the music-app keyboard row.
 - **Pause** freezes anything that is playing (scales, the game, the drone, the metronome, the timer) and resumes at the same note.
 - A sticky top bar keeps the drone, the pause button, a theme menu (four themes), the Practice Lab and help within reach while you scroll.
 
@@ -60,7 +60,7 @@ Once it's open:
 7. Click **▶ PLAY SCALE** to hear the box played ascending then descending.
 8. Click **▶ START GAME** to play Lick Attack: watch a short lick light up, then replay it by clicking the same frets in order. The lens, PLAY SCALE and PATTERNS are locked during the game.
 9. The button at the top left shows the key and starts or stops the **root drone** (`D`). Use the icon bar at the top right: the **pause** button, the **theme menu** (switches between CRT, Tropical Night, Mission Control and Blueprint), **PRACTICE** (opens the Practice Lab: metronome + timer), and **HELP** (shortcuts and how-to). **📚 LEARNING** under OPTIONS opens the theory lessons, and **📜 CHANGELOG** lists what changed in each version (a glowing dot marks a release you have not opened yet). Click a change in the list and the app scrolls to that control and spotlights it.
-11. Press **🎯 NOTE QUIZ** (or `Q`) to train reading the neck. Note names disappear and one note in the current box glows with a spinning ring. Click its name on the mini piano under the fretboard, or type the letter (`Shift` + letter adds a sharp, or a flat in flats mode). The panel keeps your score, streak and best streak. `Q`, `Esc` or ✕ stops it; starting the game stops it too.
+11. Press **🎯 NOTE QUIZ** (or `Q`) to train reading the neck. Note names disappear and one note in the current box glows with a spinning ring. Click its name on the mini piano under the fretboard, or play the piano from your keyboard like a music app: `A S D F G H J` are the white keys (C to B), `W E T Y U` the black ones. Switch the panel to **👂 HEAR IT** to train by ear: nothing glows, you hear the key's root and then the mystery note, and **REPLAY** (or `R`) plays both again. After you answer, the note is shown on the neck. The panel keeps your score, streak and best streak. `Q`, `Esc` or ✕ stops it; starting the game stops it too.
 10. Under **PATTERNS** you can draw your own shape:
     - Press **✎ BUILD**, then click notes to add or remove them. The numbers show the play order (first click plays first).
     - Type a name (up to 24 characters) and press **SAVE**. Your shapes appear under **MY PATTERNS** in the LOAD dropdown.
@@ -70,13 +70,13 @@ Once it's open:
 
 Press **Space** (or **K**) to pause or resume everything that is playing. It does nothing when nothing is playing.
 
-Keyboard shortcuts: `1`–`5` select a box, `0` shows all positions, `?` toggles help, `P` toggles the Practice Lab, `Space` or `K` pauses and resumes, `D` toggles the root drone, `Q` starts or stops the note quiz, `L` toggles the learning modal, `C` opens the changelog, `Esc` closes any open panel. During the quiz, `A`–`G` answer instead.
+Keyboard shortcuts: `1`–`5` select a box, `0` shows all positions, `?` toggles help, `P` toggles the Practice Lab, `Space` or `K` pauses and resumes, `D` toggles the root drone, `Q` starts or stops the note quiz, `L` toggles the learning modal, `C` opens the changelog, `Esc` closes any open panel. During the quiz, `A W S E D F T G Y H U J` play the piano keys instead and `R` replays in HEAR IT.
 
 If you edit the source files, hard-refresh the browser tab (Ctrl+Shift+R) — a normal reload can serve a cached copy of the CSS/JS.
 
 ### Running the test suite
 
-The project ships its own zero-dependency test suite (324 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause, the game, the changelog and the note quiz). It lives in `tests/`; serve the project folder locally to run it:
+The project ships its own zero-dependency test suite (327 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause, the game, the changelog and the note quiz). It lives in `tests/`; serve the project folder locally to run it:
 
 ```bash
 cd pentatonic-lessons

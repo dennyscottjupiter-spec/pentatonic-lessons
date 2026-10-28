@@ -14,9 +14,9 @@
   background: var(--bg-2);
   border: 2px solid var(--cyan);
   border-radius: 8px;
-  padding: 28px 32px;
-  max-width: 560px;
-  width: 92%;
+  padding: 32px 40px;
+  max-width: 920px;
+  width: 94%;
   position: relative;
   max-height: 85vh;
   overflow-y: auto;
@@ -97,9 +97,20 @@
 .keymap > div:hover kbd { transform: translateY(2px); border-bottom-width: 1px; box-shadow: 0 0 10px color-mix(in srgb, var(--yellow) 35%, transparent); }
 .keymap-note { font-size: 16px; opacity: 0.8; }
 .keymap-note kbd { min-width: 20px; height: 20px; padding: 0 5px; font-size: 8px; border-bottom-width: 2px; vertical-align: 1px; }
+@media (min-width: 860px) { .keymap { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .keymap { grid-template-columns: 1fr; } }
 
 /* ---------- Practice Lab ---------- */
+/* Two columns: drills | 7-day, backing tracks full width, metronome | timer */
+#practice-modal .modal-box {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 40px;
+  align-content: start;
+}
+#practice-modal h2, #practice-modal .practice-section:nth-of-type(3) { grid-column: 1 / -1; }
+#practice-modal .practice-section:nth-of-type(3) ul { columns: 2; column-gap: 40px; }
+#practice-modal .practice-section:nth-of-type(3) li { margin: 0 0 8px; }   /* no top margin, so both columns start level */
 .practice-section { margin-bottom: 18px; }
 .practice-section h3 {
   font-family: var(--font-display);
@@ -196,6 +207,12 @@
 }
 .learn-dot:hover { background: var(--text); }
 #learn-prev:disabled, #learn-next:disabled { opacity: 0.3; pointer-events: none; }
+
+@media (max-width: 700px) {
+  .modal-box { padding: 26px 18px; }
+  #practice-modal .modal-box { grid-template-columns: 1fr; }
+  #practice-modal .practice-section:nth-of-type(3) ul { columns: 1; }
+}
 
 /* Win screen */
 #win-screen {

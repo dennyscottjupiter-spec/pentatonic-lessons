@@ -1,7 +1,7 @@
 // ---
 // purpose: Global state, note clicks, theme, prefs, control wiring, boot
 // exports: state, onNoteClick, applyTheme, wireControls, loadPrefs, savePrefs
-// depends: data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js, quiz.js (quizKeyChroma, quizAnswer, toggleQuiz, quizStop)
+// depends: data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js, quiz-piano.js (quizKeyDown), quiz.js (quiz, toggleQuiz, quizStop)
 // gotcha: loadPrefs() must run before wireControls() (key labels use spell())
 // ---
 
@@ -47,7 +47,7 @@ function onNoteClick(e) {
   const midi   = +g.dataset.midi;
   const chroma = +g.dataset.chroma;
   const si     = +g.dataset.string;
-  if (typeof quiz !== 'undefined' && quiz.on) { if (g.classList.contains('quiz-target')) playNote(midi); return; }   // clicks never reveal the answer
+  if (typeof quiz !== 'undefined' && quiz.on) { if (quiz.mode === 'hear' || g.classList.contains('quiz-target')) playNote(midi); return; }   // SEE: only the target sounds, so a click never gives it away; HEAR: any note, to compare by ear
 
   if (state.mode === 'game' && state.gamePhase === 'input') {
     onGameNoteClick(g); return;
@@ -210,7 +210,7 @@ function wireControls() {
 
   document.addEventListener('keydown', e => {
     if (e.target.matches('input,textarea,select') || e.target.closest('#theme-menu')) return;
-    if (typeof quiz !== 'undefined' && quiz.on && !e.ctrlKey && !e.metaKey && !e.altKey) { const c = quizKeyChroma(e); if (c !== null) { e.preventDefault(); if (!e.repeat) quizAnswer(c); return; } }   // a held key must not answer the next round
+    if (typeof quiz !== 'undefined' && quiz.on && !e.ctrlKey && !e.metaKey && !e.altKey && quizKeyDown(e)) return;   // piano row + R go to the quiz first
     if (e.code === 'Space' || e.key === 'k' || e.key === 'K') { e.preventDefault(); togglePause(); return; }
     if (e.key==='d'||e.key==='D') { toggleDrone(); return; }
     if (e.key==='?'||(e.key==='/'&&e.shiftKey)) { closePractice(); closeLearn(); closeChangelog(); toggleHelp(); return; }

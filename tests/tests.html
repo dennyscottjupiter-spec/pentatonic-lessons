@@ -624,7 +624,7 @@ function escHtml(s) {
   <button class="lens" data-lens="major">MAJOR</button>
   <button class="toggle" data-toggle="blues">+ BLUE NOTE</button>
 </div>
-<div style="display:none"><button id="quiz-btn"></button><section id="quiz-dock" hidden><button id="quiz-close"></button><p id="quiz-prompt"></p><b id="quiz-score"></b><b id="quiz-streak"></b><b id="quiz-best"></b><div id="quiz-keys"></div></section></div>
+<div style="display:none"><button id="quiz-btn"></button><section id="quiz-dock" hidden><button id="quiz-close"></button><p id="quiz-prompt"></p><b id="quiz-score"></b><b id="quiz-streak"></b><b id="quiz-best"></b><div id="quiz-keys"></div><button class="qm" data-qmode="see"></button><button class="qm" data-qmode="hear"></button><span id="quiz-wave"></span><button id="quiz-replay" hidden></button></section></div>
 
 <script>
 /* Stub globals that app.js normally provides.
@@ -678,6 +678,7 @@ window.$$ = function(sel) { return Array.from(document.querySelectorAll(sel)); }
 <script src="../js/practice.js"></script>
 <script src="../js/changelog.js"></script>
 <script src="../js/patterns.js"></script>
+<script src="../js/quiz-piano.js"></script>
 <script src="../js/quiz.js"></script>
 <script src="tests-lib.js"></script>
 <script src="tests-core.js"></script>

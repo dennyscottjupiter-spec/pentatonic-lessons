@@ -4,6 +4,7 @@
 body.quiz-on .fb-note text { visibility: hidden; }
 body.quiz-on .fb-note.quiz-reveal text { visibility: visible; }
 body.quiz-on .fb-note:not(.quiz-target) { opacity: 0.45; }   /* context stays, the target pops */
+body.quiz-on.quiz-hear .fb-note:not(.quiz-target) { opacity: 0.8; }   /* nothing to single out until the answer */
 
 /* !important beats the per-note colour rules (root, blue, chromatic) so every target looks alike */
 body.quiz-on .fb-note.quiz-target circle:not(.quiz-reticle) {
@@ -68,11 +69,35 @@ body.quiz-on .fb-note.quiz-target .quiz-reticle {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
   margin-bottom: 14px;
   padding-right: 28px;   /* room for the ✕ */
 }
+.quiz-mode {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--fret-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+.qm {
+  border: 0;
+  background: none;
+  color: var(--text);
+  opacity: .6;
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s, color .15s, opacity .15s;
+}
+.qm:hover { opacity: 1; }
+.qm.active { background: var(--cyan); color: var(--bg); opacity: 1; }
+.qm:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .quiz-prompt {
   margin: 0;
   font-family: var(--font-display);
@@ -80,6 +105,27 @@ body.quiz-on .fb-note.quiz-target .quiz-reticle {
   color: var(--yellow);
   letter-spacing: 1px;
 }
+.quiz-cue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  margin-bottom: 14px;
+}
+.quiz-replay { margin-left: auto; }
+.quiz-replay[hidden] { display: none; }
+
+/* HEAR IT: a little equaliser that bounces when a note plays */
+.quiz-wave { display: none; align-items: flex-end; gap: 3px; height: 16px; }
+body.quiz-hear .quiz-wave { display: inline-flex; }
+.quiz-wave i { width: 3px; height: 4px; border-radius: 2px; background: var(--cyan); }
+.quiz-wave.playing i { animation: quiz-wave .9s ease-in-out; }
+.quiz-wave.playing i:nth-child(2) { animation-delay: .08s; }
+.quiz-wave.playing i:nth-child(3) { animation-delay: .16s; }
+.quiz-wave.playing i:nth-child(4) { animation-delay: .24s; }
+.quiz-wave.playing i:nth-child(5) { animation-delay: .32s; }
+@keyframes quiz-wave { 50% { height: 16px; } }
+
 .quiz-stats {
   display: flex;
   gap: 16px;
@@ -118,6 +164,7 @@ body.quiz-on .fb-note.quiz-target .quiz-reticle {
   transition: transform .06s, box-shadow .15s, background .15s;
 }
 .pk.white {
+  position: relative;
   background: linear-gradient(180deg, var(--text) 0%, color-mix(in srgb, var(--text) 82%, var(--bg)) 100%);
   color: var(--bg);
   border-radius: 0 0 7px 7px;
@@ -141,11 +188,31 @@ body.quiz-on .fb-note.quiz-target .quiz-reticle {
   border-radius: 0 0 6px 6px;
   box-shadow: 0 4px 0 color-mix(in srgb, var(--bg) 50%, transparent);
 }
+/* Keyboard letter on each key (the music-app row) */
+.pk-cap {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 4px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-size: 7px;
+  line-height: 1;
+  opacity: .45;
+  pointer-events: none;
+}
 .pk.white:hover { filter: brightness(1.06); }
 .pk.black:hover { border-color: var(--cyan); }
 .pk:active { transform: translateY(2px); }
 .pk.black:active { transform: translateX(-50%) translateY(2px); }
 .pk:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* Key held on the keyboard */
+.pk.held { transform: translateY(2px); box-shadow: 0 0 16px var(--cyan); }
+.pk.black.held { transform: translateX(-50%) translateY(2px); border-color: var(--cyan); }
+.pk.white.held { filter: brightness(1.08); }
 
 /* Feedback states come last so they beat the key shapes above */
 .pk.right { background: var(--green); color: var(--bg); box-shadow: 0 0 18px var(--green); }
@@ -170,10 +237,13 @@ body.quiz-on .fb-note.quiz-target .quiz-reticle {
   .quiz-keys { height: 104px; }
   .quiz-stats { font-size: 16px; }
   .quiz-hint { display: none; }
+  .pk-cap { display: none; }
+  .qm { padding: 6px 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   body.quiz-on .fb-note.quiz-target .quiz-reticle,
-  body.quiz-on .fb-note.quiz-target circle:not(.quiz-reticle) { animation: none; }
+  body.quiz-on .fb-note.quiz-target circle:not(.quiz-reticle),
+  .quiz-wave.playing i { animation: none; }
   .quiz-dock, #quiz-streak.bump, .pk.wrong { animation: none; }
 }

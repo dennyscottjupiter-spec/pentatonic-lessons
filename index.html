@@ -164,15 +164,23 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <section id="quiz-dock" class="quiz-dock" hidden aria-label="Note quiz">
     <button class="modal-close" id="quiz-close" aria-label="Close quiz">✕</button>
     <div class="quiz-head">
-      <p class="quiz-prompt" id="quiz-prompt" aria-live="polite">Name the glowing note</p>
+      <div class="quiz-mode" role="group" aria-label="Quiz mode">
+        <button class="qm active" data-qmode="see" aria-pressed="true">👁 SEE IT</button>
+        <button class="qm" data-qmode="hear" aria-pressed="false">👂 HEAR IT</button>
+      </div>
       <div class="quiz-stats">
         <span>SCORE <b id="quiz-score">0/0</b></span>
         <span>STREAK <b id="quiz-streak">0</b></span>
         <span>BEST <b id="quiz-best">0</b></span>
       </div>
     </div>
-    <div class="quiz-keys" id="quiz-keys"><!-- rendered by quiz.js --></div>
-    <p class="quiz-hint">Click a key or type the letter · Shift + letter adds ♯ (♭ in flats) · Q or Esc to stop</p>
+    <div class="quiz-cue">
+      <span class="quiz-wave" id="quiz-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <p class="quiz-prompt" id="quiz-prompt" aria-live="polite">Name the glowing note</p>
+      <button class="arc-btn ghost quiz-replay" id="quiz-replay" hidden>🔊 REPLAY</button>
+    </div>
+    <div class="quiz-keys" id="quiz-keys"><!-- rendered by quiz-piano.js --></div>
+    <p class="quiz-hint">Click a key or play it on your keyboard: A W S E D F T G Y H U J · R replays in HEAR IT · Q or Esc stops</p>
   </section>
 
   <section class="legend">
@@ -211,7 +219,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <div><dt><kbd>?</kbd></dt><dd>This help</dd></div>
         <div><dt><kbd class="wide">Esc</kbd></dt><dd>Close any panel</dd></div>
       </dl>
-      <p class="keymap-note">In the note quiz, <kbd>A</kbd>–<kbd>G</kbd> answer instead (<kbd class="wide">Shift</kbd> adds ♯, or ♭ in flats).</p>
+      <p class="keymap-note">In the note quiz your keyboard is a piano: <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> <kbd>G</kbd> <kbd>H</kbd> <kbd>J</kbd> are the white keys, <kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> the black ones, and <kbd>R</kbd> replays in HEAR IT.</p>
       <h2>🎸 HOW TO USE</h2>
       <ul>
         <li>Pick a <b>ROOT</b> from the 12 key buttons (A–G#). That's your tonal center.</li>
@@ -223,7 +231,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li><b>♯ / ♭</b> switches every note name between sharps and flats.</li>
         <li><b>PATTERNS:</b> press BUILD and click notes to draw your own shape (numbers = play order), save it by name, or load a classic. Patterns follow the key.</li>
         <li>The <b>drone</b> button (top left) holds the key's root and fifth so you can hear how each note sounds against it.</li>
-        <li><b>🎯 NOTE QUIZ</b> hides the note names and makes one note glow. Name it on the mini piano or type the letter.</li>
+        <li><b>🎯 NOTE QUIZ</b> hides the note names and makes one note glow. Name it on the mini piano. Switch to <b>👂 HEAR IT</b> to name a note by ear: you hear the root, then the mystery note.</li>
       </ul>
       <h2>🎨 THEMES</h2>
       <p>Pick a theme from the swatch menu at the top right: CRT · 🌴 Tropical Night · 🛰️ Mission Control · 📐 Blueprint. Your choice is saved.</p>
@@ -333,6 +341,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <script src="js/changelog.js"></script>
   <script src="js/app.js"></script>
   <script src="js/patterns.js"></script>
+  <script src="js/quiz-piano.js"></script>
   <script src="js/quiz.js"></script>
   <script src="js/hud.js"></script>
 </body>
