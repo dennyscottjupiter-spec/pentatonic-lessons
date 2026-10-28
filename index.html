@@ -20,13 +20,10 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
   <div class="scanlines" aria-hidden="true"></div>
 
   <header class="hud">
-    <div class="hud-chip">
-      <span class="blink">●</span>
-      <span class="hud-label">SCORE</span>
-      <span id="score" class="hud-value">0000</span>
-      <span class="hud-label" id="highscore-label" style="display:none">HI</span>
-      <span id="highscore" class="hud-value" style="display:none">0000</span>
-    </div>
+    <button class="hud-chip drone" id="drone-btn" aria-pressed="false" aria-label="Root drone" data-tip="Root drone · D">
+      <svg class="ico ico-wave" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c2-5 4.5-5 6 0s4 5 6 0s4-5 6 0"/></svg>
+      <span class="drone-key" id="drone-key">A</span><span class="drone-lens" id="drone-lens">min</span>
+    </button>
 
     <h1 class="title">PENTATONIC <span class="accent">ARCADE</span></h1>
 
@@ -151,6 +148,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
     <div class="game-stat">TRIES <span id="game-lives">🎸🎸</span></div>
     <div id="game-status">PICK A BOX · PRESS START GAME</div>
     <div class="game-stat">SCORE <span id="game-level-xp">0 XP</span></div>
+    <div class="game-stat">BEST <span id="game-best">0</span></div>
   </div>
 
   <section class="fretboard-wrap">
@@ -187,6 +185,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li><span class="kbd">?</span> → toggle this help</li>
         <li><span class="kbd">P</span> → toggle Practice Lab</li>
         <li><span class="kbd">Space</span> or <span class="kbd">K</span> → pause / resume everything playing</li>
+        <li><span class="kbd">D</span> → root drone on / off</li>
         <li><span class="kbd">Esc</span> → close any panel</li>
       </ul>
       <h2>🎸 HOW TO USE</h2>
@@ -199,6 +198,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
         <li><b>+ BLUE NOTE</b> adds the blues note (♭5 in minor, ♭3 in major), drawn with a dashed ring.</li>
         <li><b>♯ / ♭</b> switches every note name between sharps and flats.</li>
         <li><b>PATTERNS:</b> press BUILD and click notes to draw your own shape (numbers = play order), save it by name, or load a classic. Patterns follow the key.</li>
+        <li>The <b>drone</b> button (top left) holds the key's root and fifth so you can hear how each note sounds against it.</li>
       </ul>
       <h2>🎨 THEMES</h2>
       <p>Pick a theme from the swatch menu at the top right: CRT · 🌴 Tropical Night · 🛰️ Mission Control · 📐 Blueprint. Your choice is saved.</p>
@@ -295,6 +295,7 @@ try{var t=localStorage.getItem('pent-theme');if(t&&t!=='crt')document.body.class
 
   <script src="js/data.js"></script>
   <script src="js/audio.js"></script>
+  <script src="js/drone.js"></script>
   <script src="js/player.js"></script>
   <script src="js/engine.js"></script>
   <script src="js/game.js"></script>

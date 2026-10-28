@@ -110,7 +110,8 @@ function lickComplete() {
   const xp   = GAME.XP_PER_LICK * mult;
   state.gameScore += xp;
   state.highScore  = Math.max(state.highScore, state.gameScore);
-  updateScore(); updateGameHUD(); playFanfare(); saveGame();
+  document.getElementById('game-best').textContent = String(state.highScore);
+  updateGameHUD(); playFanfare(); saveGame();
   updateGamePanel(`✓ +${xp} XP  ×${mult} STREAK`);
   nextLickAfter(1000, false);
 }
@@ -157,10 +158,8 @@ function enterGame() {
   document.getElementById('game-toggle').textContent = '◀ EXPLORE';
   // PLAY SCALE would bump playGen and strand the lick in its 'show' phase
   document.querySelectorAll('.lens, #play-scale, #pattern-build, #pattern-select, #pattern-save, #pattern-delete, #pattern-clear, #pattern-name').forEach(b => b.disabled = true);
-  refreshNotes(); updateScore(); updateGameHUD();
-  document.getElementById('highscore-label').style.display = '';
-  document.getElementById('highscore').style.display = '';
-  document.getElementById('highscore').textContent = String(state.highScore).padStart(4,'0');
+  refreshNotes(); updateGameHUD();
+  document.getElementById('game-best').textContent = String(state.highScore);
   showGamePhase();
 }
 
@@ -174,7 +173,7 @@ function exitGame() {
   // #pattern-delete stays disabled: it re-enables only when a saved pattern is selected
   document.querySelectorAll('.box, .lens, #key-row .arc-btn, #play-scale, #pattern-build, #pattern-select, #pattern-save, #pattern-clear, #pattern-name').forEach(b => b.disabled = false);
   document.querySelectorAll('.box').forEach(b => b.classList.toggle('active', b.dataset.box===state.box));
-  refreshNotes(); updateScore();
+  refreshNotes();
 }
 
 function saveGame() {
@@ -184,11 +183,7 @@ function loadGame() {
   try {
     const d = JSON.parse(localStorage.getItem('pent-game')||'{}');
     if (d.xp)        state.gameScore = d.xp;
-    if (d.highScore) {
-      state.highScore = d.highScore;
-      document.getElementById('highscore-label').style.display = '';
-      document.getElementById('highscore').style.display = '';
-      document.getElementById('highscore').textContent = String(state.highScore).padStart(4,'0');
-    }
+    if (d.highScore) state.highScore = d.highScore;
+    document.getElementById('game-best').textContent = String(state.highScore);
   } catch(e) {}
 }

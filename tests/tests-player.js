@@ -1,7 +1,7 @@
 // ---
 // purpose: Suite 14: resumable step player and global pause (synchronous checks only)
 // exports: none (registers suites)
-// depends: tests-lib.js (window.T), player.js (playSteps, playerTick, setPaused, togglePause, stopSteps), engine.js (playGen), audio.js (metro, timer)
+// depends: tests-lib.js (window.T), player.js (playSteps, playerTick, setPaused, togglePause, stopSteps), engine.js (playGen), audio.js (metro, timer), drone.js (drone, droneStart/Stop, toggleDrone)
 // gotcha: playSteps arms a 100 s real timer; every test ends in reset() which clears it
 // ---
 (function () {
@@ -99,6 +99,59 @@
         setPaused(false);
         eq(st.textContent, 'X', 'status after resume');
       } finally { st.textContent = orig; reset(); }
+    });
+  });
+
+  // Root drone: each test restores state.sound and stops the drone before reset()
+  suite('14b · Root drone (droneStart / droneStop / toggleDrone)', function() {
+    var soundWas = state.sound;
+    function quietDrone() { state.sound = soundWas; droneStop(); pauseMemo.drone = false; }
+
+    test('droneStart: drone.running true when sound is on', function() {
+      try {
+        state.sound = true;
+        droneStart();
+        eq(drone.running, true, 'drone.running');
+      } finally { quietDrone(); reset(); }
+    });
+
+    test('droneStart: no-op when sound is off', function() {
+      try {
+        state.sound = false;
+        droneStart();
+        eq(drone.running, false, 'drone.running');
+      } finally { quietDrone(); reset(); }
+    });
+
+    test('droneStop: drone.running false and oscs cleared', function() {
+      try {
+        state.sound = true;
+        droneStart();
+        droneStop();
+        eq(drone.running, false, 'drone.running');
+        eq(drone.oscs, null, 'drone.oscs');
+      } finally { quietDrone(); reset(); }
+    });
+
+    test('setPaused(true) stops a running drone; setPaused(false) restarts it', function() {
+      try {
+        state.sound = true;
+        droneStart();
+        setPaused(true);
+        eq(drone.running, false, 'drone.running while paused');
+        setPaused(false);
+        eq(drone.running, true, 'drone.running after resume');
+      } finally { quietDrone(); reset(); }
+    });
+
+    test('toggleDrone flips drone.running on each call', function() {
+      try {
+        state.sound = true;
+        toggleDrone();
+        eq(drone.running, true, 'after first toggle');
+        toggleDrone();
+        eq(drone.running, false, 'after second toggle');
+      } finally { quietDrone(); reset(); }
     });
   });
 })();

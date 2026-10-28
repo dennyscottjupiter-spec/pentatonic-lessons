@@ -1,4 +1,4 @@
-/* HUD: sticky header, score chip, icon control rail, theme dropdown, pause button states. */
+/* HUD: sticky header, root-drone chip, icon control rail, theme dropdown, pause button states. */
 
 @keyframes blink { 50% { opacity: 0.15; } }
 
@@ -21,11 +21,6 @@
   transition: padding 0.2s;
 }
 body.scrolled .hud { padding: 6px 16px; }
-
-/* ---------- Score chip ---------- */
-.hud-label { font-family: var(--font-display); font-size: 10px; color: var(--cyan); }
-.hud-value { font-family: var(--font-display); font-size: 12px; color: var(--yellow); }
-.blink { color: var(--magenta); animation: blink 1s steps(2) infinite; }
 
 /* ---------- Title ---------- */
 .title {
@@ -53,6 +48,41 @@ body.scrolled .title { font-size: 14px; }
   background: color-mix(in srgb, var(--bg-2) 70%, transparent);
 }
 .hud-chip { gap: 10px; height: 42px; padding: 0 14px; }
+
+/* ---------- Root drone chip (a button; first HUD element, left edge) ---------- */
+.hud-chip.drone {
+  position: relative;
+  height: 42px;
+  padding: 0 14px 0 12px;
+  gap: 8px;
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+}
+.hud-chip.drone:hover { border-color: var(--cyan); color: var(--cyan); }
+.hud-chip.drone:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.hud-chip.drone .ico-wave { opacity: 0.55; }
+.hud-chip.drone:disabled { opacity: 0.45; cursor: not-allowed; border-color: color-mix(in srgb, var(--cyan) 28%, transparent); color: var(--text); }
+.drone-key  { font-family: var(--font-display); font-size: 13px; color: var(--yellow); }
+.drone-lens { font-family: var(--font-display); font-size: 8px; color: var(--cyan); opacity: 0.8; }
+/* Anchored to the chip's left edge so the bubble stays on screen */
+.hud-chip.drone[data-tip]::after { left: 0; transform: none; }
+
+/* ON: magenta ring, icon lit, wave dashes flow along the path */
+.hud-chip.drone[aria-pressed="true"] {
+  border-color: var(--magenta);
+  box-shadow: 0 0 0 1px var(--magenta), 0 0 18px -4px var(--magenta);
+}
+.hud-chip.drone[aria-pressed="true"] .ico-wave { color: var(--magenta); opacity: 1; }
+.hud-chip.drone[aria-pressed="true"] .ico-wave path {
+  stroke-dasharray: 4 3;
+  animation: drone-flow 0.9s linear infinite;
+}
+@keyframes drone-flow {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -14; }
+}
 
 /* ---------- Rail buttons ---------- */
 .hud-btn {
@@ -213,17 +243,17 @@ body.is-paused #pause-btn { animation: pause-ring 1.4s ease-out infinite; }
 
 /* ---------- Reduced motion: no pulsing, bouncing or sliding ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .eq i, body.is-paused #pause-btn { animation: none; }
+  .eq i, body.is-paused #pause-btn, .hud-chip.drone[aria-pressed="true"] .ico-wave path { animation: none; }
   .hud, .title, .hud-btn, .theme-btn, #theme-menu, [data-tip]::after { transition: none; }
 }
 
 /* ---------- Phone width ---------- */
 @media (max-width: 700px) {
   .title { font-size: 12px; }
-  /* Three wrapped rows would eat the screen; scrolled = score + controls only */
+  /* Three wrapped rows would eat the screen; scrolled = drone + controls only */
   body.scrolled .title { display: none; }
-  .hud-label { display: none; }
-  .hud-chip { height: 38px; }
+  .hud-chip.drone { height: 38px; }
+  .drone-lens { display: none; }
   .hud-btn { width: 36px; height: 36px; }
   .hud-btn--wide { width: auto; }
   #theme-name { display: none; }

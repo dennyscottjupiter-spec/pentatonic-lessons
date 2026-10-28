@@ -1,7 +1,7 @@
 // ---
 // purpose: Global state, note clicks, theme, prefs, control wiring, boot
 // exports: state, onNoteClick, applyTheme, wireControls, loadPrefs, savePrefs
-// depends: data.js → audio.js → player.js → engine.js → game.js → practice.js
+// depends: data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js
 // gotcha: loadPrefs() must run before wireControls() (key labels use spell())
 // ---
 
@@ -12,7 +12,6 @@ const state = {
   box:      '1',
   labels:   true,
   sound:    true,
-  score:    0,
   theme:    'crt',
   mode:          'explore',
   gameStreak:    0,
@@ -32,6 +31,8 @@ const state = {
   paused:       false,
   patternRef:   null,
   patternRoots: false,
+  patternChromatic: false,
+  patternLens:  'minor',
   pattern:      [],
   building:     false,
 };
@@ -54,17 +55,11 @@ function onNoteClick(e) {
   if (state.building) togglePick(g);
   playNote(midi); flashNote(g);
   $('#last-note').textContent = `${spell(chroma)} (str ${STRINGS[si].name}, fret ${g.dataset.fret})`;
-  state.score += (isInScale(chroma) || isBlue(chroma)) ? (isRoot(chroma) ? 25 : 10) : 1;
-  updateScore();
 }
 
 function flashNote(g, cls = 'playing') {
   g.classList.add(cls);
   setTimeout(() => g.classList.remove(cls), 200);
-}
-
-function updateScore() {
-  $('#score').textContent = String(state.mode === 'game' ? state.gameScore : state.score).padStart(4,'0');
 }
 
 // ---------- Theme ----------
@@ -122,6 +117,7 @@ function wireControls() {
       $$('.key').forEach(x => x.classList.remove('active'));
       btn.classList.add('active');
       setKey(i);
+      droneRetune();
       if (typeof syncPattern === 'function') syncPattern();
       refreshNotes();
       if (state.mode === 'game') { ++playGen; showGamePhase(); }
@@ -135,8 +131,10 @@ function wireControls() {
     b.classList.add('active');
     state.lens = b.dataset.lens;
     setKey(state.keyIdx);
+    if (typeof syncPattern === 'function') syncPattern();
     refreshNotes();
     updateBlueLegend();
+    syncDroneUi();
   }));
 
   // Box — game restarts lick on switch
@@ -153,7 +151,7 @@ function wireControls() {
   $$('.acc').forEach(b => b.addEventListener('click', () => {
     state.accidentals = b.dataset.acc;
     $$('.acc').forEach(x => { const on = x === b; x.classList.toggle('active', on); x.setAttribute('aria-pressed', String(on)); });
-    renderKeyLabels(); setKey(state.keyIdx); refreshNotes(); savePrefs();
+    renderKeyLabels(); setKey(state.keyIdx); refreshNotes(); savePrefs(); syncDroneUi();
   }));
 
   $$('.toggle').forEach(b => b.addEventListener('click', () => {
@@ -163,6 +161,7 @@ function wireControls() {
     b.setAttribute('aria-pressed', String(state[key]));
     if (key === 'labels' || key === 'blues') refreshNotes();
     if (key === 'blues') { updateBlueLegend(); savePrefs(); }
+    if (key === 'sound') { if (!state.sound) droneStop(); syncDroneUi(); }
   }));
 
   $('#play-scale').addEventListener('click', playCurrentScale);
@@ -171,6 +170,7 @@ function wireControls() {
   });
 
   const pb = $('#pause-btn'); if (pb) pb.addEventListener('click', togglePause);
+  $('#drone-btn').addEventListener('click', toggleDrone);
 
   $('#help-btn').addEventListener('click', toggleHelp);
   $('#help-close').addEventListener('click', closeHelp);
@@ -205,6 +205,7 @@ function wireControls() {
   document.addEventListener('keydown', e => {
     if (e.target.matches('input,textarea,select') || e.target.closest('#theme-menu')) return;
     if (e.code === 'Space' || e.key === 'k' || e.key === 'K') { e.preventDefault(); togglePause(); return; }
+    if (e.key==='d'||e.key==='D') { toggleDrone(); return; }
     if (e.key==='?'||(e.key==='/'&&e.shiftKey)) { closePractice(); closeLearn(); toggleHelp(); return; }
     if (e.key==='p'||e.key==='P') { closeHelp(); closeLearn(); renderChallenge(); togglePractice(); return; }
     if (e.key==='l'||e.key==='L') { closeHelp(); closePractice(); renderLesson(_learnIdx); toggleLearn(); return; }
@@ -220,6 +221,6 @@ setKey(0);
 buildFretboard();
 refreshNotes();
 wireControls();
+syncDroneUi();
 loadGame();
-updateScore();
 updateTimerDisplay();

@@ -610,7 +610,7 @@ function escHtml(s) {
 <button id="pause-btn" style="display:none"></button>
 <div id="game-status" style="display:none"></div>
 <!-- game.js updateGameHUD writes these -->
-<div style="display:none"><span id="game-level"></span><span id="game-streak"></span><span id="game-lives"></span><span id="game-level-xp"></span></div>
+<div style="display:none"><span id="game-level"></span><span id="game-streak"></span><span id="game-lives"></span><span id="game-level-xp"></span><span id="game-best"></span></div>
 <!-- patterns.js wires these at load; inert stand-ins for the index.html controls -->
 <div style="display:none">
   <button id="pattern-build">✎ BUILD</button>
@@ -636,7 +636,6 @@ window.state = {
   labels:        true,
   sound:         false,   // silences Karplus audio during tests
   mode:          'explore',
-  score:         0,
   gameScore:     0,
   highScore:     0,
   gameStreak:    0,
@@ -659,7 +658,6 @@ window.state = {
 /* Stubs for DOM-touching helpers referenced by game.js */
 window.onNoteClick   = function(){};
 window.flashNote     = function(){};
-window.updateScore   = function(){};
 window.updateGameHUD = function(){};
 window.playFanfare   = function(){};
 window.saveGame      = function(){};
@@ -672,6 +670,7 @@ window.$$ = function(sel) { return Array.from(document.querySelectorAll(sel)); }
 
 <script src="../js/data.js"></script>
 <script src="../js/audio.js"></script>
+<script src="../js/drone.js"></script>
 <script src="../js/player.js"></script>
 <script src="../js/engine.js"></script>
 <script src="../js/game.js"></script>

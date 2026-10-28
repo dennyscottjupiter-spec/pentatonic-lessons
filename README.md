@@ -1,7 +1,7 @@
 ---
 title: pentatonic-lessons
 status: current
-updated: 2026-10-27
+updated: 2026-10-28
 ---
 
 # Pentatonic Arcade
@@ -15,9 +15,10 @@ Pick a root note (A through G#) and a MINOR or MAJOR pentatonic lens, and the fr
 Extras on the same page:
 - **Note names** can be sharps (♯) or flats (♭).
 - **Blue note** adds the blues note (♭5 in minor, ♭3 in major).
-- **Patterns** let you draw your own shape on the neck, save it by name, or load one of five classics.
-- **Pause** freezes anything that is playing (scales, the game, the metronome, the timer) and resumes at the same note.
-- A sticky top bar keeps the pause button, a theme menu (four themes), the Practice Lab and help within reach while you scroll.
+- **Patterns** let you draw your own shape on the neck, save it by name, or load one of six classics (one is a chromatic map of every note).
+- **Root drone** (top left) holds the key's root and fifth so you can hear each note against it.
+- **Pause** freezes anything that is playing (scales, the game, the drone, the metronome, the timer) and resumes at the same note.
+- A sticky top bar keeps the drone, the pause button, a theme menu (four themes), the Practice Lab and help within reach while you scroll.
 
 A built-in "Lick Attack" game flashes short licks on the fretboard for you to replay from memory, awarding XP and speeding up as you improve. A Practice Lab adds a metronome, a countdown timer, and a 7-day practice plan. A five-lesson "LEARNING" modal walks through the underlying music theory.
 
@@ -57,23 +58,23 @@ Once it's open:
 6. Click any fret to hear and see that note.
 7. Click **▶ PLAY SCALE** to hear the box played ascending then descending.
 8. Click **▶ START GAME** to play Lick Attack: watch a short lick light up, then replay it by clicking the same frets in order. The lens, PLAY SCALE and PATTERNS are locked during the game.
-9. Use the icon bar at the top: the **pause** button, the **theme menu** (switches between CRT, Tropical Night, Mission Control and Blueprint), the **metronome icon** (opens the Practice Lab), and the **?** button (opens help). **📚 LEARNING** under OPTIONS opens the theory lessons.
+9. The button at the top left shows the key and starts or stops the **root drone** (`D`). Use the icon bar at the top right: the **pause** button, the **theme menu** (switches between CRT, Tropical Night, Mission Control and Blueprint), the **metronome icon** (opens the Practice Lab), and the **?** button (opens help). **📚 LEARNING** under OPTIONS opens the theory lessons.
 10. Under **PATTERNS** you can draw your own shape:
     - Press **✎ BUILD**, then click notes to add or remove them. The numbers show the play order (first click plays first).
     - Type a name (up to 24 characters) and press **SAVE**. Your shapes appear under **MY PATTERNS** in the LOAD dropdown.
-    - Pick a classic or a saved pattern in **LOAD** to load it; this also sets the lens and blue note. **DELETE** removes a saved pattern and **CLEAR** empties the board.
+    - Pick a classic or a saved pattern in **LOAD** to load it; this also sets the blue note. Your lens stays: a minor shape loaded in MAJOR moves to the relative minor, so every note is still in your scale. **DELETE** removes a saved pattern and **CLEAR** empties the board.
     - Patterns follow the key you pick, and **▶ PLAY SCALE** plays one in its order. Clicking a box position or starting the game clears the pattern.
-    - The five classics are B.B. King Box, Albert King Box, Blues Scale Box 1, Major Blues Box 1 and Root Map.
+    - The six classics are B.B. King Box, Albert King Box, Blues Scale Box 1, Major Blues Box 1, Root Map and Chromatic (all 12 notes on the whole neck; PLAY SCALE runs one octave up from the root and back).
 
 Press **Space** (or **K**) to pause or resume everything that is playing. It does nothing when nothing is playing.
 
-Keyboard shortcuts: `1`–`5` select a box, `0` shows all positions, `?` toggles help, `P` toggles the Practice Lab, `Space` or `K` pauses and resumes, `L` toggles the learning modal, `Esc` closes any open panel.
+Keyboard shortcuts: `1`–`5` select a box, `0` shows all positions, `?` toggles help, `P` toggles the Practice Lab, `Space` or `K` pauses and resumes, `D` toggles the root drone, `L` toggles the learning modal, `Esc` closes any open panel.
 
 If you edit the source files, hard-refresh the browser tab (Ctrl+Shift+R) — a normal reload can serve a cached copy of the CSS/JS.
 
 ### Running the test suite
 
-The project ships its own zero-dependency test suite (303 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause and the game). It lives in `tests/`; serve the project folder locally to run it:
+The project ships its own zero-dependency test suite (312 tests covering the music theory math, scale data, fretboard rendering, note names, blue notes, patterns, pause and the game). It lives in `tests/`; serve the project folder locally to run it:
 
 ```bash
 cd pentatonic-lessons
@@ -87,7 +88,7 @@ Then open `http://localhost:8934/tests/tests.html` in a browser; all tests shoul
 There are no files produced. Everything is on-screen:
 - A rendered, color-coded SVG fretboard showing scale notes, root notes, and out-of-scale notes.
 - Audio played through the browser (Karplus-Strong synthesized plucked-guitar sound) when you click a note or press play.
-- A running score, streak, and XP display during the Lick Attack game.
+- A score, best score, streak, and XP display in the Lick Attack game panel.
 - Saved in the browser's `localStorage` (per-browser, not exported anywhere):
   - your theme (`pent-theme`) and your note-name and blue-note choices (`pent-prefs`)
   - your saved patterns (`pent-patterns`)
