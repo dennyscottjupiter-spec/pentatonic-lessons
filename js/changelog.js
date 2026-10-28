@@ -3,6 +3,12 @@
 
 // Items are [name, text] or [name, text, selector]; a selector makes the row a "show me" link
 const CHANGELOG = [
+  { version: 'v4.6.1', date: '2026-10-28', title: 'PLAY IT fixes', items: [
+    ['Sound hold', 'In PLAY IT the drone and metronome pause while the mic listens and come back after, so the mic hears only your string.', '#quiz-btn'],
+    ['Silent clicks', 'In PLAY IT a fret click makes no sound, so the speakers cannot answer for the guitar.', '#quiz-btn'],
+    ['Mic message', 'If the mic is blocked, the reason stays on the prompt. On a plain http page it says the mic needs https.', '#quiz-btn'],
+    ['Hidden tab and pause', 'The mic turns off in a hidden tab and comes back when you return. While paused, it ignores what it hears.', '#quiz-btn'],
+  ]},
   { version: 'v4.6.0', date: '2026-10-28', title: 'Guitar mic quiz, interval names', items: [
     ['PLAY IT', 'In the note quiz, pick 🎸 PLAY IT: play the glowing note on your real guitar. The app listens through the mic, any octave counts, and nothing is recorded or saved.', '#quiz-btn'],
     ['Interval names', 'After every answer the quiz names how far the note sits from the root, like "5 · perfect 5th".', '#quiz-btn'],

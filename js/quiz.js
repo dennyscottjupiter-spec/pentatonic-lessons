@@ -1,11 +1,11 @@
 // ---
 // purpose: NOTE QUIZ rounds: target pick, SEE/HEAR/PLAY modes, answers, score, interval line, board pool
-// exports: quiz, quizStart, quizStop, toggleQuiz, quizAnswer, quizReplay, setQuizMode, quizPool, quizRefresh, quizMicNote, quizMicLevel, intervalName
-// depends: app.js (state, $, $$), data.js (KEYS, INTERVAL_NAMES), engine.js (spell, mkSvg, refreshNotes), audio.js (playNote, playBuzz), quiz-piano.js (renderQuizKeys), mic.js (micStart, micStop)
+// exports: quiz, quizStart, quizStop, toggleQuiz, quizAnswer, quizReplay, setQuizMode, quizPool, quizRefresh, intervalName
+// depends: app.js (state, $, $$), data.js (KEYS, INTERVAL_NAMES), engine.js (spell, mkSvg, refreshNotes), audio.js (playNote, playBuzz), quiz-piano.js (renderQuizKeys), mic.js (micStop), quiz-play.js (quizListen, quizHoldSound)
 // gotcha: quiz.gen drops stale next-round timers after stop/restart
 // ---
 
-const quiz = { on:false, target:null, score:0, tries:0, streak:0, best:0, locked:false, gen:0, acc:null, mode:'see' };
+const quiz = { on:false, target:null, score:0, tries:0, streak:0, best:0, locked:false, gen:0, acc:null, mode:'see', micMsg:'', held:{ drone:false, metro:false } };
 const QUIZ_LIT = ['in-scale', 'root', 'blue', 'chromatic'];
 const QUIZ_BEST_KEY = 'pent-quiz-best';
 const QUIZ_LOCKS = ['#play-scale', '#pattern-build'];
@@ -52,7 +52,7 @@ function nextRound() {
     quizReplay();
   } else {   // SEE IT and PLAY IT both glow the note
     markTarget(t);
-    $('#quiz-prompt').textContent = quiz.mode === 'play' ? 'Play the glowing note on your guitar' : 'Name the glowing note';
+    $('#quiz-prompt').textContent = quiz.mode === 'play' ? (quiz.micMsg || 'Play the glowing note on your guitar') : 'Name the glowing note';
   }
   updateQuizStats();
 }
@@ -128,7 +128,7 @@ function quizStart() {
 function quizStop() {
   if (!quiz.on) return;
   quiz.on = false; quiz.locked = false; ++quiz.gen;
-  clearTarget(); micStop();
+  clearTarget(); micStop(); quizHoldSound(false); quiz.micMsg = '';
   quizIntervalLine(''); $('#quiz-heard').textContent = '';
   document.body.classList.remove('quiz-on', 'quiz-hear', 'quiz-play');
   $$('#quiz-keys .pk.held').forEach(k => k.classList.remove('held'));
@@ -146,18 +146,9 @@ function syncQuizMode() {
   document.body.classList.toggle('quiz-play', quiz.mode === 'play');
   $$('.qm').forEach(b => { const on = b.dataset.qmode === quiz.mode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
   const rep = $('#quiz-replay'); if (rep) rep.hidden = quiz.mode !== 'hear';
-  if (quiz.on && quiz.mode === 'play') {
-    micStart(quizMicNote, quizMicLevel).then(okay => {
-      if (!okay && quiz.on && quiz.mode === 'play') $('#quiz-prompt').textContent = 'Mic blocked: allow the microphone for this page, or pick SEE IT';
-    });
-  } else micStop();
+  if (quiz.on && quiz.mode === 'play') quizListen();
+  else { micStop(); quizHoldSound(false); quiz.micMsg = ''; }
 }
-
-// The mic heard a pitch class: show it, then answer like a click (quizAnswer ignores it when locked or off)
-function quizMicNote(chroma) { $('#quiz-heard').textContent = '🎤 ' + spell(chroma); quizAnswer(chroma); }
-
-// Live level 0..1 drives the PLAY IT bars (CSS --lvl); RMS 0.125 is already full
-function quizMicLevel(level) { $('#quiz-wave').style.setProperty('--lvl', Math.min(1, level * 8).toFixed(2)); }
 
 function setQuizMode(m) {
   if (!['see', 'hear', 'play'].includes(m)) return;

@@ -1,7 +1,7 @@
 // ---
 // purpose: Suite 17: PLAY IT pitch detection, onset rule, interval names, PLAY IT quiz lifecycle
 // exports: none (registers suites)
-// depends: tests-lib.js (window.T), mic.js (detectPitch, micFeed, micReset, hzToMidi), quiz.js (intervalName, quizMicNote, quizMicLevel, setQuizMode, quizStart, quizStop, quiz), engine.js (setKey, buildFretboard, refreshNotes, spell)
+// depends: tests-lib.js (window.T), mic.js (detectPitch, micFeed, micReset, hzToMidi), quiz.js (intervalName, setQuizMode, quizStart, quizStop, quiz), quiz-play.js (quizMicNote, quizMicLevel), engine.js (setKey, buildFretboard, refreshNotes, spell)
 // ---
 (function () {
   'use strict';

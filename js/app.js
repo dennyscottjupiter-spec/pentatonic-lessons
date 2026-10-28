@@ -1,7 +1,7 @@
 // ---
 // purpose: Global state, note clicks, theme, prefs, control wiring, boot
 // exports: state, onNoteClick, applyTheme, wireControls, loadPrefs, savePrefs
-// depends: data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js, quiz-piano.js (quizKeyDown), quiz.js (quiz, toggleQuiz, quizStop)
+// depends: data.js → audio.js → drone.js → player.js → engine.js → game.js → practice.js, quiz-piano.js (quizKeyDown), quiz.js (quiz, toggleQuiz, quizStop), quiz-play.js (quizClickSounds)
 // gotcha: loadPrefs() must run before wireControls() (key labels use spell())
 // ---
 
@@ -47,7 +47,7 @@ function onNoteClick(e) {
   const midi   = +g.dataset.midi;
   const chroma = +g.dataset.chroma;
   const si     = +g.dataset.string;
-  if (typeof quiz !== 'undefined' && quiz.on) { if (quiz.mode === 'hear' || g.classList.contains('quiz-target')) playNote(midi); return; }   // SEE: only the target sounds, so a click never gives it away; HEAR: any note, to compare by ear
+  if (typeof quiz !== 'undefined' && quiz.on) { if (quizClickSounds(g)) playNote(midi); return; }   // SEE: only the target sounds, so a click never gives it away; HEAR: any note, to compare by ear; PLAY IT: silent, the speakers would answer for the guitar
 
   if (state.mode === 'game' && state.gamePhase === 'input') {
     onGameNoteClick(g); return;

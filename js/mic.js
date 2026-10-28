@@ -1,7 +1,7 @@
 // ---
 // purpose: PLAY IT mic listener: YIN pitch detection, note-onset rule, mic start/stop
 // exports: mic, micStart, micStop, micFeed, micReset, detectPitch, hzToMidi, rms
-// depends: audio.js (ensureAudio), engine.js (midiToChroma); quiz.js passes the callbacks
+// depends: audio.js (ensureAudio), engine.js (midiToChroma); quiz-play.js passes the callbacks
 // gotcha: the analyser is never connected to ctx.destination, or the speakers feed the mic
 // ---
 
